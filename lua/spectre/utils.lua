@@ -77,25 +77,53 @@ function M.get_visual_selection()
     return query
 end
 
--- adsafdsa trieu  trieu trieu
--- @FIXME
--- to highlight different text of onput and output_line
--- highlight regex on replace_line is not work with \0 \1
-M.hl_different_text = function( input_line, output_line, lnum)
-  local luaquery = state.query.search_query:gsub("%\\","%%")
-  local col_start, col_end = string.find(input_line,luaquery )
-  print(vim.inspect(col_start))
-  local diff = {}
-  local count = 0
-  local last_col = 0
-  if col_start == nil then return end
-  repeat
-    input_line = string.sub(input_line, col_end + 1,-1)
-    table.insert(diff,{col_start + last_col, col_end + last_col})
-    last_col = last_col + col_end
-    col_start, col_end = string.find(input_line, state.query.search_query)
-    count = count + 1
-  until count > 10 or col_start == nil
-  print(vim.inspect(diff))
+-- local string_to_table=function(str)
+--   local t = {}
+--   for i=1, string.len(str) do
+--     t[i]= (string.sub(str,i,i))
+--   end
+--   return t
+-- end
+
+function M.vim_replace_text(search_text,replace_text,search_line)
+  -- use vim function substitute with magic mode
+  -- need to sure that query is work in vim when you run command
+  return vim.fn.substitute(
+    search_line,
+    "\\v"..search_text,
+    replace_text,
+    'g'
+  )
+end
+
+local function get_col_match_on_line(match,str)
+  if match == nil or str == nil then return {}  end
+  if match == "" or str == "" then return {}  end
+  local index = 0
+  local len = string.len(str)
+  local match_len = string.len(match)
+  local col_tbl = {}
+  while index < len do
+    local txt = string.sub(str, index, index + match_len -1)
+    if txt == match then
+      table.insert(col_tbl,{index -1, index + match_len -1})
+      index = index + match_len
+    else
+      index = index + 1
+    end
+  end
+return col_tbl
+end
+
+M.different_text_col = function(opts)
+  local search_text, replace_text, search_line, replace_line
+    = opts.search_text, opts.replace_text, opts.search_line, opts.replace_line
+  local result = {input = {}, output = {}}
+  local search_match = vim.fn.matchstr(search_line, search_text)
+  result.input = get_col_match_on_line(search_match, search_line)
+  local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
+  result.output = get_col_match_on_line(replace_match, replace_line)
+  return result
+
 end
 return M

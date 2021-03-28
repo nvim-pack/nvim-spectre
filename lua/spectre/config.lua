@@ -9,7 +9,7 @@ local config = {
   highlight={
     ui      = "String",
     search  = "DiffChange",
-    replace = "DiffAdd",
+    replace = "DiffDelete",
   },
   mapping = {
     ['delete_line']={

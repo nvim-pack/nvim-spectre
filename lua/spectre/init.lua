@@ -60,6 +60,7 @@ M.open = function (opts)
     end
   end
   vim.cmd [[setlocal buftype=nofile]]
+  vim.cmd [[file spectre]]
   vim.bo.filetype = config.filetype
   state.bufnr = api.nvim_get_current_buf();
   api.nvim_buf_clear_namespace(state.bufnr, config.namespace, 0, -1)
@@ -127,31 +128,46 @@ local highlight_safe = function(group, query)
 end
 
 
-local function get_replace_text(input)
-
-  -- use vim function substitute with magic mode
-  -- need to sure that query is work in vim when you run command
-  return vim.fn.substitute(
-    input,
-    "\\v"..state.query.search_query,
-    state.query.replace_query,
-    'g'
-  )
-end
-
--- @TODO we need a better hl text
---
 local function hl_match(opts)
   vim.cmd("syn clear " .. config.highlight.search)
   vim.cmd("syn clear " .. config.highlight.replace)
   if #opts.search_query > 0 then
-    highlight_safe(config.highlight.search,opts.search_query)
     api.nvim_buf_add_highlight(state.bufnr, config.namespace,config.highlight.search, 2, 0,-1)
   end
   if #opts.replace_query>0 then
-    highlight_safe('DiffDelete', utils.escape_hl(opts.replace_query))
     api.nvim_buf_add_highlight(state.bufnr, config.namespace,config.highlight.replace, 4, 0,-1)
   end
+end
+
+local function hl_different_line(search, replace, lnum)
+  local diff = utils.different_text_col({
+    search_text=state.query.search_query,
+    replace_text = state.query.replace_query,
+    search_line=search,
+    replace_line=replace
+  })
+  if diff then
+    for _, value in pairs(diff.input) do
+      api.nvim_buf_add_highlight(
+        state.bufnr,
+        config.namespace, config.highlight.search,
+        lnum,
+        value[1],
+        value[2]
+      )
+    end
+    for _, value in pairs(diff.output) do
+      api.nvim_buf_add_highlight(
+        state.bufnr,
+        config.namespace,
+        config.highlight.replace,
+        lnum + 1,
+        value[1],
+        value[2]
+        )
+    end
+  end
+
 end
 
 local function check_is_edit ()
@@ -222,12 +238,13 @@ M.do_replace_text = function(opts)
       lnum_replace = 0
     end
     if lnum_replace == 2 then
-      local replace_line = get_replace_text(line)
+      local replace_line = utils.
+      vim_replace_text(state.query.search_query, state.query.replace_query, line)
       api.nvim_buf_set_lines(
         state.bufnr, lnum, lnum + 1, false,
         {replace_line}
       )
-      utils.hl_different_text(line, replace_line, lnum)
+      hl_different_line(line, replace_line, lnum-1)
     end
     if lnum_replace >= 0 then
       lnum_replace = lnum_replace + 1
@@ -277,6 +294,7 @@ M.search = function(opts)
   local c_line = config.line_result
   api.nvim_buf_set_lines( state.bufnr, c_line -1, c_line -1, false, { config.line_sep})
 
+  local padding_txt="    "
   local on_output = function(_, output_text)
     pcall(vim.schedule_wrap( function()
       local t = utils.parse_line_grep(output_text)
@@ -285,16 +303,18 @@ M.search = function(opts)
       end
       local replace_txt = output_text
       if #state.query.replace_query > 1 then
-        replace_txt = get_replace_text(t.text);
+        replace_txt = utils.
+        vim_replace_text(state.query.search_query, state.query.replace_query, t.text);
       else
         replace_txt = ""
       end
       api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
         string.format("%s:%s:%s:", t.filename, t.lnum, t.col),
-        "     " .. t.text,
-        "     " .. replace_txt,
+        padding_txt .. t.text,
+        padding_txt  .. replace_txt,
         config.line_sep,
       })
+      hl_different_line(padding_txt .. t.text, padding_txt .. replace_txt, c_line + 1)
       c_line = c_line + 4
       total = total + 1
     end))
@@ -345,7 +365,6 @@ M.search = function(opts)
   })
 
   job:start()
-
 end
 
 M.show_help = function()
