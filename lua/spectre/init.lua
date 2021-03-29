@@ -1,9 +1,9 @@
 local plenary=require('plenary.reload')
--- run lua _G.__is_dev=true
+
+-- @CMD lua _G.__is_dev=true
 if _G.import == nil then
   if _G.__is_dev then
     _G.import = function(path)
-      print(vim.inspect(path))
       return plenary.reload_module(path)
     end
   else
@@ -19,6 +19,8 @@ local _config = import('spectre.config')
 local config, state=_config.config, _config.state
 local utils = import('spectre.utils')
 local M = {}
+
+local MAX_LINE_CHARS = 255
 
 M.visual_open = function(opts)
   opts = opts or {}
@@ -120,12 +122,6 @@ function M.init_buffer(bufnr)
   end
 end
 
--- don't throw error of hightlight syntax regex
-local highlight_safe = function(group, query)
-  if #query > 1 then
-    pcall(vim.cmd, string.format("syn match %s /%s/", group, query))
-  end
-end
 
 
 local function hl_match(opts)
@@ -141,10 +137,10 @@ end
 
 local function hl_different_line(search, replace, lnum)
   local diff = utils.different_text_col({
-    search_text=state.query.search_query,
+    search_text = state.query.search_query,
     replace_text = state.query.replace_query,
-    search_line=search,
-    replace_line=replace
+    search_line = search,
+    replace_line = replace
   })
   if diff then
     for _, value in pairs(diff.input) do
@@ -210,11 +206,16 @@ M.on_insert_leave = function ()
   local line = vim.fn.getpos('.')
   -- if change path and if different to the open lnum_UIwind ow id
   -- then we don't need to search in local file
-  if state.target_winid then
-    local bufnr = api.nvim_win_get_buf(state.target_winid)
+  if state.target_winid ~= nil then
+    print(vim.inspect(state.target_winid))
+    local ok, bufnr = pcall(api.nvim_win_get_buf, state.target_winid)
+    if ok then
+      local bufname = vim.fn.bufname(bufnr)
+      query.is_file = query.path == bufname
+    else
+      state.target_winid = nil 
+    end
     -- can't use api.nvim_buf_get_name it get a full path
-    local bufname = vim.fn.bufname(bufnr)
-    query.is_file = query.path == bufname
   end
 
   if line[2] >= 5 and line[2] < 7 then
@@ -297,6 +298,10 @@ M.search = function(opts)
   local padding_txt="    "
   local on_output = function(_, output_text)
     pcall(vim.schedule_wrap( function()
+      if output_text == nil then return end
+      if string.len(output_text) > MAX_LINE_CHARS then
+        output_text = string.sub(output_text, 0, MAX_LINE_CHARS)
+      end
       local t = utils.parse_line_grep(output_text)
       if t.lnum ==nil or t.col ==nil then
         return
@@ -314,7 +319,7 @@ M.search = function(opts)
         padding_txt  .. replace_txt,
         config.line_sep,
       })
-      hl_different_line(padding_txt .. t.text, padding_txt .. replace_txt, c_line + 1)
+      -- hl_different_line(padding_txt .. t.text, padding_txt .. replace_txt, c_line + 1)
       c_line = c_line + 4
       total = total + 1
     end))

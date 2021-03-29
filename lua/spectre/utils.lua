@@ -5,6 +5,13 @@ local _config = import('spectre.config')
 local config, state=_config.config, _config.state
 local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
 
+-- -- don't throw error of hightlight syntax regex
+-- local highlight_safe = function(group, query)
+--   if #query > 1 then
+--     pcall(vim.cmd, string.format("syn match %s /%s/", group, query))
+--   end
+-- end
+--
 M.parse_line_grep = function(query)
   local t = {text = query}
   local _, _, filename, lnum, col, text = string.find(t.text, _regex_file_line)
@@ -85,9 +92,9 @@ end
 --   return t
 -- end
 
-function M.vim_replace_text(search_text,replace_text,search_line)
-  -- use vim function substitute with magic mode
-  -- need to sure that query is work in vim when you run command
+--- use vim function substitute with magic mode
+--- need to sure that query is work in vim when you run command
+function M.vim_replace_text(search_text, replace_text, search_line)
   return vim.fn.substitute(
     search_line,
     "\\v"..search_text,
@@ -96,7 +103,9 @@ function M.vim_replace_text(search_text,replace_text,search_line)
   )
 end
 
-local function get_col_match_on_line(match,str)
+--- get position of text match in string
+--- @return table
+local function get_col_match_on_line(match, str)
   if match == nil or str == nil then return {}  end
   if match == "" or str == "" then return {}  end
   local index = 0
