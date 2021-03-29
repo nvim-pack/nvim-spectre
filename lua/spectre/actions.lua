@@ -1,8 +1,9 @@
 local Job = require("plenary.job")
 local api = vim.api
 local utils = import('spectre.utils')
-local _config = import('spectre.config')
-local config, state=_config.config, _config.state
+local config = import('spectre.config')
+local state=import('spectre.state')
+
 local M = {}
 
 local open_file = function(filename, lnum, col, winid)

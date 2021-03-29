@@ -1,8 +1,8 @@
 local api = vim.api
 local M = {}
 
-local _config = import('spectre.config')
-local config, state=_config.config, _config.state
+local config = import('spectre.config')
+local state = import('spectre.state')
 local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
 
 -- -- don't throw error of hightlight syntax regex
@@ -84,6 +84,23 @@ function M.get_visual_selection()
     return query
 end
 
+function M.extend(f, default_opts)
+  default_opts = default_opts or {}
+
+  return setmetatable({
+    new = function(opts)
+      opts = vim.tbl_extend("keep", opts, default_opts)
+      return f(opts)
+    end,
+  }, {
+    __call = function()
+      local ok, err = pcall(f(default_opts))
+      if not ok then
+        error(debug.traceback(err))
+      end
+    end
+  })
+end
 -- local string_to_table=function(str)
 --   local t = {}
 --   for i=1, string.len(str) do
@@ -123,7 +140,9 @@ local function get_col_match_on_line(match, str)
   end
 return col_tbl
 end
-
+--- find different tex of 2 line with search_text and replace_text
+--- @params opts {search_text, replace_text, search_line, replace_line}
+--- @return table {inpu:{},output{}}
 M.different_text_col = function(opts)
   local search_text, replace_text, search_line, replace_line
     = opts.search_text, opts.replace_text, opts.search_line, opts.replace_line

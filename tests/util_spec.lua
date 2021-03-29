@@ -1,5 +1,4 @@
 local utils = require("spectre.utils")
-
 local eq = assert.are.same
 local esc_test_data={
   {[[ \( ]],  [[ \\( ]], " slash"},

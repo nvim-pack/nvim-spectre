@@ -55,14 +55,5 @@ local config = {
   is_open_target_win = true
 }
 
-local state = {
-  query = { },
-  vt = { }
-}
-_G.__search_state = _G.__search_state or state
-state = _G.__search_state
+return config
 
-return {
-  state = state,
-  config = config
-}
