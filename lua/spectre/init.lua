@@ -216,8 +216,11 @@ M.do_replace_text = function(opts)
             lnum_replace = 0
         end
         if lnum_replace == 2 then
-            local replace_line = utils.
-            vim_replace_text(state.query.search_query, state.query.replace_query, search_line)
+            local replace_line = utils. vim_replace_text(
+            state.query.search_query,
+            state.query.replace_query,
+            search_line)
+            print(vim.inspect(replace_line))
             api.nvim_buf_set_lines(
                 state.bufnr,
                 lnum,
@@ -309,7 +312,7 @@ M.search_handler = function()
             api.nvim_buf_set_lines(state.bufnr, c_line, c_line + 1, false,{'--   ' .. error_msg })
             c_line = c_line + 1
         end,
-        on_finish = function(result_msg)
+        on_finish = function()
             local end_time = ( vim.loop.hrtime() - start_time) / 1E9
             local help_text = string.format("Total: %s match, time: %ss", total, end_time)
             state.vt.status_id = utils.write_virtual_text(state.bufnr, config.namespace_status, config.line_result -2, {{ help_text, 'Question' } })

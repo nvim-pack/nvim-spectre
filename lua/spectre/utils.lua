@@ -83,24 +83,6 @@ function M.get_visual_selection()
     local query=table.concat(lines,'')
     return query
 end
-
-function M.extend(f, default_opts)
-  default_opts = default_opts or {}
-
-  return setmetatable({
-    new = function(opts)
-      opts = vim.tbl_extend("keep", opts, default_opts)
-      return f(opts)
-    end,
-  }, {
-    __call = function()
-      local ok, err = pcall(f(default_opts))
-      if not ok then
-        error(debug.traceback(err))
-      end
-    end
-  })
-end
 -- local string_to_table=function(str)
 --   local t = {}
 --   for i=1, string.len(str) do
@@ -147,11 +129,10 @@ M.different_text_col = function(opts)
   local search_text, replace_text, search_line, replace_line
     = opts.search_text, opts.replace_text, opts.search_line, opts.replace_line
   local result = {input = {}, output = {}}
-  local search_match = vim.fn.matchstr(search_line, search_text)
+  local search_match = vim.fn.matchstr(search_line, M.escape_chars(search_text))
   result.input = get_col_match_on_line(search_match, search_line)
   local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
   result.output = get_col_match_on_line(replace_match, replace_line)
   return result
-
 end
 return M

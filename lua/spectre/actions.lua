@@ -95,9 +95,10 @@ M.replace_tool = function()
       "%s,%ss/%s/%s/g",
       value.lnum,
       value.lnum,
-      utils.escape_chars(state.query.search_query),
-      utils.escape_chars(state.query.replace_query)
+      utils.escape_slash(state.query.search_query),
+      utils.escape_slash(state.query.replace_query)
     )
+    print(vim.inspect(t_sed))
 
     local args={
       '-i',
