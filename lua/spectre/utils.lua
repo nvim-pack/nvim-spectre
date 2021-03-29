@@ -42,17 +42,14 @@ M.escape_chars = function(query)
             :gsub('%]', '\\]')
 end
 
+-- change form slash to hash
 M.regex_slash_to_hash = function(query)
   return query.gsub("%\\","%%")
 end
 
+-- only escape slash
 M.escape_slash = function(query)
   return query:gsub('%\\', '\\\\')
-end
-M.escape_hl = function(query)
-  return query:gsub("%\\%d", ".*")
-            :gsub('%(', '\\(')
-            :gsub('%)', '\\)')
 end
 
 function M.write_virtual_text(bufnr, ns, line, chunks, virt_text_pos)
@@ -82,24 +79,6 @@ function M.get_visual_selection()
     lines[1] = string.sub(lines[1], start_pos[2] + plusStart , string.len(lines[1]))
     local query=table.concat(lines,'')
     return query
-end
-
-function M.extend(f, default_opts)
-  default_opts = default_opts or {}
-
-  return setmetatable({
-    new = function(opts)
-      opts = vim.tbl_extend("keep", opts, default_opts)
-      return f(opts)
-    end,
-  }, {
-    __call = function()
-      local ok, err = pcall(f(default_opts))
-      if not ok then
-        error(debug.traceback(err))
-      end
-    end
-  })
 end
 -- local string_to_table=function(str)
 --   local t = {}
@@ -147,11 +126,10 @@ M.different_text_col = function(opts)
   local search_text, replace_text, search_line, replace_line
     = opts.search_text, opts.replace_text, opts.search_line, opts.replace_line
   local result = {input = {}, output = {}}
-  local search_match = vim.fn.matchstr(search_line, search_text)
+  local search_match = vim.fn.matchstr(search_line, M.escape_chars(search_text))
   result.input = get_col_match_on_line(search_match, search_line)
   local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
   result.output = get_col_match_on_line(replace_match, replace_line)
   return result
-
 end
 return M

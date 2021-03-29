@@ -40,7 +40,7 @@ M.open = function (opts)
     state.finder = search_engine.rg:new({}, M.search_handler())
     opts = vim.tbl_extend('force',{
         search_text = '',
-        replace_txt = '',
+        replace_text = '',
         path = '',
         is_file = false
     }, opts or {})
@@ -70,9 +70,9 @@ M.open = function (opts)
 
     vim.cmd [[setlocal buftype=nofile]]
     vim.cmd [[setlocal nobuflisted ]]
+    state.bufnr = api.nvim_get_current_buf();
     vim.cmd(string.format("file %s/spectre", state.bufnr))
     vim.bo.filetype = config.filetype
-    state.bufnr = api.nvim_get_current_buf();
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace, 0, -1)
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_status, 0, -1)
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
@@ -85,7 +85,7 @@ M.open = function (opts)
 
     api.nvim_buf_set_lines(state.bufnr, 0, 0, 0, lines)
     api.nvim_buf_set_lines(state.bufnr, 2, 2, 0, {opts.search_text})
-    api.nvim_buf_set_lines(state.bufnr, 4, 4, 0, {opts.replace_txt})
+    api.nvim_buf_set_lines(state.bufnr, 4, 4, 0, {opts.replace_text})
     api.nvim_buf_set_lines(state.bufnr, 6, 6, 0, {opts.path})
     api.nvim_win_set_cursor(0,{3, 0})
     if #opts.search_text > 0 then
@@ -110,10 +110,10 @@ M.open = function (opts)
         c_line = c_line + 2
     end
 
-    M.init_buffer(state.bufnr)
+    M.setup_mapping_buffer(state.bufnr)
 end
 
-function M.init_buffer(bufnr)
+function M.setup_mapping_buffer(bufnr)
     vim.cmd [[ augroup search_panel_autocmds ]]
     vim.cmd [[ au! * <buffer> ]]
     vim.cmd [[ au InsertEnter <buffer> lua import"spectre".on_insert_enter() ]]
@@ -187,12 +187,12 @@ M.on_insert_leave = function ()
     if state.target_winid ~= nil then
         local ok, bufnr = pcall(api.nvim_win_get_buf, state.target_winid)
         if ok then
+            -- can't use api.nvim_buf_get_name it get a full path
             local bufname = vim.fn.bufname(bufnr)
             query.is_file = query.path == bufname
         else
             state.target_winid = nil
         end
-        -- can't use api.nvim_buf_get_name it get a full path
     end
 
     if line[2] >= 5 and line[2] < 7 then
@@ -216,8 +216,10 @@ M.do_replace_text = function(opts)
             lnum_replace = 0
         end
         if lnum_replace == 2 then
-            local replace_line = utils.
-            vim_replace_text(state.query.search_query, state.query.replace_query, search_line)
+            local replace_line = utils. vim_replace_text(
+            state.query.search_query,
+            state.query.replace_query,
+            search_line)
             api.nvim_buf_set_lines(
                 state.bufnr,
                 lnum,
@@ -309,7 +311,7 @@ M.search_handler = function()
             api.nvim_buf_set_lines(state.bufnr, c_line, c_line + 1, false,{'--   ' .. error_msg })
             c_line = c_line + 1
         end,
-        on_finish = function(result_msg)
+        on_finish = function()
             local end_time = ( vim.loop.hrtime() - start_time) / 1E9
             local help_text = string.format("Total: %s match, time: %ss", total, end_time)
             state.vt.status_id = utils.write_virtual_text(state.bufnr, config.namespace_status, config.line_result -2, {{ help_text, 'Question' } })
@@ -327,8 +329,8 @@ M.search = function(opts)
     api.nvim_buf_set_lines( state.bufnr, c_line -1, c_line -1, false, { config.line_sep})
 
     state.finder:search({
-        search_text=state.query.search_query,
-        replace_txt = state.query.replace_text,
+        search_text = state.query.search_query,
+        replace_text = state.query.replace_text,
         path=state.query.path
     })
 end

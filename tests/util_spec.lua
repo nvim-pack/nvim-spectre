@@ -16,6 +16,7 @@ end)
 
 local fixtures_different = {
   {
+    name="case 1 ",
     search_text="data",
     replace_text = "no\\0",
     search_line=" data1 data_2 data 3",
@@ -26,6 +27,7 @@ local fixtures_different = {
     }
   },
   {
+    name="case 2 ",
     search_text="d\\S*a",
     replace_text = "no\\0",
     search_line=" data1 data_2 data 3",
@@ -35,9 +37,20 @@ local fixtures_different = {
       output = {{1, 7},{9, 15},{18, 24}}
     }
   },
+  {
+    name="case 3 ",
+    search_text="data(.*)",
+    replace_text = "no",
+    search_line=" data1 data_2 data 3",
+    replace_line = " no",
+    result = {
+      input = {{1, 5},{7,11},{14,18}},
+      output = {{1, 3}}
+    }
+  },
   -- {" data1 data2 data 3\\", " wdata_1 wdata2 wdata_3 \\"},
 }
-describe('utils different test', function()
+describe('utils test different highlight', function()
  it("should match 2 different text group",function()
     for _, value in pairs(fixtures_different) do
       eq(value.replace_line,
@@ -45,8 +58,8 @@ describe('utils different test', function()
         'replace_text not match '..value.replace_line
       )
       local result = utils.different_text_col(value)
-      eq(value.result.input, result.input, 'input  error :' .. value.search_line)
-      eq(value.result.output, result.output, 'output error :' .. value.search_line)
+      eq(value.result.input, result.input, 'input error :' .. value.name)
+      eq(value.result.output, result.output, 'output error :' .. value.name)
     end
   end)
 end)

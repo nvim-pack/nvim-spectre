@@ -15,7 +15,7 @@ local open_file = function(filename, lnum, col, winid)
   api.nvim_win_set_cursor(0,{lnum, col})
 end
 
-M.goto_file = function()
+M.select_entry = function()
   local t = M.get_current_entries()
   if t == nil then return nil end
   if config.is_open_target_win and state.target_winid ~= nil then
@@ -95,10 +95,9 @@ M.replace_tool = function()
       "%s,%ss/%s/%s/g",
       value.lnum,
       value.lnum,
-      utils.escape_chars(state.query.search_query),
-      utils.escape_chars(state.query.replace_query)
+      utils.escape_slash(state.query.search_query),
+      utils.escape_slash(state.query.replace_query)
     )
-
     local args={
       '-i',
       '-E',
