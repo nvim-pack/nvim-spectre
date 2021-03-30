@@ -1,1 +1,3 @@
-spectre
+test data spectre ok ()
+test  function()
+end
