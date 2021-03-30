@@ -1,0 +1,3 @@
+test data zzzz ok ()
+test  function abcd()
+end
