@@ -1,6 +1,20 @@
 local state = {
-  query = { },
-  vt = { }--virtual text namespace
+    -- current config
+    config = {
+
+    },
+    query = {
+        search_quey = '',
+        replace_query = '',
+        path = '',
+        is_file = '' -- search in current file
+    },
+    finder = nil,
+    replacer = nil,
+    -- virtual text namespace
+    vt = {
+
+    }
 }
 
 if _G.__is_dev then

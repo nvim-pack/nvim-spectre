@@ -1,4 +1,4 @@
-local rg = require('spectre.search.rg')
+local rg = require('spectre.search').rg
 local helpers = require('tests.helper')
 local eq = assert.are.same
 

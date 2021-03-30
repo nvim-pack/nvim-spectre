@@ -77,7 +77,7 @@ M.replace_cmd = function()
     else
       keyquery = string.format(
         ':%s %%s/\\v%s/%s/g | update',
-        config.replace_cmd,
+        config.replace_vim_cmd,
         state.query.search_query,
         state.query.replace_query
       )
@@ -88,7 +88,7 @@ M.replace_cmd = function()
   end
 end
 
-M.replace_tool = function()
+M.run_replace = function()
   local entries = M.get_all_entries()
   for _, value in pairs(entries) do
     local t_sed = string.format(

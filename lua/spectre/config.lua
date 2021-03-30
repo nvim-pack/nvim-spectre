@@ -28,9 +28,9 @@ local config = {
             cmd = "<cmd>lua import('spectre.actions').replace_cmd()<CR>",
             desc = "input replace command vim"
         },
-        ['replace_tool'] = {
+        ['run_replace'] = {
             map = "rs",
-            cmd = "<cmd>lua import('spectre.actions').replace_tool()<CR>",
+            cmd = "<cmd>lua import('spectre.actions').run_replace()<CR>",
             desc = "replace all"
         }
         -- ["undo_file"]     = {
@@ -45,9 +45,11 @@ local config = {
         --   desc="Goto file"
         -- },
     },
+    finder_cmd="rg",
+    replace_cmd = "sed",
     lnum_UI = 8, -- total line for ui you can edit it
     line_result = 10, -- line begin result
-    replace_cmd = "cfdo",
+    replace_vim_cmd = "cfdo",
     is_open_target_win = true
 }
 

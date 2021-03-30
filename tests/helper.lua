@@ -1,3 +1,4 @@
+local utils = require('spectre.utils')
 local M = {}
 local api = vim.api
 
@@ -28,6 +29,11 @@ M.wait = function (time, check)
             done = true
         end
     end
+end
+
+M.checkoutfile = function(filename)
+    utils.get_os_command_output({'git', 'checkout', 'HEAD', filename})
+    return
 end
 return M
 

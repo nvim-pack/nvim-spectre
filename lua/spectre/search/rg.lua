@@ -1,4 +1,3 @@
-local search = import('spectre.search.base')
 
 local rg = {}
 
@@ -23,5 +22,4 @@ rg.get_path_args = function(_, path)
 end
 
 
-
-return search.extend(rg)
+return rg

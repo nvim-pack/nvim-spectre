@@ -29,6 +29,7 @@ base.on_output = function(self, output_text)
 end
 
 base.on_error = function (self, line)
+    print(vim.inspect(line))
     if line ~= nil then
         pcall(vim.schedule_wrap( function()
             self.handler.on_error(line)

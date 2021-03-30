@@ -1,6 +1,8 @@
 local api = vim.api
 local M = {}
 
+local Job = require("plenary.job")
+
 local config = import('spectre.config')
 local state = import('spectre.state')
 local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
@@ -52,6 +54,19 @@ M.escape_slash = function(query)
   return query:gsub('%\\', '\\\\')
 end
 
+
+M.get_os_command_output = function(cmd, cwd)
+  if type(cmd) ~= "table" then
+    print('cmd has to be a table')
+    return {}
+  end
+  local command = table.remove(cmd, 1)
+  local stderr = {}
+  local stdout, ret = Job:new({ command = command, args = cmd, cwd = cwd, on_stderr = function(_, data)
+    table.insert(stderr, data)
+  end }):sync()
+  return stdout, ret, stderr
+end
 function M.write_virtual_text(bufnr, ns, line, chunks, virt_text_pos)
   local vt_id = nil
   if ns == config.namespace_status and state.vt.status_id ~= 0 then

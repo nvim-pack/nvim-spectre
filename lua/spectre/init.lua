@@ -21,7 +21,10 @@ local highlights = import('spectre.highlights')
 
 local M = {}
 
-M.setup = function(user_config)
+M.setup = function(usr_cfg)
+    state.config   = vim.tbl_deep_extend('force', config, usr_cfg or {})
+    state.finder   = search_engine.get(state.config.finder_cmd)
+    state.replacer = search_engine.get(state.config.replace_cmd)
 end
 
 M.open_visual = function(opts)
@@ -37,7 +40,10 @@ M.open_file_search = function()
 end
 
 M.open = function (opts)
-    state.finder = search_engine.rg:new({}, M.search_handler())
+    if state.finder == nil then
+        M.setup()
+    end
+
     opts = vim.tbl_extend('force',{
         search_text = '',
         replace_text = '',
@@ -121,12 +127,12 @@ function M.setup_mapping_buffer(bufnr)
     vim.cmd [[ augroup END ]]
     vim.cmd [[ syn match Comment /.*:\d\+:\d\+:/]]
     vim.cmd [[setlocal nowrap]]
-
-    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua import("spectre").on_insert_leave()<CR>',{noremap = true})
-    api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',{noremap = true})
-    api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua import('spectre').show_help()<cr>",{noremap = true})
+    local map_opt = {noremap = true, silent = _G.__is_dev == nil  }
+    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua import("spectre").on_insert_leave()<CR>',map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua import('spectre').show_help()<cr>",map_opt)
     for _,map in pairs(config.mapping) do
-        api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd,{noremap = true})
+        api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
     end
 end
 
@@ -182,8 +188,7 @@ M.on_insert_leave = function ()
         end
     end
     local line = vim.fn.getpos('.')
-    -- if change path and if different to the open lnum_UIwind ow id
-    -- then we don't need to search in local file
+    -- check path to verify search in 1  current file
     if state.target_winid ~= nil then
         local ok, bufnr = pcall(api.nvim_win_get_buf, state.target_winid)
         if ok then
@@ -330,8 +335,7 @@ M.search = function(opts)
 
     state.finder:search({
         search_text = state.query.search_query,
-        replace_text = state.query.replace_text,
-        path=state.query.path
+        path = state.query.path
     })
 end
 
