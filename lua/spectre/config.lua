@@ -1,12 +1,17 @@
 local api = vim.api
 
 local config = {
-    filetype = "search_panel",
+    filetype = "spectre_panel",
     namespace = api.nvim_create_namespace("SEARCH_PANEL"),
     namespace_status = api.nvim_create_namespace("SEARCH_PANEL_STATUS"),
     namespace_result = api.nvim_create_namespace("SEARCH_PANEL_RESULT"),
     line_sep = '--------------------------------------',
-    highlight = {ui = "String", search = "DiffChange", replace = "DiffDelete"},
+    result_padding = '   ',
+    highlight = {
+        ui = "String",
+        search = "DiffChange",
+        replace = "DiffDelete"
+    },
     mapping = {
         ['delete_line'] = {
             map = "dd",
@@ -29,7 +34,7 @@ local config = {
             desc = "input replace command vim"
         },
         ['run_replace'] = {
-            map = "rs",
+            map = "rS",
             cmd = "<cmd>lua import('spectre.actions').run_replace()<CR>",
             desc = "replace all"
         }
@@ -44,6 +49,18 @@ local config = {
         --   cmd = "<cmd>lua import('spectre.actions').undo_all()<CR>",
         --   desc="Goto file"
         -- },
+    },
+    find_engine = {
+        ['rg'] = {
+            cmd = "rg",
+            args = nil
+        },
+    },
+    replace_engine={
+       ['sed']={
+            cmd = "sed",
+            args = nil
+        },
     },
     finder_cmd="rg",
     replace_cmd = "sed",

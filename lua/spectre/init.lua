@@ -1,6 +1,12 @@
 local plenary=require('plenary.reload')
 
+-- try to do live reload with lua
+-- sometime it break your neovim:)
+-- run that command and feel
 -- @CMD lua _G.__is_dev=true
+--
+-- reset state if you change default config
+-- @CMD lua _G.__spectre_state.user_config = nil
 if _G.import == nil then
     if _G.__is_dev then
         _G.import = function(path)
@@ -17,13 +23,13 @@ local config = import('spectre.config')
 local state = import('spectre.state')
 local utils = import('spectre.utils')
 local search_engine = import('spectre.search')
-local replace_engine = import('spectre.replace')
 local highlights = import('spectre.highlights')
 
 local M = {}
 
+---@TODO need to improve it
 M.setup = function(usr_cfg)
-    state.config   = vim.tbl_deep_extend('force', config, usr_cfg or {})
+    state.user_config = vim.tbl_deep_extend('force', config, usr_cfg or {})
 end
 
 M.open_visual = function(opts)
@@ -39,10 +45,12 @@ M.open_file_search = function()
 end
 
 M.open = function (opts)
-
-    local finder_creator   = search_engine.get(state.config.finder_cmd)
+    if state.user_config == nil then
+        M.setup()
+    end
+    local finder_creator = search_engine[state.user_config.finder_cmd]
     state.finder = finder_creator:new({}, M.search_handler())
-    state.replacer_creator = replace_engine.get(state.config.replace_cmd)
+
     opts = vim.tbl_extend('force',{
         search_text = '',
         replace_text = '',
@@ -51,7 +59,9 @@ M.open = function (opts)
     }, opts or {})
 
     state.target_winid = api.nvim_get_current_win()
+    state.target_bufnr = api.nvim_get_current_buf()
     local is_new = true
+    --check reopen panel by reuse bufnr
     if state.bufnr ~= nil then
         local wins = vim.fn.win_findbuf(state.bufnr)
         if #wins >= 1 then
@@ -101,12 +111,13 @@ M.open = function (opts)
         })
     end
     local details_ui = {}
-    table.insert(details_ui , {{"Search: "  , config.highlight.ui}})
-    table.insert(details_ui , {{"Replace: " , config.highlight.ui}})
-    table.insert(details_ui , {{"Path: "    , config.highlight.ui}})
+    table.insert(details_ui , {{"Search: "  , state.user_config.highlight.ui}})
+    table.insert(details_ui , {{"Replace: " , state.user_config.highlight.ui}})
+    table.insert(details_ui , {{"Path: "    , state.user_config.highlight.ui}})
 
 
-    local help_text = "[Nvim Spectre]        Show mapping (?)"
+    local help_text = string.format("[Nvim Spectre] (Search by %s) (Replace by %s)   Mapping(?)", state.user_config.finder_cmd, state.user_config.replace_cmd)
+
     utils.write_virtual_text(state.bufnr, config.namespace, 0, {{ help_text, 'Comment' } })
 
     local c_line = 1
@@ -130,7 +141,7 @@ function M.setup_mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua import("spectre").on_insert_leave()<CR>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua import('spectre').show_help()<cr>",map_opt)
-    for _,map in pairs(config.mapping) do
+    for _,map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
     end
 end
@@ -138,18 +149,16 @@ end
 
 
 local function hl_match(opts)
-    vim.cmd("syn clear " .. config.highlight.search)
-    vim.cmd("syn clear " .. config.highlight.replace)
     if #opts.search_query > 0 then
-        api.nvim_buf_add_highlight(state.bufnr, config.namespace,config.highlight.search, 2, 0,-1)
+        api.nvim_buf_add_highlight(state.bufnr, config.namespace,state.user_config.highlight.search, 2, 0,-1)
     end
     if #opts.replace_query>0 then
-        api.nvim_buf_add_highlight(state.bufnr, config.namespace,config.highlight.replace, 4, 0,-1)
+        api.nvim_buf_add_highlight(state.bufnr, config.namespace,state.user_config.highlight.replace, 4, 0,-1)
     end
 end
 
 
-local function check_is_edit ()
+local function can_edit_line ()
     local line = vim.fn.getpos('.')
     if line[2] > config.lnum_UI then
         return false
@@ -158,7 +167,7 @@ local function check_is_edit ()
 end
 
 M.on_insert_enter = function ()
-    if check_is_edit() then return end
+    if can_edit_line() then return end
     local key = api.nvim_replace_termcodes("<esc>", true, false, true)
     api.nvim_feedkeys(key, "m", true)
     print("You can't make changes in results.")
@@ -166,7 +175,7 @@ end
 
 
 M.on_insert_leave = function ()
-    if not check_is_edit() then return end
+    if not can_edit_line() then return end
     local lines = api.nvim_buf_get_lines(state.bufnr, 0, config.lnum_UI, false)
 
     local query = {
@@ -221,9 +230,10 @@ M.do_replace_text = function(opts)
         end
         if lnum_replace == 2 then
             local replace_line = utils. vim_replace_text(
-            state.query.search_query,
-            state.query.replace_query,
-            search_line)
+                state.query.search_query,
+                state.query.replace_query,
+                search_line
+            )
             api.nvim_buf_set_lines(
                 state.bufnr,
                 lnum,
@@ -248,7 +258,7 @@ end
 
 
 M.delete = function ()
-    if check_is_edit() then
+    if can_edit_line() then
         -- delete line content
         vim.cmd[[:normal! ^d$]]
         return false
@@ -277,7 +287,6 @@ M.delete = function ()
 end
 
 M.search_handler = function()
-    local padding_txt="    "
     local c_line = 0
     local total = 0
     local start_time=0
@@ -295,8 +304,8 @@ M.search_handler = function()
             end
             api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
                 string.format("%s:%s:%s:", item.filename, item.lnum, item.col),
-                padding_txt .. item.text,
-                padding_txt  .. item.replace_text,
+                state.user_config.result_padding .. item.text,
+                state.user_config.result_padding  .. item.replace_text,
                 config.line_sep,
             })
             highlights.hl_different_line(
@@ -304,8 +313,8 @@ M.search_handler = function()
                 config.namespace,
                 state.query.search_query,
                 state.query.replace_query,
-                padding_txt .. item.text,
-                padding_txt .. item.replace_text,
+                state.user_config.result_padding .. item.text,
+                state.user_config.result_padding .. item.replace_text,
                 c_line + 1
                 )
             c_line = c_line + 4
@@ -322,6 +331,7 @@ M.search_handler = function()
         end
     }
 end
+
 M.search = function(opts)
     if #opts.search_query < 2 then return end
     state.query = opts
@@ -345,7 +355,7 @@ M.show_help = function()
     end
 
     local win_width, win_height = vim.lsp.util._make_floating_popup_size(help_msg,{})
-    local help_win, preview = popup.create(help_msg,{
+    local help_win, preview = popup.create(help_msg, {
         title = "Mapping",
         border = true,
         padding = {1, 1, 1, 1},
@@ -358,9 +368,11 @@ M.show_help = function()
 
     vim.api.nvim_win_set_option(help_win, 'winblend', 0)
     vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
-    preview.border.win_id)
+        preview.border.win_id
+    )
     vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
-    help_win)
+        help_win
+    )
 end
 
 

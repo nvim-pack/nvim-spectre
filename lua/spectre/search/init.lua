@@ -1,11 +1,17 @@
 local base = import('spectre.search.base')
-local rg = import('spectre.search.rg')
-
-local s={
-    rg = base.extend(rg)
-}
-s.get = function (key)
-    if key and s[key]~= nil then return s[key] end
-    return s.rg
+local s = {}
+s.get = function(key)
+    assert(key ~= nil, "key no nil")
+    local ok, engine = pcall(require, "spectre.search." .. key)
+    if not ok then
+        print("No search engine " .. key)
+        engine = require("spectre.search.rg")
+    end
+    engine.name = key
+    return base.extend(engine)
 end
-return s
+return setmetatable(s, {
+    __index = function(self, key)
+        return self.get(key)
+    end
+})

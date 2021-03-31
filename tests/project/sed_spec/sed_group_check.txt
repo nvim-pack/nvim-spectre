@@ -1,3 +1,3 @@
 test data zzzz ok ()
-test  function new()
+test  function abcde()
 end

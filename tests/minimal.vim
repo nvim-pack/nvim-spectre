@@ -1,4 +1,4 @@
-set rtp +=.
+set rtp +=./
 set rtp +=../plenary.nvim/
 set rtp +=../popup.nvim
 
@@ -11,5 +11,6 @@ set nobackup
 
 lua << EOF
 require('spectre.init')
+require('tests/helper').init()
 EOF
 

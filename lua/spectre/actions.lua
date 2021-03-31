@@ -89,7 +89,7 @@ end
 
 M.run_replace = function()
   local entries = M.get_all_entries()
-  local replacer_creator = replace_engine.get(state.config.replace_cmd)
+  local replacer_creator = replace_engine.get(state.user_config.replace_cmd)
   local replacer = replacer_creator:new({},{
       on_finish = function(result)
           if(result.ref) then

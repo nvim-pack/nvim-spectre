@@ -2,6 +2,10 @@ local utils = require('spectre.utils')
 local M = {}
 local api = vim.api
 
+M.init = function ()
+    vim.cmd ("set rtp +="..vim.fn.system('pwd'))
+end
+
 M.defer_get_line = function(bufnr, start_col, end_col, time)
     assert(bufnr ~= nil, 'buffer not nil')
     time = time or 600
