@@ -1,9 +1,8 @@
-local Job = require("plenary.job")
 local api = vim.api
 local utils = import('spectre.utils')
 local config = import('spectre.config')
 local state=import('spectre.state')
-
+local replace_engine = import('spectre.replace')
 local M = {}
 
 local open_file = function(filename, lnum, col, winid)
@@ -49,7 +48,7 @@ M.get_all_entries = function()
   for index, line in pairs(lines) do
     local grep = utils.parse_line_grep(line)
     if grep ~= nil and line:match("^%w") ~= nil then
-      grep.lnum_result = config.line_result + index -2
+      grep.display_lnum = config.line_result + index -2
       table.insert(entries, grep)
     end
   end
@@ -90,41 +89,34 @@ end
 
 M.run_replace = function()
   local entries = M.get_all_entries()
+  local replacer_creator = replace_engine.get(state.config.replace_cmd)
+  local replacer = replacer_creator:new({},{
+      on_finish = function(result)
+          if(result.ref) then
+              local value = result.ref
+              value.text = " DONE"
+              vim.fn.setqflist(entries, 'r')
+              api.nvim_buf_set_extmark(M.bufnr, config.namespace, value.display_lnum, 0, { virt_text = {{" DONE", "String"}}, virt_text_pos = 'eol'})
+          end
+      end,
+      on_error = function(result)
+          if(result.ref) then
+              local value = result.ref
+              value.text = "ERROR"
+              vim.fn.setqflist(entries, 'r')
+              api.nvim_buf_set_extmark(M.bufnr, config.namespace, value.display_lnum, 0, { virt_text = {{" ERROR", "Error"}}, virt_text_pos = 'eol'})
+          end
+      end
+  })
   for _, value in pairs(entries) do
-    local t_sed = string.format(
-      "%s,%ss/%s/%s/g",
-      value.lnum,
-      value.lnum,
-      utils.escape_slash(state.query.search_query),
-      utils.escape_slash(state.query.replace_query)
-    )
-    local args={
-      '-i',
-      '-E',
-      t_sed,
-      value.filename,
-    }
-
-    local job = Job:new({
-      command = "sed",
-      args = args,
-      on_stderr = function(error,status)
-        pcall(vim.schedule_wrap( function()
-          value.text = " ERROR"
-          vim.fn.setqflist(entries, 'r')
-        end))
-      end,
-      on_exit = function(_,status)
-        if status == 0 then
-          pcall(vim.schedule_wrap( function()
-            value.text = " DONE"
-            vim.fn.setqflist(entries, 'r')
-            api.nvim_buf_set_extmark(M.bufnr, config.namespace, value.lnum_result, 0, { virt_text = {{" DONE", "String"}}, virt_text_pos = 'eol'})
-          end))
-        end
-      end,
-    })
-    job:sync()
+      replacer:replace({
+          lnum = value.lnum,
+          col = value.col,
+          display_lnum = value.display_lnum,
+          filename = value.filename,
+          search_text = state.query.search_query,
+          replace_text = state.query.replace_query,
+      })
   end
 end
 

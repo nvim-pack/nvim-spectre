@@ -1,1 +1,1 @@
-test /home/winner visual
+test def visual

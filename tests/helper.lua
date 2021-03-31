@@ -35,5 +35,28 @@ M.checkoutfile = function(filename)
     utils.get_os_command_output({'git', 'checkout', 'HEAD', filename})
     return
 end
+
+M.test_replace = function(opts, f_replace)
+    local eq = assert.are.same
+    M.checkoutfile(opts.filename)
+    local finish = false
+    local handler= {
+        on_finish = function()
+            finish = true
+        end
+    }
+    local replacer = f_replace(handler)
+    replacer:replace({
+        lnum = opts.lnum,
+        filename = opts.filename,
+        search_text = opts.search_text,
+        replace_text = opts.replace_text
+    })
+    M.wait(1000, function()
+        return finish
+    end)
+    local output_txt = utils.get_os_command_output({"cat", opts.filename})
+    eq(output_txt[opts.lnum], opts.expected, "test " .. opts.filename)
+end
 return M
 

@@ -17,14 +17,13 @@ local config = import('spectre.config')
 local state = import('spectre.state')
 local utils = import('spectre.utils')
 local search_engine = import('spectre.search')
+local replace_engine = import('spectre.replace')
 local highlights = import('spectre.highlights')
 
 local M = {}
 
 M.setup = function(usr_cfg)
     state.config   = vim.tbl_deep_extend('force', config, usr_cfg or {})
-    state.finder   = search_engine.get(state.config.finder_cmd)
-    state.replacer = search_engine.get(state.config.replace_cmd)
 end
 
 M.open_visual = function(opts)
@@ -40,10 +39,10 @@ M.open_file_search = function()
 end
 
 M.open = function (opts)
-    if state.finder == nil then
-        M.setup()
-    end
 
+    local finder_creator   = search_engine.get(state.config.finder_cmd)
+    state.finder = finder_creator:new({}, M.search_handler())
+    state.replacer_creator = replace_engine.get(state.config.replace_cmd)
     opts = vim.tbl_extend('force',{
         search_text = '',
         replace_text = '',

@@ -28,11 +28,10 @@ base.on_output = function(self, output_text)
     end))
 end
 
-base.on_error = function (self, line)
-    print(vim.inspect(line))
-    if line ~= nil then
+base.on_error = function (self, output_text)
+    if output_text ~= nil then
         pcall(vim.schedule_wrap( function()
-            self.handler.on_error(line)
+            self.handler.on_error(output_text)
             return
         end))
     end

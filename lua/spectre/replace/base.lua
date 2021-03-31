@@ -1,14 +1,5 @@
-
-
 local base = {}
 base.__index = base
-
-
-base.get_path_args = function(self, path)
-    print("[spectre] should implement path_args for ", self.state.config.cmd)
-    return {path}
-end
-
 
 base.on_output = function(self, value)
     pcall(vim.schedule_wrap( function()
@@ -16,19 +7,23 @@ base.on_output = function(self, value)
     end))
 end
 
-base.on_error = function (self, value)
+base.on_error = function (self, value, ref)
     if value ~= 0 then
         pcall(vim.schedule_wrap( function()
-            self.handler.on_error(value)
+            self.handler.on_error({
+                ref = ref
+            })
             return
         end))
     end
 end
 
-base.on_exit = function(self, value)
+base.on_exit = function(self, value, ref)
     if value == 0 then
         pcall(vim.schedule_wrap( function()
-            self.handler.on_finish(value)
+            self.handler.on_finish({
+                ref = ref
+            })
         end))
     else
         base.on_error(self, value)

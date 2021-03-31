@@ -32,21 +32,24 @@ M.parse_line_grep = function(query)
   return t
 end
 
+-- escape_chars but don't escape it if have slash before or after
 M.escape_chars = function(query)
-  return query:gsub('^%^', '\\^')
-            :gsub("%/", "\\/")
-            :gsub("%{", "\\{")
-            :gsub("%}", "\\}")
-            :gsub('%(', '\\(')
-            :gsub('%)', '\\)')
-            :gsub('%.', '\\.')
-            :gsub('%[', '\\[')
-            :gsub('%]', '\\]')
-end
+-- local regex = string.gsub([[ ([^\\])([\^\%\(\)\[\]\{\}\.\*\|\\])([^\\]) ]]," ","")
+--   return vim.fn.substitute(
+--     query,
+--     "\\v"..regex,
+--     "\\1\\\\\\2\\3",
+--     'g'
+--   )
+   return query:gsub("[^%\\][%^%/%{%}%(%)%[%]%\\%.][^%\\]", function(v)
+        local cmd = v:sub(1, 1) .. "\\"..v:sub(2,3)
+        return cmd
+   end)
 
+end
 -- change form slash to hash
 M.regex_slash_to_hash = function(query)
-  return query.gsub("%\\","%%")
+  return query:gsub("%\\","%%")
 end
 
 -- only escape slash
@@ -54,6 +57,19 @@ M.escape_slash = function(query)
   return query:gsub('%\\', '\\\\')
 end
 
+-- escape slash with / and '
+M.escape_sed = function (query)
+    return query:gsub("[%/%']", function (v)
+        return "\\" ..v
+    end)
+end
+
+--escape slash without number
+M.escape_slash_ex_number = function(query)
+  return query:gsub('%\\[^%d]', function(v1)
+      return "\\"..v1
+  end)
+end
 
 M.get_os_command_output = function(cmd, cwd)
   if type(cmd) ~= "table" then
@@ -67,6 +83,7 @@ M.get_os_command_output = function(cmd, cwd)
   end }):sync()
   return stdout, ret, stderr
 end
+
 function M.write_virtual_text(bufnr, ns, line, chunks, virt_text_pos)
   local vt_id = nil
   if ns == config.namespace_status and state.vt.status_id ~= 0 then
@@ -95,16 +112,9 @@ function M.get_visual_selection()
     local query=table.concat(lines,'')
     return query
 end
--- local string_to_table=function(str)
---   local t = {}
---   for i=1, string.len(str) do
---     t[i]= (string.sub(str,i,i))
---   end
---   return t
--- end
 
 --- use vim function substitute with magic mode
---- need to sure that query is work in vim when you run command
+--- need to verify that query is work in vim when you run command
 function M.vim_replace_text(search_text, replace_text, search_line)
   return vim.fn.substitute(
     search_line,
@@ -114,9 +124,9 @@ function M.vim_replace_text(search_text, replace_text, search_line)
   )
 end
 
---- get position of text match in string
---- @return table
-local function get_col_match_on_line(match, str)
+--- get all position of text match in string
+---@return table col{{start1, end1},{start2, end2}} math in line
+local function match_text_line(match, str)
   if match == nil or str == nil then return {}  end
   if match == "" or str == "" then return {}  end
   local index = 0
@@ -134,17 +144,21 @@ local function get_col_match_on_line(match, str)
   end
 return col_tbl
 end
---- find different tex of 2 line with search_text and replace_text
+
+--- find different text of 2 line with search_text and replace_text
 --- @params opts {search_text, replace_text, search_line, replace_line}
---- @return table {inpu:{},output{}}
+--- @return table { input={}, output = {}}
 M.different_text_col = function(opts)
-  local search_text, replace_text, search_line, replace_line
-    = opts.search_text, opts.replace_text, opts.search_line, opts.replace_line
-  local result = {input = {}, output = {}}
-  local search_match = vim.fn.matchstr(search_line, M.escape_chars(search_text))
-  result.input = get_col_match_on_line(search_match, search_line)
-  local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
-  result.output = get_col_match_on_line(replace_match, replace_line)
-  return result
+    local search_text, replace_text, search_line, replace_line =
+    opts.search_text, opts.replace_text, opts.search_line, opts.replace_line
+    local result = {input = {}, output = {}}
+    local ok, search_match = pcall(vim.fn.matchstr, search_line, "\\v" .. search_text)
+    if ok then
+        result.input = match_text_line(search_match, search_line)
+        local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
+        result.output = match_text_line(replace_match, replace_line)
+    end
+    return result
 end
+
 return M
