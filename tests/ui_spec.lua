@@ -1,6 +1,6 @@
 local spectre = require('spectre')
+-- local rg = require('spectre.search.rg')
 local config=require('spectre.config')
-local state = require('spectre.state')
 local helper=require('tests.helper')
 
 local eq = assert.are.same

@@ -18,15 +18,13 @@ jobs:
 
       - name: Prepare
         run: |
-          mkdir -p ~/.vim/autoload
-          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.vim/autoload/plenary.nvim
-          git clone --depth 1 https://github.com/nvim-lua/popup.nvim ~/.vim/autoload/popup.nvim
-          git clone --depth 1 https://github.com/nvim-treesitter/nvim-treesitter ~/.vim/autoload/nvim-treesitter
-          git clone --depth 1 https://github.com/nvim-treesitter/playground ~/.vim/autoload/playground
-          ln -s $(pwd) ~/.vim/autoload
+          sudo apt-get install ripgrep
+          mkdir -p ~/.local/share/nvim/site/pack/vendor/start
+          git clone --depth 1 https://github.com/nvim-lua/plenary.nvim ~/.local/share/nvim/site/pack/vendor/start/plenary.nvim
+          git clone --depth 1 https://github.com/nvim-lua/popup.nvim ~/.local/share/nvim/site/pack/vendor/start/popup.nvim
+          ln -s $(pwd) ~/.local/share/nvim/site/pack/vendor/start
       - name: Run tests
         run: |
           curl -OL https://raw.githubusercontent.com/norcalli/bot-ci/master/scripts/github-actions-setup.sh
           source github-actions-setup.sh nightly-x64
-          nvim --headless -u tests/minimal.vim -c "TSInstallSync all" -c "q"
           make test

@@ -51,16 +51,16 @@ describe("[sed] replace ", function()
     local test_sed = {
         {
             filename = 'sed_spec/sed_group_check.txt',
-            search_text = [[function (abcd.*)]],
-            replace_text = [[function new\1]],
-            expected = "test  function newabcd()",
+            search_text = [[function (new.*)]],
+            replace_text = [[function abcde\1]],
+            expected = "test  function abcdenew()",
             lnum = 2
         }, {
             filename = 'sed_spec/sed_group_check.txt',
             lnum = 2,
-            search_text = [[abcd\(]],
-            replace_text = "new(",
-            expected = "test  function new()"
+            search_text = [[new\(]],
+            replace_text = "abcde(",
+            expected = "test  function abcde()"
         }, {
             filename = 'sed_spec/sed_single_quote.txt',
             lnum = 1,
@@ -79,6 +79,10 @@ describe("[sed] replace ", function()
         it("should match result text in " .. test.filename, function()
             helpers.test_replace(test, get_replacer)
         end)
+    end
+
+    for _,test in pairs(test_sed) do
+        helpers.checkoutfile(test.filename)
     end
 
 end)

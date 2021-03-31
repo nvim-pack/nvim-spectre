@@ -9,6 +9,11 @@ local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
 
 -- -- don't throw error of hightlight syntax regex
 -- local highlight_safe = function(group, query)
+-- if state.target_bufnr ~= nil and state.query.is_file then
+--     api.nvim_buf_call(state.target_bufnr,function()
+--         vim.cmd(string.format([[2match %s /%s/]], state.user_config.highlight.search, state.query.search_query))
+--     end)
+-- end
 --   if #query > 1 then
 --     pcall(vim.cmd, string.format("syn match %s /%s/", group, query))
 --   end
