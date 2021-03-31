@@ -81,4 +81,8 @@ describe("[sed] replace ", function()
         end)
     end
 
+    for _,test in pairs(test_sed) do
+        helpers.checkoutfile(test.filename)
+    end
+
 end)
