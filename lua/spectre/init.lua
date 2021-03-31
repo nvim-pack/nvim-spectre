@@ -220,15 +220,17 @@ M.do_replace_text = function(opts)
     state.query = opts
     hl_match(opts)
 
-    local lines = api.nvim_buf_get_lines(state.bufnr, config.line_result -1, -1, false)
-    local lnum = config.line_result -1
+    local lines        = api.nvim_buf_get_lines(state.bufnr, config.line_result -1, -1, false)
+    local lnum         = config.line_result -1
     local lnum_replace = 1
+    local padding      = #state.user_config.result_padding
     for _, search_line in pairs(lines) do
         lnum = lnum + 1
         if search_line == config.line_sep then
             lnum_replace = 0
         end
         if lnum_replace == 2 then
+            search_line = search_line:sub(padding + 1)
             local replace_line = utils. vim_replace_text(
                 state.query.search_query,
                 state.query.replace_query,
@@ -239,7 +241,7 @@ M.do_replace_text = function(opts)
                 lnum,
                 lnum + 1,
                 false,
-                {replace_line}
+                {state.user_config.result_padding .. replace_line}
             )
             highlights.hl_different_line(
                 state.bufnr,
@@ -247,7 +249,8 @@ M.do_replace_text = function(opts)
                 state.query.search_query,
                 state.query.replace_query,
                 search_line, replace_line,
-                lnum-1
+                lnum-1,
+                padding
             )
         end
         if lnum_replace >= 0 then
@@ -290,6 +293,7 @@ M.search_handler = function()
     local c_line = 0
     local total = 0
     local start_time=0
+    local padding=#state.user_config.result_padding
     return {
         on_start=function()
             c_line =config.line_result
@@ -313,10 +317,11 @@ M.search_handler = function()
                 config.namespace,
                 state.query.search_query,
                 state.query.replace_query,
-                state.user_config.result_padding .. item.text,
-                state.user_config.result_padding .. item.replace_text,
-                c_line + 1
-                )
+                item.text,
+                item.replace_text,
+                c_line + 1,
+                padding
+            )
             c_line = c_line + 4
             total = total + 1
         end,

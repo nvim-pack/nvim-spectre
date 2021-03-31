@@ -131,37 +131,38 @@ end
 
 --- get all position of text match in string
 ---@return table col{{start1, end1},{start2, end2}} math in line
-local function match_text_line(match, str)
-  if match == nil or str == nil then return {}  end
-  if match == "" or str == "" then return {}  end
-  local index = 0
-  local len = string.len(str)
-  local match_len = string.len(match)
-  local col_tbl = {}
-  while index < len do
-    local txt = string.sub(str, index, index + match_len -1)
-    if txt == match then
-      table.insert(col_tbl,{index -1, index + match_len -1})
-      index = index + match_len
-    else
-      index = index + 1
+local function match_text_line(match, str, padding)
+    if match == nil or str == nil then return {}  end
+    if match == "" or str == "" then return {}  end
+    padding = padding or 0
+    local index = 0
+    local len = string.len(str)
+    local match_len = string.len(match)
+    local col_tbl = {}
+    while index < len do
+        local txt = string.sub(str, index, index + match_len -1)
+        if txt == match then
+            table.insert(col_tbl,{index -1 +padding, index + match_len -1+padding})
+            index = index + match_len
+        else
+            index = index + 1
+        end
     end
-  end
-return col_tbl
+    return col_tbl
 end
 
 --- find different text of 2 line with search_text and replace_text
 --- @params opts {search_text, replace_text, search_line, replace_line}
 --- @return table { input={}, output = {}}
 M.different_text_col = function(opts)
-    local search_text, replace_text, search_line, replace_line =
-    opts.search_text, opts.replace_text, opts.search_line, opts.replace_line
+    local search_text, replace_text, search_line, replace_line,padding =
+        opts.search_text, opts.replace_text, opts.search_line, opts.replace_line, opts.padding
     local result = {input = {}, output = {}}
     local ok, search_match = pcall(vim.fn.matchstr, search_line, "\\v" .. search_text)
     if ok then
-        result.input = match_text_line(search_match, search_line)
+        result.input = match_text_line(search_match, search_line, padding)
         local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
-        result.output = match_text_line(replace_match, replace_line)
+        result.output = match_text_line(replace_match, replace_line, padding)
     end
     return result
 end
