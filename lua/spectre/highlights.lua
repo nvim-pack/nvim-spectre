@@ -1,6 +1,6 @@
 local M = {}
-local utils = import('spectre.utils')
-local config = import('spectre.config')
+local utils = require('spectre.utils')
+local config = require('spectre.config')
 local api = vim.api
 
 M.hl_different_line = function(bufnr, namespace, search_query, replace_query, search, replace, lnum, padding)

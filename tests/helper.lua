@@ -36,7 +36,7 @@ M.wait = function (time, check)
 end
 
 M.checkoutfile = function(filename)
-    utils.get_os_command_output({'git', 'checkout', 'HEAD', filename})
+    utils.run_os_cmd({'git', 'checkout', 'HEAD', filename})
     return
 end
 
@@ -59,7 +59,7 @@ M.test_replace = function(opts, f_replace)
     M.wait(1000, function()
         return finish
     end)
-    local output_txt = utils.get_os_command_output({"cat", opts.filename})
+    local output_txt = utils.run_os_cmd({"cat", opts.filename})
     eq(output_txt[opts.lnum], opts.expected, "test " .. opts.filename)
 end
 return M

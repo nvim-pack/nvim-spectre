@@ -10,11 +10,13 @@ rg.init = function(_, config)
             '--with-filename',
             '--line-number',
             '--column',
+        },
+        options={
+            ['ignore-case']="--ignore-case",
+            ['hidden'] = "--hidden"
         }
     }, config or {})
-    return {
-        config = config
-    }
+    return config
 end
 
 rg.get_path_args = function(_, path)

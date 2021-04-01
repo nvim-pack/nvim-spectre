@@ -1,4 +1,4 @@
-local base = import('spectre.search.base')
+local base = require('spectre.search.base')
 local s = {}
 s.get = function(key)
     assert(key ~= nil, "key no nil")

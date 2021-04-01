@@ -7,11 +7,14 @@ local state = {
         path = '',
         is_file = '' -- search in current file
     },
-    finder = nil,
-    replacer = nil,
     -- virtual text namespace
     vt = {
 
+    },
+    --for options
+    options={
+        ['ignore-case'] = false,
+        ['hidden'] = false
     }
 }
 

@@ -1,6 +1,6 @@
 
 local Job = require("plenary.job")
-local utils = import('spectre.utils')
+local utils = require('spectre.utils')
 
 local sed={}
 
@@ -13,28 +13,25 @@ sed.init = function(_, config)
             '-E',
         }
     }, config or {})
-    return {
-        config = config
-    }
+    return config
 end
 
 sed.replace = function(self, value)
     local t_sed = string.format(
-        self.state.config.pattern,
+        self.state.pattern,
         value.lnum,
         value.lnum,
         utils.escape_sed(value.search_text),
         utils.escape_sed(value.replace_text)
     )
-    local args={
-        '-i',
-        '-E',
+    local args = vim.tbl_flatten({
+        self.state.args,
         t_sed,
         value.filename,
-    }
+    })
     -- print(table.concat(args, ' '))
     local job = Job:new({
-        command = self.state.config.cmd,
+        command = self.state.cmd,
         args = args,
         on_stdout = function(_, v) self:on_output(v, value) end,
         on_stderr = function(_, v) self:on_error(v, value) end,

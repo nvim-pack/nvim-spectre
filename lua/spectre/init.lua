@@ -1,36 +1,45 @@
 local plenary=require('plenary.reload')
 
--- try to do live reload with lua
+-- try to do hot reload with lua
 -- sometime it break your neovim:)
 -- run that command and feel
 -- @CMD lua _G.__is_dev=true
+-- @CMD luafile %
 --
 -- reset state if you change default config
--- @CMD lua _G.__spectre_state.user_config = nil
-if _G.import == nil then
+-- @CMD lua _G.__spectre_state = nil
+
+if _G._require == nil then
     if _G.__is_dev then
-        _G.import = function(path)
-            return plenary.reload_module(path)
+        _G._require = require
+        _G.require = function(path)
+            if string.find(path, '^spectre') ~= nil then
+                plenary.reload_module(path)
+            end
+            return _G._require(path)
         end
-    else
-        _G.import = require
     end
 end
 
 local popup = require('popup')
 local api = vim.api
-local config = import('spectre.config')
-local state = import('spectre.state')
-local utils = import('spectre.utils')
-local search_engine = import('spectre.search')
-local highlights = import('spectre.highlights')
+local config = require('spectre.config')
+local state = require('spectre.state')
+local state_utils = require('spectre.state_utils')
+local utils = require('spectre.utils')
+local highlights = require('spectre.highlights')
 
 local M = {}
 
----@TODO need to improve it
+
+---@ need to improve it
 M.setup = function(usr_cfg)
     state.user_config = vim.tbl_deep_extend('force', config, usr_cfg or {})
+    for _, opt in pairs(state.user_config.default.find.options) do
+        state.options[opt] = true
+    end
 end
+
 
 M.open_visual = function(opts)
     opts = opts or {}
@@ -48,10 +57,9 @@ M.open = function (opts)
     if state.user_config == nil then
         M.setup()
     end
-    local finder_creator = search_engine[state.user_config.finder_cmd]
-    state.finder = finder_creator:new({}, M.search_handler())
 
     opts = vim.tbl_extend('force',{
+        is_insert_mode = state.user_config.is_insert_mode,
         search_text = '',
         replace_text = '',
         path = '',
@@ -88,59 +96,84 @@ M.open = function (opts)
     state.bufnr = api.nvim_get_current_buf();
     vim.cmd(string.format("file %s/spectre", state.bufnr))
     vim.bo.filetype = config.filetype
-    api.nvim_buf_clear_namespace(state.bufnr, config.namespace, 0, -1)
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_status, 0, -1)
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
     api.nvim_buf_set_lines(state.bufnr, 0, -1, 0, {})
+
+    -- set empty line for virtual text
     local lines = {}
     local length = config.lnum_UI
     for _ = 1, length, 1 do
         table.insert(lines, "")
     end
-
     api.nvim_buf_set_lines(state.bufnr, 0, 0, 0, lines)
     api.nvim_buf_set_lines(state.bufnr, 2, 2, 0, {opts.search_text})
     api.nvim_buf_set_lines(state.bufnr, 4, 4, 0, {opts.replace_text})
     api.nvim_buf_set_lines(state.bufnr, 6, 6, 0, {opts.path})
     api.nvim_win_set_cursor(0,{3, 0})
+
+    M.builder_search_ui()
+    M.builder_header()
+
+    if opts.is_insert_mode == true then
+        vim.api.nvim_feedkeys('A', 'n', true)
+    end
+
+    M.mapping_buffer(state.bufnr)
+
     if #opts.search_text > 0 then
         M.search({
             search_query = opts.search_text,
-            replace_query = "",
+            replace_query = opts.replace_text,
             path = opts.path,
         })
     end
+end
+
+function M.builder_search_ui()
+    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_ui, 0, config.lnum_UI)
     local details_ui = {}
-    table.insert(details_ui , {{"Search: "  , state.user_config.highlight.ui}})
+    local search_message = "Search:          "
+    local cfg = state_utils.get_search_engine_config()
+    for key,value in pairs(state.options) do
+        if value == true and cfg.options[key] then
+            search_message = search_message .. cfg.options[key].icon
+        end
+    end
+
+    table.insert(details_ui , {{search_message, state.user_config.highlight.ui}})
     table.insert(details_ui , {{"Replace: " , state.user_config.highlight.ui}})
     table.insert(details_ui , {{"Path: "    , state.user_config.highlight.ui}})
 
-
-    local help_text = string.format("[Nvim Spectre] (Search by %s) (Replace by %s)   Mapping(?)", state.user_config.finder_cmd, state.user_config.replace_cmd)
-
-    utils.write_virtual_text(state.bufnr, config.namespace, 0, {{ help_text, 'Comment' } })
-
     local c_line = 1
     for _, vt_text in ipairs(details_ui) do
-        utils.write_virtual_text(state.bufnr, config.namespace, c_line, vt_text)
+        utils.write_virtual_text(state.bufnr, config.namespace_ui, c_line, vt_text)
         c_line = c_line + 2
     end
-
-    M.setup_mapping_buffer(state.bufnr)
 end
 
-function M.setup_mapping_buffer(bufnr)
+function M.builder_header()
+    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_header, 0, config.lnum_UI)
+    local help_text = string.format(
+        "[Nvim Spectre] (Search by %s) (Replace by %s)  Mapping(?)",
+        state.user_config.default.find.cmd,
+        state.user_config.default.replace.cmd
+    )
+    utils.write_virtual_text(state.bufnr, config.namespace_header, 0, {{ help_text, 'Comment' } })
+end
+
+function M.mapping_buffer(bufnr)
     vim.cmd [[ augroup search_panel_autocmds ]]
     vim.cmd [[ au! * <buffer> ]]
-    vim.cmd [[ au InsertEnter <buffer> lua import"spectre".on_insert_enter() ]]
-    vim.cmd [[ au InsertLeave <buffer> lua import"spectre".on_insert_leave() ]]
+    vim.cmd [[ au InsertEnter <buffer> lua require"spectre".on_insert_enter() ]]
+    vim.cmd [[ au InsertLeave <buffer> lua require"spectre".on_insert_leave() ]]
     vim.cmd [[ augroup END ]]
     vim.cmd [[ syn match Comment /.*:\d\+:\d\+:/]]
     vim.cmd [[setlocal nowrap]]
     local map_opt = {noremap = true, silent = _G.__is_dev == nil  }
-    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua import("spectre").on_insert_leave()<CR>',map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua require("spectre").on_insert_leave()<CR>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua import('spectre').show_help()<cr>",map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>",map_opt)
     for _,map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
     end
@@ -295,7 +328,7 @@ M.search_handler = function()
     local start_time=0
     local padding=#state.user_config.result_padding
     return {
-        on_start=function()
+        on_start = function()
             c_line =config.line_result
             total = 0
             start_time = vim.loop.hrtime()
@@ -338,6 +371,12 @@ M.search_handler = function()
 end
 
 M.search = function(opts)
+    opts = opts or state.query
+    local finder_creator = state_utils.get_finder_creator()
+    local finder = finder_creator:new(
+        state_utils.get_search_engine_config(),
+        M.search_handler()
+    )
     if #opts.search_query < 2 then return end
     state.query = opts
     -- clear old search result
@@ -347,11 +386,13 @@ M.search = function(opts)
     local c_line = config.line_result
     api.nvim_buf_set_lines( state.bufnr, c_line -1, c_line -1, false, { config.line_sep})
 
-    state.finder:search({
+    finder:search({
         search_text = state.query.search_query,
         path = state.query.path
     })
 end
+
+
 
 M.show_help = function()
     local help_msg = {}
@@ -361,14 +402,14 @@ M.show_help = function()
 
     local win_width, win_height = vim.lsp.util._make_floating_popup_size(help_msg,{})
     local help_win, preview = popup.create(help_msg, {
-        title = "Mapping",
-        border = true,
+        title   = "Mapping",
+        border  = true,
         padding = {1, 1, 1, 1},
-        enter = false,
-        width = win_width + 2,
-        height = win_height + 2,
-        col = "cursor+2",
-        line = "cursor+2",
+        enter   = false,
+        width   = win_width + 2,
+        height  = win_height + 2,
+        col     = "cursor+2",
+        line    = "cursor+2",
     })
 
     vim.api.nvim_win_set_option(help_win, 'winblend', 0)
@@ -378,6 +419,58 @@ M.show_help = function()
     vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
         help_win
     )
+end
+
+M.change_options = function(key)
+    if state.options[key] == nil then
+        state.options[key] = false
+    end
+    state.options[key] = not state.options[key]
+    if #state.query.search_query>0 then
+        M.builder_search_ui()
+        M.search()
+    end
+end
+
+M.show_options = function()
+    local cfg = state_utils.get_search_engine_config()
+    local help_msg = {" Press number to select option"}
+    local option_cmd = {}
+    local i = 1
+
+    for key, option in pairs(cfg.options) do
+        table.insert(help_msg, string.format(" %s : toggle %s" , i, option.desc or ' '))
+        table.insert(option_cmd,key)
+        i = i + 1
+    end
+
+    local win_width, win_height = vim.lsp.util._make_floating_popup_size(help_msg,{})
+
+    local help_win, preview = popup.create(help_msg, {
+        title   = "Options",
+        border  = true,
+        padding = {1, 1, 1, 1},
+        enter   = false,
+        width   = win_width + 2,
+        height  = win_height + 2,
+        col     = "cursor+2",
+        line    = "cursor+2",
+    })
+
+    vim.api.nvim_win_set_option(help_win, 'winblend', 0)
+    vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
+        preview.border.win_id
+    )
+    vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
+        help_win
+    )
+    vim.defer_fn(function ()
+        local char = vim.fn.getchar() -48
+        if option_cmd[char] then
+            M.change_options(option_cmd[char])
+        end
+
+    end,200)
 end
 
 

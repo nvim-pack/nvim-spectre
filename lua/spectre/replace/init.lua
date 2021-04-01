@@ -1,11 +1,11 @@
-local base = import('spectre.replace.base')
+local base = require('spectre.replace.base')
 local r = {}
 r.get = function(key)
     assert(key ~= nil, "key no nil")
-    local ok, engine = pcall(import, "spectre.replace." .. key)
+    local ok, engine = pcall(require, "spectre.replace." .. key)
     if not ok then
         print("No replace engine" .. key)
-        engine = import("spectre.replace.sed")
+        engine = require("spectre.replace.sed")
     end
     engine.name = key
     return base.extend(engine)

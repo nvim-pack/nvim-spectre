@@ -3,8 +3,8 @@ local M = {}
 
 local Job = require("plenary.job")
 
-local config = import('spectre.config')
-local state = import('spectre.state')
+local config = require('spectre.config')
+local state = require('spectre.state')
 local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
 
 -- -- don't throw error of hightlight syntax regex
@@ -37,24 +37,26 @@ M.parse_line_grep = function(query)
   return t
 end
 
--- escape_chars but don't escape it if have slash before or after
-M.escape_chars = function(query)
--- local regex = string.gsub([[ ([^\\])([\^\%\(\)\[\]\{\}\.\*\|\\])([^\\]) ]]," ","")
---   return vim.fn.substitute(
---     query,
---     "\\v"..regex,
---     "\\1\\\\\\2\\3",
---     'g'
---   )
-   return query:gsub("[^%\\][%^%/%{%}%(%)%[%]%\\%.][^%\\]", function(v)
-        local cmd = v:sub(1, 1) .. "\\"..v:sub(2,3)
-        return cmd
-   end)
-
+-- help /ordinary-atom
+-- help non-greedy
+M.escape_vim_magic=function (query)
+    local regex = string.gsub([[ (\\)@<![><=](\\)@! ]]," ","")
+      return vim.fn.substitute(
+        query,
+        "\\v"..regex,
+        [[\\\0]],
+        'g'
+     )
 end
--- change form slash to hash
-M.regex_slash_to_hash = function(query)
-  return query:gsub("%\\","%%")
+-- escape_chars but don't escape it if have slash before or after !
+M.escape_chars = function(query)
+    local regex = string.gsub([[ (\\)@<![\^\%\(\)\[\]\{\}\.\*\|\\](\\)@! ]]," ","")
+    return vim.fn.substitute(
+        query,
+        "\\v"..regex,
+        [[\\\0]],
+        'g'
+    )
 end
 
 -- only escape slash
@@ -69,14 +71,7 @@ M.escape_sed = function (query)
     end)
 end
 
---escape slash without number
-M.escape_slash_ex_number = function(query)
-  return query:gsub('%\\[^%d]', function(v1)
-      return "\\"..v1
-  end)
-end
-
-M.get_os_command_output = function(cmd, cwd)
+M.run_os_cmd = function(cmd, cwd)
   if type(cmd) ~= "table" then
     print('cmd has to be a table')
     return {}
@@ -121,12 +116,13 @@ end
 --- use vim function substitute with magic mode
 --- need to verify that query is work in vim when you run command
 function M.vim_replace_text(search_text, replace_text, search_line)
-  return vim.fn.substitute(
-    search_line,
-    "\\v"..search_text,
-    replace_text,
-    'g'
-  )
+    local text=vim.fn.substitute(
+        search_line,
+        "\\v"..M.escape_vim_magic(search_text),
+        replace_text,
+        'g'
+    )
+    return text
 end
 
 --- get all position of text match in string
@@ -158,7 +154,7 @@ M.different_text_col = function(opts)
     local search_text, replace_text, search_line, replace_line,padding =
         opts.search_text, opts.replace_text, opts.search_line, opts.replace_line, opts.padding
     local result = {input = {}, output = {}}
-    local ok, search_match = pcall(vim.fn.matchstr, search_line, "\\v" .. search_text)
+    local ok, search_match = pcall(vim.fn.matchstr, search_line, "\\v" .. M.escape_vim_magic(search_text))
     if ok then
         result.input = match_text_line(search_match, search_line, padding)
         local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
@@ -167,4 +163,16 @@ M.different_text_col = function(opts)
     return result
 end
 
+--- remove item duplicate on table
+M.tbl_remove_dup = function (tbl)
+    local hash = {}
+    local res = {}
+    for _,v in ipairs(tbl) do
+        if (not hash[v]) then
+            res[#res+1] = v
+            hash[v] = true
+        end
+    end
+    return res
+end
 return M

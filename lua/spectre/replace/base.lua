@@ -1,4 +1,4 @@
-local state = import('spectre.state')
+
 local base = {}
 base.__index = base
 
@@ -36,10 +36,7 @@ local function extend(child)
     local creator = {}
     creator.__index = creator
     function creator:new(config, handler)
-        assert(config ~= nil, "search config not nil")
-        if(config.args == nil and state.user_config ~= nil) then
-            config = state.user_config.replace_engine[child.name] or config
-        end
+        assert(config ~= nil, "replace config not nil")
         handler = vim.tbl_extend('force', {
             on_start = function()
             end,
@@ -49,13 +46,13 @@ local function extend(child)
             end
         }, handler or {})
         local replace_state = child:init(config)
-        local search = {
+        local replace = {
             state = replace_state,
             handler = handler
         }
         local meta = {}
         meta.__index = vim.tbl_extend('force', base, child)
-        return setmetatable(search, meta)
+        return setmetatable(replace, meta)
     end
     return creator
 end

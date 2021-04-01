@@ -66,7 +66,7 @@ describe("[rg] search ", function()
         helpers.wait(time_wait, function()
             return finish
         end)
-        eq(1, total_item, "should have 3 item")
+        eq(1, total_item, "should have 1 item")
 
     end)
 

@@ -11,7 +11,7 @@ local get_replacer = function(handler)
 end
 
 describe("[sed] replace ", function()
-    it("should not empty", function()
+    it("search result not empty", function()
         local filename = 'sed_spec/sed_test.txt'
         helpers.checkoutfile(filename)
         local finish = false
@@ -24,12 +24,12 @@ describe("[sed] replace ", function()
         helpers.wait(time_wait, function()
             return finish
         end)
-        local output_txt = utils.get_os_command_output({"cat", filename})
+        local output_txt = utils.run_os_cmd({"cat", filename})
         eq(output_txt[1], "test data zzzz ok ()")
         eq(true, finish, "should call finish")
     end)
 
-    it("should call error when it don't have file", function()
+    it("call error if it don't have file", function()
         local finish = false
         local error = false
         local replacer = sed:new({}, {
@@ -76,7 +76,7 @@ describe("[sed] replace ", function()
         }
     }
     for _, test in pairs(test_sed) do
-        it("should match result text in " .. test.filename, function()
+        it("match result text in " .. test.filename, function()
             helpers.test_replace(test, get_replacer)
         end)
     end
