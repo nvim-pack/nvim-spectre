@@ -9,7 +9,7 @@ A search panel for neovim.
 ## Why Spectre?
 * Use regex in search
 * It can filter search by path glob (filetype)
-* It onnly search when you leave **Insert Mode**. You don't need a typeahead function .
+* It only search when you leave **Insert Mode**. You don't need a typeahead function .
 It always search when you type and it is very useless on search with regex
 * Use 1 buffer and you can edit or move
 * A tool to replace text on project
