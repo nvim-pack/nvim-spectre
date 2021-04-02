@@ -37,15 +37,15 @@ nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 **WARNING**
 * Commit your file before you replace text. It is not support undo
 * Don't use your crazy vim skill to edit result text or UI.
-* You can use dd to delete result item
+* You can use `dd` to delete result item
 
 
 ## Regex Issue
 * default regex use vim regex **magic mode** `\v` and **no-ignore-case** .
 * It has different regex of search command `rg` and replace command
 `sed` so careful if you want to replace text.
-* It has a different of hightlight result because I use vim regex to
-hightlight text so careful but you can try to replace.
+* It has a different of highlight result because I use vim regex to
+highlight text so careful but you can try to replace.
 
 ## Replace
 
@@ -155,7 +155,7 @@ require('spectre').setup({
       }
   },
   replace_vim_cmd = "cfdo",
-  is_open_target_win = true --open file on openner windown
+  is_open_target_win = true --open file on opener window
   is_insert_mode = false,  -- start open panel on is_insert_mode
 })
 
@@ -182,4 +182,4 @@ require('spectre').open({
 * what is Spectre?
 > I want create a `Search Panel` but this name is not cool.
 > so I get the hero name from a game.
-> Spectre has a skill to find enemy on global map so i use it:)
+> Spectre has a skill to find enemy on global map so I use it:)
