@@ -1,9 +1,9 @@
 local api = vim.api
 
 local config = {
-    filetype = "spectre_panel",
-    namespace = api.nvim_create_namespace("SEARCH_PANEL"),
-    namespace_ui = api.nvim_create_namespace("SEARCH_PANEL_UI"),
+    filetype         = "spectre_panel",
+    namespace        = api.nvim_create_namespace("SEARCH_PANEL"),
+    namespace_ui     = api.nvim_create_namespace("SEARCH_PANEL_UI"),
     namespace_header = api.nvim_create_namespace("SEARCH_PANEL_HEADER"),
     namespace_status = api.nvim_create_namespace("SEARCH_PANEL_STATUS"),
     namespace_result = api.nvim_create_namespace("SEARCH_PANEL_RESULT"),

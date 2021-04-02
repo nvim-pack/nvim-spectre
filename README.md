@@ -54,7 +54,7 @@ if you run command replace and don't see the change. you need to reload
 file with `:e` because `sed` is replace outside vim.
 
 ## Customize
-Change any setting above if you don't like it
+Change any setting if you don't like it.
 
 ``` lua
 require('spectre').setup({
@@ -163,9 +163,11 @@ require('spectre').setup({
 ### Custom function
 
 ``` lua
--- if you want to get item from spectre panel and do whatever you
+-- if you want to get item from spectre panel you can use some function.
+-- create your function and add it to mapping config on setup.
 require('spectre.actions').get_current_entry()
 require('spectre.actions').get_all_entries()
+require('spectre.actions').get_state()
 
 -- write your custom open function
 require('spectre').open({

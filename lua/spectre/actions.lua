@@ -25,6 +25,14 @@ M.select_entry = function()
     end
 end
 
+M.get_state = function()
+    local result = {
+        query = state.query,
+        options = state.options
+    }
+    return vim.deepcopy(result)
+end
+
 M.get_current_entry = function ()
     local lnum  = vim.fn.getpos('.')[2]
     local line  = ""
