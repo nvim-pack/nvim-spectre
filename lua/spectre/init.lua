@@ -267,7 +267,7 @@ M.do_replace_text = function(opts)
     local padding      = #state.user_config.result_padding
     for _, search_line in pairs(lines) do
         lnum = lnum + 1
-        if search_line == config.line_sep then
+        if search_line == state.user_config.line_sep then
             lnum_replace = 0
         end
         if lnum_replace == 2 then
@@ -290,7 +290,7 @@ M.do_replace_text = function(opts)
                 state.query.search_query,
                 state.query.replace_query,
                 search_line, replace_line,
-                lnum-1,
+                lnum -1,
                 padding
             )
         end
@@ -315,13 +315,13 @@ M.delete = function ()
 
     repeat
         line = vim.fn.getline(start)
-        check = line == config.line_sep
+        check = line == state.user_config.line_sep
         if not check then start = start -1 end
     until check or lnum - start > 3
 
     repeat
         line = vim.fn.getline(finish)
-        check = line == config.line_sep
+        check = line == state.user_config.line_sep
         if not check then finish = finish + 1 end
     until check or finish - lnum > 3
 
@@ -351,7 +351,7 @@ M.search_handler = function()
                 string.format("%s:%s:%s:", item.filename, item.lnum, item.col),
                 state.user_config.result_padding .. item.text,
                 state.user_config.result_padding  .. item.replace_text,
-                config.line_sep,
+                state.user_config.line_sep,
             })
             highlights.hl_different_line(
                 state.bufnr,
@@ -392,7 +392,7 @@ M.search = function(opts)
     api.nvim_buf_set_lines(state.bufnr, config.line_result -1, -1, false,{})
     hl_match(opts)
     local c_line = config.line_result
-    api.nvim_buf_set_lines( state.bufnr, c_line -1, c_line -1, false, { config.line_sep})
+    api.nvim_buf_set_lines( state.bufnr, c_line -1, c_line -1, false, { state.user_config.line_sep})
 
     finder:search({
         cwd = state.cwd,
