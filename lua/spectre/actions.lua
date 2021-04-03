@@ -2,19 +2,26 @@ local api = vim.api
 local utils = require('spectre.utils')
 local config = require('spectre.config')
 local state = require('spectre.state')
+local Path = require('plenary.path')
 local state_utils=require('spectre.state_utils')
 
 local M = {}
 
 local open_file = function(filename, lnum, col, winid)
-  if winid ~= nil then
-    vim.fn.win_gotoid(winid)
-  end
-  vim.api.nvim_command[[execute "normal! m` "]]
-  vim.cmd("e " .. filename)
-  api.nvim_win_set_cursor(0,{lnum, col})
+    if winid ~= nil then
+        vim.fn.win_gotoid(winid)
+    end
+    vim.api.nvim_command[[execute "normal! m` "]]
+    vim.cmd("e " .. filename)
+    api.nvim_win_set_cursor(0,{lnum, col})
 end
 
+local get_file_path=function(filename)
+    if state.cwd ~= nil and state.cwd ~= "" then
+        return  vim.fn.expand(state.cwd) .. Path.path.sep .. filename
+    end
+    return filename
+end
 M.select_entry = function()
     local t = M.get_current_entry()
     if t == nil then return nil end
@@ -28,6 +35,7 @@ end
 M.get_state = function()
     local result = {
         query = state.query,
+        cwd = state.cwd,
         options = state.options
     }
     return vim.deepcopy(result)
@@ -44,6 +52,7 @@ M.get_current_entry = function ()
         if check then
             local t = utils.parse_line_grep(line)
             if t ~= nil and t.filename ~= nil then
+                t.filename = get_file_path(t.filename)
                 return t
             end
         end
@@ -58,6 +67,7 @@ M.get_all_entries = function()
         local grep = utils.parse_line_grep(line)
         if grep ~= nil and line:match("^%w") ~= nil then
             grep.display_lnum = config.line_result + index -2
+            grep.filename = get_file_path(grep.filename)
             table.insert(entries, grep)
         end
     end
@@ -138,7 +148,8 @@ M.run_replace = function()
         replacer:replace({
             lnum = value.lnum,
             col = value.col,
-            display_lnum = value.display_lnum,
+            cwd = state.cwd,
+            display_lnum= value.display_lnum,
             filename = value.filename,
             search_text = state.query.search_query,
             replace_text = state.query.replace_query,

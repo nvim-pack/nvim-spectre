@@ -1,5 +1,6 @@
 local flatten = vim.tbl_flatten
 local Job = require("plenary.job")
+local log = require('spectre._log')
 local MAX_LINE_CHARS = 255
 local utils = require('spectre.utils')
 local base = {}
@@ -29,6 +30,7 @@ end
 
 base.on_error = function (self, output_text)
     if output_text ~= nil then
+        log.error("search error ", output_text)
         pcall(vim.schedule_wrap( function()
             self.handler.on_error(output_text)
             return
@@ -60,6 +62,10 @@ base.search = function(self, query)
     args = utils.tbl_remove_dup(flatten(args))
 
     table.insert(args, query.search_text)
+
+    log.debug("search cwd " .. (query.cwd or ''))
+    log.debug("search args " .. self.state.cmd, args)
+    if query.cwd == "" then query.cwd = nil end
 
     self.handler.on_start()
     local job = Job:new({

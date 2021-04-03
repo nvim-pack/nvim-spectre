@@ -1,0 +1,43 @@
+================================================================================
+                                                                       *spectre*
+
+nvim-spectre is a search panel for neovim. it help find and replace text with UI
+interface
+
+To find out more:
+https://github.com/windwp/nvim-spectre.vnim
+
+================================================================================
+                                                                 *spectre.open*
+Open spectre panel
+
+you can add arguments to open function
+
+``` lua
+require('spectre').open()
+
+require('spectre').open({
+  is_insert_mode = true,
+  cwd = "~/.config/nvim",
+  search_text="test",
+  replace_text="test",
+  path="lua/**/*.lua"
+})
+```
+
+================================================================================
+                                                                 *spectre.state*
+
+
+                                                *spectre.state.get_current_entry*
+get current item on spectre panel
+
+                                                  *spectre.state.get_all_entries*
+get all item on spectre panel
+
+                                                        *spectre.state.get_state*
+get search_text and replace_text from state
+
+================================================================================
+
+ vim:tw=78:ts=8:ft=help:norl:

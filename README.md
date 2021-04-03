@@ -172,6 +172,7 @@ require('spectre.actions').get_state()
 -- write your custom open function
 require('spectre').open({
   is_insert_mode = true,
+  cwd = "~/.config/nvim",
   search_text="test",
   replace_text="test",
   path="lua/**/*.lua"

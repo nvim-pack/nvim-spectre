@@ -1,6 +1,7 @@
 
 local Job = require("plenary.job")
 local utils = require('spectre.utils')
+local log= require('spectre._log')
 
 local sed={}
 
@@ -29,9 +30,13 @@ sed.replace = function(self, value)
         t_sed,
         value.filename,
     })
-    -- print(table.concat(args, ' '))
+    log.debug("replace cwd " .. (value.cwd or ''))
+    log.debug("replace args " .. self.state.cmd, args)
+
+    if value.cwd == "" then value.cwd = nil end
     local job = Job:new({
         command = self.state.cmd,
+        cwd = value.cwd,
         args = args,
         on_stdout = function(_, v) self:on_output(v, value) end,
         on_stderr = function(_, v) self:on_error(v, value) end,

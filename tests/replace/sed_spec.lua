@@ -21,7 +21,7 @@ describe("[sed] replace ", function()
             end
         })
         replacer:replace({lnum = 1, filename = filename, search_text = "spectre", replace_text = "zzzz"})
-        helpers.wait(time_wait, function()
+        vim.wait(time_wait, function()
             return finish
         end)
         local output_txt = utils.run_os_cmd({"cat", filename})
@@ -42,7 +42,7 @@ describe("[sed] replace ", function()
             end
         })
         replacer:replace({lnum = 1, filename = "sed_spec/sed_test1.txt", search_text = "test", replace_text = "stupid"})
-        helpers.wait(time_wait, function()
+        vim.wait(time_wait, function()
             return finish
         end)
         eq(true, error, "should call finish")

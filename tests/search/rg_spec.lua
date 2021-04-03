@@ -1,5 +1,4 @@
 local rg = require('spectre.search').rg
-local helpers = require('tests.helper')
 local eq = assert.are.same
 
 vim.cmd [[tcd tests/project]]
@@ -22,7 +21,7 @@ describe("[rg] search ", function()
             end
         })
         finder:search({search_text = "spectre"})
-        helpers.wait(time_wait, function()
+        vim.wait(time_wait, function()
             return finish
         end)
         eq(2, total_item, "should have 2 item")
@@ -43,7 +42,7 @@ describe("[rg] search ", function()
             end
         })
         finder:search({search_text = "spectre"})
-        helpers.wait(time_wait, function()
+        vim.wait(time_wait, function()
             return finish
         end)
         eq(true, finish, "finish is not call")
@@ -63,7 +62,7 @@ describe("[rg] search ", function()
             end
         })
         finder:search({search_text = "spectre", path = "**/rg_spec/*.txt"})
-        helpers.wait(time_wait, function()
+        vim.wait(time_wait, function()
             return finish
         end)
         eq(1, total_item, "should have 1 item")

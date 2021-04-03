@@ -13,7 +13,7 @@ if _G._require == nil then
     if _G.__is_dev then
         _G._require = require
         _G.require = function(path)
-            if string.find(path, '^spectre') ~= nil then
+            if string.find(path, '^spectre[^_]*$') ~= nil then
                 plenary.reload_module(path)
             end
             return _G._require(path)
@@ -59,6 +59,7 @@ M.open = function (opts)
     end
 
     opts = vim.tbl_extend('force',{
+        cwd = nil,
         is_insert_mode = state.user_config.is_insert_mode,
         search_text = '',
         replace_text = '',
@@ -112,6 +113,8 @@ M.open = function (opts)
     api.nvim_buf_set_lines(state.bufnr, 6, 6, 0, {opts.path})
     api.nvim_win_set_cursor(0,{3, 0})
 
+
+    state.cwd = opts.cwd
     M.builder_search_ui()
     M.builder_header()
 
@@ -123,6 +126,7 @@ M.open = function (opts)
 
     if #opts.search_text > 0 then
         M.search({
+            cwd = opts.cwd,
             search_query = opts.search_text,
             replace_query = opts.replace_text,
             path = opts.path,
@@ -143,7 +147,11 @@ function M.builder_search_ui()
 
     table.insert(details_ui , {{search_message, state.user_config.highlight.ui}})
     table.insert(details_ui , {{"Replace: " , state.user_config.highlight.ui}})
-    table.insert(details_ui , {{"Path: "    , state.user_config.highlight.ui}})
+    local path_message = "Path:"
+    if state.cwd then
+        path_message = path_message .. string.format("   cwd=%s", state.cwd)
+    end
+    table.insert(details_ui, {{ path_message, state.user_config.highlight.ui}})
 
     local c_line = 1
     for _, vt_text in ipairs(details_ui) do
@@ -387,6 +395,7 @@ M.search = function(opts)
     api.nvim_buf_set_lines( state.bufnr, c_line -1, c_line -1, false, { config.line_sep})
 
     finder:search({
+        cwd = state.cwd,
         search_text = state.query.search_query,
         path = state.query.path
     })
