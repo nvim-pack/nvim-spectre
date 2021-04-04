@@ -14,11 +14,11 @@ local config = {
     -- result_padding = '│  ',
     -- color_devicons = true,
     -- line_sep = '├──────────────────────────────────────',
-    
+    -- line_sep_start = '┌-----------------------------------------',
     result_padding = '¦  ',
     color_devicons = true,
-    line_sep_start = '┌-----------------------------------------',
-    line_sep       = '└-----------------------------------------',
+    line_sep_start = '------------------------------------------',
+    line_sep       = '------------------------------------------',
     highlight = {
         ui = "String",
         filename = "Keyword",
@@ -103,6 +103,13 @@ local config = {
             args = {
                 '-i',
                 '-E',
+            },
+            options = {
+                ['ignore-case'] = {
+                        value= "--ignore-case",
+                        icon="[I]",
+                        desc="ignore case"
+                },
             }
         },
     },

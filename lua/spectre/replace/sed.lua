@@ -12,14 +12,24 @@ sed.init = function(_, config)
         args = {
             '-i',
             '-E',
-        }
+        },
     }, config or {})
     return config
 end
 
 sed.replace = function(self, value)
+    local pattern = self.state.pattern
+
+    if self.state.options_value ~= nil then
+        for _,v in pairs(self.state.options_value) do
+            if v == '--ignore-case'  then
+                pattern = pattern .. "i"
+            end
+        end
+    end
+
     local t_sed = string.format(
-        self.state.pattern,
+        pattern,
         value.lnum,
         value.lnum,
         utils.escape_sed(value.search_text),
@@ -30,6 +40,8 @@ sed.replace = function(self, value)
         t_sed,
         value.filename,
     })
+
+
     log.debug("replace cwd " .. (value.cwd or ''))
     log.debug("replace args " .. self.state.cmd, args)
 

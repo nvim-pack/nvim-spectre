@@ -10,6 +10,12 @@ local get_replacer = function(handler)
     return sed:new({}, handler)
 end
 
+
+local get_replacer_case = function(handler)
+    return sed:new({
+        options_value = {'--ignore-case'}
+    }, handler)
+end
 describe("[sed] replace ", function()
     it("search result not empty", function()
         local filename = 'sed_spec/sed_test.txt'
@@ -73,11 +79,22 @@ describe("[sed] replace ", function()
             search_text = [[/home/winner]],
             replace_text = [[def]],
             expected = "test def visual"
+        }, {
+            ignore_case = true,
+            filename = 'sed_spec/sed_ignore_case.txt',
+            lnum = 1,
+            search_text = [[spectre]],
+            replace_text = [[data]],
+            expected = "data abcdef"
         }
     }
     for _, test in pairs(test_sed) do
         it("match result text in " .. test.filename, function()
-            helpers.test_replace(test, get_replacer)
+            if test.ignore_case ==true then
+                helpers.test_replace(test, get_replacer_case)
+            else
+                helpers.test_replace(test, get_replacer)
+            end
         end)
     end
 
