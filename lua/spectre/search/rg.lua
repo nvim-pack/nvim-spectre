@@ -11,10 +11,6 @@ rg.init = function(_, config)
             '--line-number',
             '--column',
         },
-        options={
-            ['ignore-case']="--ignore-case",
-            ['hidden'] = "--hidden"
-        }
     }, config or {})
     return config
 end

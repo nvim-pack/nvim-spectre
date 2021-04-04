@@ -1,11 +1,11 @@
 local api = vim.api
 local M = {}
 
+local Path = require('plenary.path')
 local Job = require("plenary.job")
 
 local config = require('spectre.config')
 local state = require('spectre.state')
-local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
 
 -- -- don't throw error of hightlight syntax regex
 -- local highlight_safe = function(group, query)
@@ -19,22 +19,23 @@ local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
 --   end
 -- end
 --
+local _regex_file_line=[[([^:]+):(%d+):(%d+):(.*)]]
 M.parse_line_grep = function(query)
   local t = {text = query}
   local _, _, filename, lnum, col, text = string.find(t.text, _regex_file_line)
 
-  if filename == nil then return nil end
-  local ok
-  ok, lnum = pcall(tonumber, lnum)
-  if not ok then return nil end
-  ok, col = pcall(tonumber, col)
-  if not ok then return nil end
+    if filename == nil then return nil end
+    local ok
+    ok, lnum = pcall(tonumber, lnum)
+    if not ok then return nil end
+    ok, col = pcall(tonumber, col)
+    if not ok then return nil end
 
-  t.filename = filename
-  t.lnum = lnum
-  t.col = col
-  t.text = text
-  return t
+    t.filename = filename
+    t.lnum = lnum
+    t.col = col
+    t.text = text
+    return t
 end
 
 -- help /ordinary-atom
@@ -59,6 +60,54 @@ M.escape_chars = function(query)
     )
 end
 
+
+-- copy from telescope
+M.strdisplaywidth = (function()
+  if jit and Path.path.sep ~= '\\' then
+    local ffi = require('ffi')
+    ffi.cdef[[
+      typedef unsigned char char_u;
+      int linetabsize_col(int startcol, char_u *s);
+    ]]
+
+    return function(str, col)
+      local startcol = col or 0
+      local s = ffi.new('char[?]', #str + 1)
+      ffi.copy(s, str)
+      return ffi.C.linetabsize_col(startcol, s) - startcol
+    end
+  else
+    return function(str, col)
+      return #str - (col or 0)
+    end
+  end
+end)()
+
+function M.trim(s)
+  return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
+end
+
+M.truncate = function(str, len)
+  str = tostring(str) -- We need to make sure its an actually a string and not a number
+  if M.strdisplaywidth(str) <= len then
+    return str
+  end
+  local charlen = 0
+  local cur_len = 0
+  local result = ''
+  local len_of_dots = M.strdisplaywidth('…')
+  while true do
+    local part = M.strcharpart(str, charlen, 1)
+    cur_len = cur_len + M.strdisplaywidth(part)
+    if (cur_len + len_of_dots) > len then
+      result = result .. '…'
+      break
+    end
+    result = result .. part
+    charlen = charlen + 1
+  end
+  return result
+end
 -- only escape slash
 M.escape_slash = function(query)
   return query:gsub('%\\', '\\\\')

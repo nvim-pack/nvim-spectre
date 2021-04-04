@@ -38,6 +38,7 @@ end
 M.t=function(cmd)
   return vim.api.nvim_replace_termcodes(cmd, true, false, true)
 end
+
 M.test_replace = function(opts, f_replace)
     local eq = assert.are.same
     M.checkoutfile(opts.filename)
