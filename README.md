@@ -17,18 +17,25 @@ It always search when you type and it is very useless on search with regex
 ## Installation
 
 ``` lua
-Plug 'nvim-lua/popup.nvim'
 Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-lua/popup.nvim'
 Plug 'windwp/nvim-spectre'
+
 ```
+You need install rg and sed
+
+- [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) (finder)
+- [sed](https://www.gnu.org/software/sed/) (replace tool)
+- [devicons](https://github.com/kyazdani42/nvim-web-devicons) (icons)
+
 ## Usage
 
 ``` vim
 nnoremap <leader>S :lua require('spectre').open()<CR>
 
 "search current word
-vnoremap <leader>S :lua require('spectre').open_visual()<CR>
-nnoremap <leader>Sw viw:lua require('spectre').open_visual()<CR>
+nnoremap <leader>sw viw:lua require('spectre').open_visual()<CR>
+vnoremap <leader>s :lua require('spectre').open_visual()<CR>
 "  search in current file
 nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 
@@ -54,18 +61,25 @@ if you run command replace and don't see the change. you need to reload
 file with `:e` because `sed` is replace outside vim.
 
 ## Customize
-Change any setting if you don't like it.
+``` lua
+require('spectre').setup()
+
+```
+
+Change any setting if you don't like it. ** Don't copy all**.
+It can be change when plugin update so better use a default setting.
 
 ``` lua
 require('spectre').setup({
 
-  result_padding = '¦  ',
   color_devicons = true,
-  line_sep = '└-----------------------------------------',
+  result_padding = '¦  ',
+  line_sep_start = '┌-----------------------------------------',
+  line_sep       = '└-----------------------------------------',
   highlight = {
-    ui = "String",
-    search = "DiffChange",
-    replace = "DiffDelete"
+      ui = "String",
+      search = "DiffChange",
+      replace = "DiffDelete"
   },
   mapping={
     ['delete_line'] = {
@@ -143,6 +157,13 @@ require('spectre').setup({
           cmd = "sed",
           args = nil
       },
+      options = {
+        ['ignore-case'] = {
+          value= "--ignore-case",
+          icon="[I]",
+          desc="ignore case"
+        },
+      }
   },
   default = {
       find = {
