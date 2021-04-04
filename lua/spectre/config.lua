@@ -11,10 +11,18 @@ local config = {
     lnum_UI = 8, -- total line for ui you can edit it
     line_result = 10, -- line begin result
 
-    line_sep = '--------------------------------------',
-    result_padding = '    ',
+    -- result_padding = '│  ',
+    -- color_devicons = true,
+    -- line_sep = '├──────────────────────────────────────',
+    
+    result_padding = '¦  ',
+    color_devicons = true,
+    line_sep_start = '┌-----------------------------------------',
+    line_sep       = '└-----------------------------------------',
     highlight = {
         ui = "String",
+        filename = "Keyword",
+        filedirectory = "Comment",
         search = "DiffChange",
         replace = "DiffDelete"
     },

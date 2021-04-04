@@ -59,8 +59,9 @@ Change any setting if you don't like it.
 ``` lua
 require('spectre').setup({
 
-  line_sep = '--------------------------------------',
-  result_padding = '    ',
+  result_padding = '¦  ',
+  color_devicons = true,
+  line_sep = '└-----------------------------------------',
   highlight = {
     ui = "String",
     search = "DiffChange",

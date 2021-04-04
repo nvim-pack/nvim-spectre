@@ -28,6 +28,9 @@ M.get_search_engine_config = function ()
     return cfg
 end
 
+M.config = function ()
+    return state.user_config
+end
 
 M.has_options = function(key)
     return state.options[key] == true

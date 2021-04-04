@@ -48,9 +48,10 @@ M.get_current_entry = function ()
     local start = lnum
     repeat
         line = vim.fn.getline(start)
-        check = string.find(line, "^[^%s]*%:%d*:%d*:")
+        local c,_, remove_icon = string.find(line, "([^%s]*%:%d*:%d*:)$")
+        check = c
         if check then
-            local t = utils.parse_line_grep(line)
+            local t = utils.parse_line_grep(remove_icon)
             if t ~= nil and t.filename ~= nil then
                 t.filename = get_file_path(t.filename)
                 return t
@@ -64,11 +65,14 @@ M.get_all_entries = function()
     local lines = api.nvim_buf_get_lines(state.bufnr, config.line_result -1, -1, false)
     local entries   = {}
     for index, line in pairs(lines) do
-        local grep = utils.parse_line_grep(line)
-        if grep ~= nil and line:match("^%w") ~= nil then
-            grep.display_lnum = config.line_result + index -2
-            grep.filename = get_file_path(grep.filename)
-            table.insert(entries, grep)
+        local c,_, remove_icon_text = string.find(line, "([^%s]*%:%d*:%d*:)$")
+        if c then
+            local grep = utils.parse_line_grep(remove_icon_text)
+            if grep ~= nil then
+                grep.display_lnum = config.line_result + index -2
+                grep.filename = get_file_path(grep.filename)
+                table.insert(entries, grep)
+            end
         end
     end
     return entries
