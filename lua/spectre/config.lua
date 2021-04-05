@@ -24,6 +24,7 @@ local config = {
         filename = "Keyword",
         filedirectory = "Comment",
         search = "DiffChange",
+        border = "Comment",
         replace = "DiffDelete"
     },
     mapping = {

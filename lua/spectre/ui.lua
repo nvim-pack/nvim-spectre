@@ -6,7 +6,7 @@ local state_utils=require('spectre.state_utils')
 local utils = require('spectre.utils')
 
 local Path = require('plenary.path')
-local popup
+local popup = require('popup')
 local api = vim.api
 
 local M={}
@@ -71,8 +71,8 @@ M.render_filename = function (bufnr, namespace, line, entry)
     })
     local width = utils.strdisplaywidth(filename)
     local hl = {
-        {{1, 3}, icon_highlight},
-        {{1, utils.strdisplaywidth(directory) + 1   }, u_config.highlight.filedirectory},
+        {{0, 4}, icon_highlight},
+        {{1, utils.strdisplaywidth(directory)}, u_config.highlight.filedirectory},
         {{0, width + 1 }, u_config.highlight.filename},
     }
     if icon=="" then
@@ -156,7 +156,7 @@ M.show_help = function()
 end
 M.show_options=function()
     local cfg = state_utils.get_search_engine_config()
-    local help_msg = {" Press number to select option"}
+    local help_msg = {" Press number to select option ....."}
     local option_cmd = {}
     local i = 1
 
@@ -186,5 +186,6 @@ M.show_options=function()
     vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
         help_win
     )
+    return option_cmd
 end
 return M

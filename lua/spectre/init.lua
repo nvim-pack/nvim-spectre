@@ -30,10 +30,8 @@ local ui = require('spectre.ui')
 
 local M = {}
 
-
----@ need to improve it
-M.setup = function(usr_cfg)
-    state.user_config = vim.tbl_deep_extend('force', config, usr_cfg or {})
+M.setup = function(cfg)
+    state.user_config = vim.tbl_deep_extend('force', config, cfg or {})
     for _, opt in pairs(state.user_config.default.find.options) do
         state.options[opt] = true
     end
@@ -251,6 +249,8 @@ M.do_replace_text = function(opts)
                 false,
                 {state.user_config.result_padding .. replace_line}
             )
+            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+                state.user_config.highlight.border, lnum, 0, padding)
             ui.hl_different_line(
                 state.bufnr,
                 config.namespace,
@@ -302,6 +302,7 @@ M.search_handler = function()
     local total = 0
     local start_time=0
     local padding=#state.user_config.result_padding
+    local cfg = state.user_config
     -- local last_filename = ''
     return {
         on_start = function()
@@ -331,10 +332,17 @@ M.search_handler = function()
                 -- last_filename = item.filename
             -- end
             api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
-                state.user_config.result_padding .. item.search_text,
-                state.user_config.result_padding  .. item.replace_text,
-                state.user_config.line_sep,
+                cfg.result_padding .. item.search_text,
+                cfg.result_padding  .. item.replace_text,
+                cfg.line_sep,
             })
+
+            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+                cfg.highlight.border, c_line + 2, 0,-1)
+            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+                cfg.highlight.border, c_line, 0, padding)
+            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+                cfg.highlight.border, c_line + 1, 0, padding)
             ui.hl_different_line(
                 state.bufnr,
                 config.namespace,
@@ -345,11 +353,15 @@ M.search_handler = function()
                 c_line ,
                 padding
             )
+
             c_line = c_line + 3
             total = total + 1
         end,
         on_error = function (error_msg)
-            api.nvim_buf_set_lines(state.bufnr, c_line, c_line + 1, false,{'--   ' .. error_msg })
+            api.nvim_buf_set_lines(state.bufnr, c_line, c_line + 1, false,
+                {cfg.result_padding .. error_msg })
+            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+                cfg.highlight.border, c_line , 0, padding)
             c_line = c_line + 1
         end,
         on_finish = function()
@@ -385,7 +397,8 @@ M.search = function(opts)
         false,
         { state.user_config.line_sep_start}
     )
-
+    api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+        state.user_config.highlight.border, c_line -1, 0,-1)
     finder:search({
         cwd = state.cwd,
         search_text = state.query.search_query,
