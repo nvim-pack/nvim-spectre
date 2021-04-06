@@ -303,6 +303,7 @@ M.search_handler = function()
     local start_time=0
     local padding=#state.user_config.result_padding
     local cfg = state.user_config
+    local is_error = false
     -- local last_filename = ''
     return {
         on_start = function()
@@ -310,6 +311,7 @@ M.search_handler = function()
             c_line =config.line_result
             total = 0
             start_time = vim.loop.hrtime()
+            is_error = false
         end,
         on_result = function (item)
             item.replace_text = ''
@@ -363,10 +365,19 @@ M.search_handler = function()
             api.nvim_buf_add_highlight(state.bufnr, config.namespace,
                 cfg.highlight.border, c_line , 0, padding)
             c_line = c_line + 1
+            is_error = true
         end,
         on_finish = function()
             local end_time = ( vim.loop.hrtime() - start_time) / 1E9
             local help_text = string.format("Total: %s match, time: %ss", total, end_time)
+
+            if is_error then
+                api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
+                    cfg.line_sep,
+                })
+                api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+                        cfg.highlight.border, c_line , 0, -1)
+            end
 
             state.vt.status_id = utils.write_virtual_text(
                 state.bufnr,

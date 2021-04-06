@@ -3,7 +3,6 @@ A search panel for neovim.
 
 **Spectre** __find the enemy and replace them with dark power.__
 
-**WIP**
 ![demo](./images/demo.gif)
 
 ## Why Spectre?
@@ -73,8 +72,8 @@ It can be change when plugin update so better use a default setting.
 require('spectre').setup({
 
   color_devicons = true,
-  result_padding = '¦  ',
   line_sep_start = '┌-----------------------------------------',
+  result_padding = '¦  ',
   line_sep       = '└-----------------------------------------',
   highlight = {
       ui = "String",

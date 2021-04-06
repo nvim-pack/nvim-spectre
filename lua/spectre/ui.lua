@@ -127,16 +127,10 @@ function M.render_header()
     utils.write_virtual_text(state.bufnr, config.namespace_header, 0, {{ help_text, 'Comment' } })
 end
 
-M.show_help = function()
-    local help_msg = {}
-
-    for _, map in pairs(state.user_config.mapping) do
-        table.insert(help_msg, string.format("%4s : %s", map.map, map.desc))
-    end
-
-    local win_width, win_height = vim.lsp.util._make_floating_popup_size(help_msg,{})
-    local help_win, preview = popup.create(help_msg, {
-        title   = "Mapping",
+M.show_menu_options = function (title, content)
+    local win_width, win_height = vim.lsp.util._make_floating_popup_size(content,{})
+    local help_win, preview = popup.create(content, {
+        title   = title,
         border  = true,
         padding = {1, 1, 1, 1},
         enter   = false,
@@ -153,10 +147,22 @@ M.show_help = function()
     vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
         help_win
     )
+
+    -- vim.fn.win_gotoid(help_win)
 end
-M.show_options=function()
+M.show_help = function()
+    local help_msg = {}
+
+    for _, map in pairs(state.user_config.mapping) do
+        table.insert(help_msg, string.format("%4s : %s", map.map, map.desc))
+    end
+    M.show_menu_options("Mapping", help_msg)
+
+end
+
+M.show_options = function()
     local cfg = state_utils.get_search_engine_config()
-    local help_msg = {" Press number to select option ....."}
+    local help_msg = {" Press number to select option."}
     local option_cmd = {}
     local i = 1
 
@@ -166,26 +172,21 @@ M.show_options=function()
         i = i + 1
     end
 
-    local win_width, win_height = vim.lsp.util._make_floating_popup_size(help_msg,{})
-
-    local help_win, preview = popup.create(help_msg, {
-        title   = "Options",
-        border  = true,
-        padding = {1, 1, 1, 1},
-        enter   = false,
-        width   = win_width + 2,
-        height  = win_height + 2,
-        col     = "cursor+2",
-        line    = "cursor+2",
-    })
-
-    vim.api.nvim_win_set_option(help_win, 'winblend', 0)
-    vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
-        preview.border.win_id
-    )
-    vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
-        help_win
-    )
+    M.show_menu_options("Options", help_msg)
     return option_cmd
+end
+
+M.show_find_engine = function ()
+    local engines = state.user_config.find_engine;
+
+    local help_msg = {" Press number to select option."}
+    local option_cmd = {}
+    local i = 1
+
+    for key, option in pairs(engines) do
+        table.insert(help_msg, string.format(" %s : engine %s" , i, option.desc or ' '))
+        table.insert(option_cmd,key)
+        i = i + 1
+    end
 end
 return M
