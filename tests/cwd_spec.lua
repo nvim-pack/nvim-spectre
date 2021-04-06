@@ -16,7 +16,6 @@ describe('check search on another directory', function()
 
     it("open search and result not empty", function()
         local cwd = helper.get_cwd('tests/project_2/')
-        print(vim.inspect(cwd))
         spectre.open({
            search_text = "spectre",
             cwd = cwd

@@ -187,7 +187,7 @@ local function match_text_line(match, str, padding)
     while index < len do
         local txt = string.sub(str, index, index + match_len -1)
         if txt == match then
-            table.insert(col_tbl,{index -1 +padding, index + match_len -1+padding})
+            table.insert(col_tbl,{index -1 + padding, index + match_len -1 + padding})
             index = index + match_len
         else
             index = index + 1
@@ -196,22 +196,48 @@ local function match_text_line(match, str, padding)
     return col_tbl
 end
 
---- find different text of 2 line with search_text and replace_text
---- @params opts {search_text, replace_text, search_line, replace_line}
---- @return table { input={}, output = {}}
-M.different_text_col = function(opts)
-    local search_text, replace_text, search_line, replace_line,padding =
-        opts.search_text, opts.replace_text, opts.search_line, opts.replace_line, opts.padding
-    local result = {input = {}, output = {}}
-    local ok, search_match = pcall(vim.fn.matchstr, search_line, "\\v" .. M.escape_vim_magic(search_text))
+
+--- get highlight text from search_text and replace_text
+--- @params opts {search_query, replace_query, search_text, padding}
+--- @return table { text, search = {}, replace = {}}
+M.get_hl_line_text = function(opts)
+    local ok, search_match = pcall(
+        vim.fn.matchstr,
+        opts.search_text,
+        "\\v" .. M.escape_vim_magic(opts.search_query)
+    )
+
+    local result = {search = {}, replace = {}, text = ""}
+    opts.replace_query = opts.replace_query or ""
+    result.text = opts.search_text
     if ok then
-        result.input = match_text_line(search_match, search_line, padding)
-        local replace_match = M.vim_replace_text(search_text, replace_text, search_match)
-        result.output = match_text_line(replace_match, replace_line, padding)
+        result.search = match_text_line(search_match, opts.search_text, 0)
+        if opts.replace_query and opts.show_replace ~= false then
+            local replace_match = M.vim_replace_text(opts.search_query, opts.replace_query, search_match)
+            local replace_length=#replace_match
+            local total_increase = 0
+            if opts.show_search == false then
+                result.text = M.vim_replace_text(opts.search_query, opts.replace_query, opts.search_text)
+                result.replace = match_text_line(replace_match, result.text, 0)
+                result.search={}
+            else
+                -- highlight and join replace text
+                for _,v in pairs(result.search) do
+                    v[1] = v[1] + total_increase
+                    v[2] = v[2] + total_increase
+                    local pos = {v[2] , v[2] + replace_length }
+                    table.insert(result.replace, pos)
+                    local text = result.text
+                    result.text = text:sub(0, v[2])
+                        .. replace_match
+                        .. text:sub(v[2] + 1 )
+                    total_increase =  total_increase + replace_length
+                end
+            end
+        end
     end
     return result
 end
-
 --- remove item duplicate on table
 M.tbl_remove_dup = function (tbl)
     local hash = {}

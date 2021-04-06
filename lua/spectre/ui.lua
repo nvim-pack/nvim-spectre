@@ -12,21 +12,36 @@ local api = vim.api
 local M={}
 
 
-M.hl_different_line = function(bufnr, namespace, search_query, replace_query, search, replace, lnum, padding)
-    local diff = utils.different_text_col({
-        search_text = search_query,
-        replace_text = replace_query,
-        search_line = search,
-        replace_line = replace,
-        padding = padding or 0
+M.render_line = function(
+    bufnr, namespace,text_opts,view_opts)
+    local cfg = state.user_config
+    local diff = utils.get_hl_line_text({
+        search_query = text_opts.search_query,
+        replace_query = text_opts.replace_query,
+        search_text = text_opts.search_text,
+        show_search = view_opts.show_search,
+        show_replace = view_opts.show_replace,
     })
-    if diff then
-        for _, value in pairs(diff.input) do
-            api.nvim_buf_add_highlight(bufnr, namespace,state.user_config.highlight.search , lnum, value[1], value[2])
+    local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
+    api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum , false,{
+        view_opts.padding_text .. diff.text,
+    })
+    if not view_opts.is_disable then
+        for _, value in pairs(diff.search) do
+            api.nvim_buf_add_highlight(bufnr, namespace,
+                cfg.highlight.search ,
+                text_opts.lnum, value[1] + view_opts.padding, value[2] + view_opts.padding)
         end
-        for _, value in pairs(diff.output) do
-            api.nvim_buf_add_highlight(bufnr, namespace, state.user_config.highlight.replace, lnum + 1, value[1], value[2])
+        for _, value in pairs(diff.replace) do
+            api.nvim_buf_add_highlight(bufnr, namespace,
+                cfg.highlight.replace,
+                text_opts.lnum, value[1] + view_opts.padding, value[2] + view_opts.padding)
         end
+        api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+            cfg.highlight.border, text_opts.lnum, 0, view_opts.padding)
+    else
+        api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+            cfg.highlight.border, text_opts.lnum, 0, -1)
     end
 
 end

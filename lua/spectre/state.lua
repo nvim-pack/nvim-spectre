@@ -7,6 +7,12 @@ local state = {
         path = '',
         is_file = '' -- search in current file
     },
+    -- display text and highlight on result
+    view = {
+        mode = "both",
+        search=true,
+        replace=true
+    },
     -- virtual text namespace
     vt = {
 

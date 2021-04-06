@@ -39,24 +39,30 @@ local config = {
             desc = "goto current file"
         },
         ['send_to_qf'] = {
-            map = "rq",
+            map = "<leader>q",
             cmd = "<cmd>lua require('spectre.actions').send_to_qf()<CR>",
             desc = "send all item to quickfix"
         },
         ['replace_cmd'] = {
-            map = "rc",
+            map = "<leader>c",
             cmd = "<cmd>lua require('spectre.actions').replace_cmd()<CR>",
             desc = "input replace vim command vim"
         },
         ['show_option_menu'] = {
-            map = "to",
+            map = "<leader>o",
             cmd = "<cmd>lua require('spectre').show_options()<CR>",
             desc = "show option"
         },
         ['run_replace'] = {
-            map = "rS",
+            map = "<leader>R",
             cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>",
             desc = "replace all"
+        },
+        -- only show replace text in result UI
+        ['change_view_mode'] = {
+            map = "<leader>v",
+            cmd = "<cmd>lua require('spectre').change_view()<CR>",
+            desc = "change result view mode"
         },
         -- only work if the find_engine following have that option
         ['toggle_ignore_case'] = {

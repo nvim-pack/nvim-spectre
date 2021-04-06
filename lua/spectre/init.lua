@@ -112,6 +112,7 @@ M.open = function (opts)
 
 
     state.cwd = opts.cwd
+    M.change_view("reset")
     ui.render_search_ui()
     ui.render_header()
 
@@ -222,51 +223,52 @@ end
 
 
 M.do_replace_text = function(opts)
-    state.query = opts
-    hl_match(opts)
-
-    local lines        = api.nvim_buf_get_lines(state.bufnr, config.line_result -1, -1, false)
-    local lnum         = config.line_result -1
-    local lnum_replace = 1
-    local padding      = #state.user_config.result_padding
-    for _, search_line in pairs(lines) do
-        lnum = lnum + 1
-        -- 4 character display  corner on line
-        if search_line:sub(4,14) == state.user_config.line_sep:sub(4,14) then
-            lnum_replace = 0
-        end
-        if lnum_replace == 2 then
-            search_line = search_line:sub(padding + 1)
-            local replace_line = utils. vim_replace_text(
-                state.query.search_query,
-                state.query.replace_query,
-                search_line
-            )
-            api.nvim_buf_set_lines(
-                state.bufnr,
-                lnum,
-                lnum + 1,
-                false,
-                {state.user_config.result_padding .. replace_line}
-            )
-            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-                state.user_config.highlight.border, lnum, 0, padding)
-            ui.hl_different_line(
-                state.bufnr,
-                config.namespace,
-                state.query.search_query,
-                state.query.replace_query,
-                search_line, replace_line,
-                lnum -1,
-                padding
-            )
-        end
-        if lnum_replace >= 0 then
-            lnum_replace = lnum_replace + 1
-        end
+    state.query = opts or state.query
+    hl_match(state.query)
+    for _, item in pairs(state.total_item) do
+        ui.render_line(
+            state.bufnr,
+            config.namespace,
+            {
+                search_query= state.query.search_query,
+                replace_query= state.query.replace_query,
+                search_text = item.search_text,
+                lnum = item.display_lnum,
+                is_replace = true
+            } ,
+            {
+                is_disable = item.disable,
+                padding_text = state.user_config.result_padding,
+                padding = #state.user_config.result_padding,
+                show_search = state.view.show_search,
+                show_replace = state.view.show_replace,
+            }
+        )
     end
 end
 
+M.change_view = function(reset)
+    if reset then
+        state.view.mode = ""
+    end
+    if state.view.mode == 'replace' then
+        state.view.mode = "search"
+        state.view.show_search = true
+        state.view.show_replace = false
+    elseif state.view.mode == 'both' then
+        state.view.mode = "replace"
+        state.view.show_search = false
+        state.view.show_replace = true
+
+    else
+        state.view.mode = "both"
+        state.view.show_search = true
+        state.view.show_replace = true
+    end
+    if not reset then
+        M.do_replace_text()
+    end
+end
 
 M.delete = function ()
     if can_edit_line() then
@@ -274,26 +276,30 @@ M.delete = function ()
         vim.cmd[[:normal! ^d$]]
         return false
     end
-    local lnum = vim.fn.getpos('.')[2]
-    if(lnum <= config.line_result ) then return false end
-    local line = ""
-    local check = false
-    local start, finish = lnum, lnum
+    local lnum = unpack(vim.api.nvim_win_get_cursor(0))
+    local item = state.total_item[lnum]
+    if item.display_lnum == lnum - 1 then
+        item.disable =  not item.disable
+        ui.render_line(
+            state.bufnr,
+            config.namespace,
+            {
+                search_query= state.query.search_query,
+                replace_query= state.query.replace_query,
+                search_text = item.search_text,
+                lnum = item.display_lnum,
+                is_replace = true
+            } ,
+            {
+                is_disable=item.disable,
+                padding_text = state.user_config.result_padding,
+                padding = #state.user_config.result_padding,
+                show_search = state.view.show_search,
+                show_replace = state.view.show_replace
+            }
+        )
 
-    repeat
-        line = vim.fn.getline(start)
-        check = line == state.user_config.line_sep
-        if not check then start = start -1 end
-    until check or lnum - start > 3
-
-    repeat
-        line = vim.fn.getline(finish)
-        check = line == state.user_config.line_sep
-        if not check then finish = finish + 1 end
-    until check or finish - lnum > 3
-
-    if start < finish then
-        vim.api.nvim_buf_set_lines(state.bufnr, start, finish, false,{})
+        return
     end
 end
 
@@ -303,15 +309,13 @@ M.search_handler = function()
     local start_time=0
     local padding=#state.user_config.result_padding
     local cfg = state.user_config
-    local is_error = false
-    -- local last_filename = ''
+    local last_filename = ''
     return {
         on_start = function()
             state.total_item = {}
             c_line =config.line_result
             total = 0
             start_time = vim.loop.hrtime()
-            is_error = false
         end,
         on_result = function (item)
             item.replace_text = ''
@@ -323,7 +327,7 @@ M.search_handler = function()
                     item.search_text
                 );
             end
-            -- if last_filename ~= item.filename then
+            if last_filename ~= item.filename then
                 ui.render_filename(
                     state.bufnr,
                     config.namespace,
@@ -331,33 +335,31 @@ M.search_handler = function()
                     item
                 )
                 c_line = c_line + 1
-                -- last_filename = item.filename
-            -- end
-            api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
-                cfg.result_padding .. item.search_text,
-                cfg.result_padding  .. item.replace_text,
-                cfg.line_sep,
-            })
+                last_filename = item.filename
+            end
 
-            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-                cfg.highlight.border, c_line + 2, 0,-1)
-            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-                cfg.highlight.border, c_line, 0, padding)
-            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-                cfg.highlight.border, c_line + 1, 0, padding)
-            ui.hl_different_line(
+            item.display_lnum = c_line
+            ui.render_line(
                 state.bufnr,
                 config.namespace,
-                state.query.search_query,
-                state.query.replace_query,
-                item.search_text,
-                item.replace_text,
-                c_line ,
-                padding
+                {
+                    search_query= state.query.search_query,
+                    replace_query= state.query.replace_query,
+                    search_text = item.search_text,
+                    lnum = item.display_lnum,
+                    is_replace = false
+                } ,
+                {
+                    is_disable=item.disable,
+                    padding_text = cfg.result_padding,
+                    padding = padding,
+                    show_search = state.view.show_search,
+                    show_replace = state.view.show_replace
+                }
             )
-
-            c_line = c_line + 3
+            c_line = c_line + 1
             total = total + 1
+            state.total_item[c_line] = item
         end,
         on_error = function (error_msg)
             api.nvim_buf_set_lines(state.bufnr, c_line, c_line + 1, false,
@@ -365,19 +367,16 @@ M.search_handler = function()
             api.nvim_buf_add_highlight(state.bufnr, config.namespace,
                 cfg.highlight.border, c_line , 0, padding)
             c_line = c_line + 1
-            is_error = true
         end,
         on_finish = function()
             local end_time = ( vim.loop.hrtime() - start_time) / 1E9
             local help_text = string.format("Total: %s match, time: %ss", total, end_time)
 
-            if is_error then
-                api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
-                    cfg.line_sep,
-                })
-                api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-                        cfg.highlight.border, c_line , 0, -1)
-            end
+            api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
+                cfg.line_sep,
+            })
+            api.nvim_buf_add_highlight(state.bufnr, config.namespace,
+                    cfg.highlight.border, c_line , 0, -1)
 
             state.vt.status_id = utils.write_virtual_text(
                 state.bufnr,
@@ -410,6 +409,7 @@ M.search = function(opts)
     )
     api.nvim_buf_add_highlight(state.bufnr, config.namespace,
         state.user_config.highlight.border, c_line -1, 0,-1)
+    state.total_item = {}
     finder:search({
         cwd = state.cwd,
         search_text = state.query.search_query,

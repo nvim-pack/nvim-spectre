@@ -42,38 +42,22 @@ M.get_state = function()
 end
 
 M.get_current_entry = function ()
-    local lnum  = vim.fn.getpos('.')[2]
-    local line  = ""
-    local check = false
-    local start = lnum
-    repeat
-        line = vim.fn.getline(start)
-        local c,_, remove_icon = string.find(line, "([^%s]*%:%d*:%d*:)$")
-        check = c
-        if check then
-            local t = utils.parse_line_grep(remove_icon)
-            if t ~= nil and t.filename ~= nil then
-                t.filename = get_file_path(t.filename)
-                return t
-            end
-        end
-        start = start -1
-    until check or lnum - start > 3
+    local lnum = unpack(vim.api.nvim_win_get_cursor(0))
+    local item = state.total_item[lnum]
+    if item ~=nil and item.display_lnum == lnum - 1 then
+        local t = vim.deepcopy(item)
+        t.filename = get_file_path(item.filename)
+        return t
+    end
 end
 
 M.get_all_entries = function()
     local lines = api.nvim_buf_get_lines(state.bufnr, config.line_result -1, -1, false)
     local entries   = {}
-    for index, line in pairs(lines) do
-        local c,_, remove_icon_text = string.find(line, "([^%s]*%:%d*:%d*:)$")
-        if c then
-            local grep = utils.parse_line_grep(remove_icon_text)
-            if grep ~= nil then
-                grep.display_lnum = config.line_result + index -2
-                grep.filename = get_file_path(grep.filename)
-                table.insert(entries, grep)
-            end
-        end
+    for _, item in pairs(state.total_item) do
+        local t = vim.deepcopy(item)
+        t.filename = get_file_path(item.filename)
+        table.insert(entries, t)
     end
     return entries
 end
