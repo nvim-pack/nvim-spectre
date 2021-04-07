@@ -30,7 +30,7 @@ end
 
 base.on_error = function (self, output_text)
     if output_text ~= nil then
-        log.error("search error ", output_text)
+        log.debug("search error ", output_text)
         pcall(vim.schedule_wrap( function()
             self.handler.on_error(output_text)
             return

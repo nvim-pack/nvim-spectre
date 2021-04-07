@@ -141,6 +141,8 @@ function M.mapping_buffer(bufnr)
     vim.cmd [[ augroup END ]]
     vim.cmd [[ syn match Comment /.*:\d\+:\d\+:/]]
     vim.cmd [[setlocal nowrap]]
+    vim.cmd [[setlocal foldexpr=spectre#foldexpr()]]
+    vim.cmd [[setlocal foldmethod=expr]]
     local map_opt = {noremap = true, silent = _G.__is_dev == nil  }
     api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua require("spectre").on_insert_leave()<CR>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
@@ -278,20 +280,20 @@ M.delete = function ()
     end
     local lnum = unpack(vim.api.nvim_win_get_cursor(0))
     local item = state.total_item[lnum]
-    if item.display_lnum == lnum - 1 then
+    if item  ~= nil and item.display_lnum == lnum - 1 then
         item.disable =  not item.disable
         ui.render_line(
             state.bufnr,
             config.namespace,
             {
-                search_query= state.query.search_query,
-                replace_query= state.query.replace_query,
+                search_query = state.query.search_query,
+                replace_query = state.query.replace_query,
                 search_text = item.search_text,
                 lnum = item.display_lnum,
                 is_replace = true
             } ,
             {
-                is_disable=item.disable,
+                is_disable = item.disable,
                 padding_text = state.user_config.result_padding,
                 padding = #state.user_config.result_padding,
                 show_search = state.view.show_search,
@@ -300,6 +302,40 @@ M.delete = function ()
         )
 
         return
+    else
+        -- delete all item in 1 file
+        local line = vim.fn.getline(lnum)
+        local check = string.find(line, "([^%s]*%:%d*:%d*:)$")
+        if check then
+            check = state.total_item[lnum + 1]
+            if check == nil then return end
+            local disable = not check.disable
+            item = check
+            local index = lnum + 1
+            while item ~= nil and check.filename == item.filename do
+                item.disable = disable
+                ui.render_line(
+                    state.bufnr,
+                    config.namespace,
+                    {
+                        search_query = state.query.search_query,
+                        replace_query = state.query.replace_query,
+                        search_text = item.search_text,
+                        lnum = item.display_lnum,
+                        is_replace = true
+                    } ,
+                    {
+                        is_disable = item.disable,
+                        padding_text = state.user_config.result_padding,
+                        padding = #state.user_config.result_padding,
+                        show_search = state.view.show_search,
+                        show_replace = state.view.show_replace
+                    }
+                )
+                index = index + 1
+                item = state.total_item[index]
+            end
+        end
     end
 end
 
@@ -444,6 +480,24 @@ M.show_options = function()
     end,200)
 end
 
+M.get_fold = function(lnum)
+    if lnum < config.lnum_UI then
+        return '0'
+    end
+    local line = vim.fn.getline(lnum)
+    local check = string.find(line, "([^%s]*%:%d*:%d*:)$")
+    if check then return '>1' end
+
+    local nextline = vim.fn.getline(lnum + 1)
+    local nextcheck = string.find(nextline, "([^%s]*%:%d*:%d*:)$")
+    if nextcheck then return '<1' end
+    local item = state.total_item[lnum]
+    if item ~= nil then
+        return '1'
+    end
+    return '0'
+
+end
 
 return M
 

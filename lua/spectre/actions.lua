@@ -52,12 +52,13 @@ M.get_current_entry = function ()
 end
 
 M.get_all_entries = function()
-    local lines = api.nvim_buf_get_lines(state.bufnr, config.line_result -1, -1, false)
     local entries   = {}
     for _, item in pairs(state.total_item) do
-        local t = vim.deepcopy(item)
-        t.filename = get_file_path(item.filename)
-        table.insert(entries, t)
+        if not item.disable then
+            local t = vim.deepcopy(item)
+            t.filename = get_file_path(item.filename)
+            table.insert(entries, t)
+        end
     end
     return entries
 end
