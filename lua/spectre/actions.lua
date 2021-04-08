@@ -1,5 +1,4 @@
 local api = vim.api
-local utils = require('spectre.utils')
 local config = require('spectre.config')
 local state = require('spectre.state')
 local Path = require('plenary.path')
@@ -22,6 +21,7 @@ local get_file_path=function(filename)
     end
     return filename
 end
+
 M.select_entry = function()
     local t = M.get_current_entry()
     if t == nil then return nil end

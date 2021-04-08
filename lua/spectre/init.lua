@@ -146,6 +146,7 @@ function M.mapping_buffer(bufnr)
     local map_opt = {noremap = true, silent = _G.__is_dev == nil  }
     api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua require("spectre").on_insert_leave()<CR>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'v', 'd', ':lua require("spectre").delete_visual()<cr>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>",map_opt)
     for _,map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
@@ -272,13 +273,21 @@ M.change_view = function(reset)
     end
 end
 
-M.delete = function ()
+M.delete_visual = function()
+    local startline = unpack(vim.api.nvim_buf_get_mark(0, '<'))
+    local endline =  unpack(vim.api.nvim_buf_get_mark(0, '>'))
+    for i = startline, endline, 1 do
+        M.delete(i)
+    end
+end
+
+M.delete = function (line_visual)
     if can_edit_line() then
         -- delete line content
         vim.cmd[[:normal! ^d$]]
         return false
     end
-    local lnum = unpack(vim.api.nvim_win_get_cursor(0))
+    local lnum = line_visual or unpack(vim.api.nvim_win_get_cursor(0))
     local item = state.total_item[lnum]
     if item  ~= nil and item.display_lnum == lnum - 1 then
         item.disable =  not item.disable
@@ -302,7 +311,7 @@ M.delete = function ()
         )
 
         return
-    else
+    elseif not line_visual then
         -- delete all item in 1 file
         local line = vim.fn.getline(lnum)
         local check = string.find(line, "([^%s]*%:%d*:%d*:)$")

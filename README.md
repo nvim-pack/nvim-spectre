@@ -43,7 +43,7 @@ nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 **WARNING**
 * Commit your file before you replace text. It is not support undo
 * Don't use your crazy vim skill to edit result text or UI.
-* You can use `dd` to delete result item
+* You can use `dd` to toggle result item
 
 
 ## Regex Issue
@@ -84,7 +84,7 @@ require('spectre').setup({
     ['delete_line'] = {
         map = "dd",
         cmd = "<cmd>lua require('spectre').delete()<CR>",
-        desc = "delete current item"
+        desc = "toggle current item"
     },
     ['enter_file'] = {
         map = "<cr>",
@@ -189,8 +189,8 @@ require('spectre').setup({
 ### Custom function
 
 ``` lua
--- if you want to get item from spectre panel you can use some function.
--- create your function and add it to mapping config on setup.
+-- if you want to get item from spectre panel.
+-- you can use some following function to get data from spectre.
 require('spectre.actions').get_current_entry()
 require('spectre.actions').get_all_entries()
 require('spectre.actions').get_state()
