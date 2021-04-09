@@ -126,10 +126,10 @@ require('spectre').setup({
       cmd = "<cmd>lua require('spectre').change_options('hidden')<CR>",
       desc = "toggle search hidden"
     },
-    -- you can put your mapping here it only have normal
+    -- you can put your mapping here it only use normal mode
   },
   find_engine = {
-    -- rg is map wiht finder_cmd
+    -- rg is map with finder_cmd
     ['rg'] = {
       cmd = "rg",
       -- default args
@@ -171,12 +171,12 @@ require('spectre').setup({
   },
   default = {
       find = {
-          --pick one of item that find_engine
+          --pick one of item in find_engine
           cmd = "rg",
           options = {"ignore-case"}
       },
       replace={
-          --pick one of item that replace_engine
+          --pick one of item in replace_engine
           cmd = "sed"
       }
   },
