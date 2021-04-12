@@ -107,7 +107,7 @@ require('spectre').setup({
         desc = "show option"
     },
     ['run_replace'] = {
-        map = "<repace>R",
+        map = "<leader>R",
         cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>",
         desc = "replace all"
     },
