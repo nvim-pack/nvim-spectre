@@ -46,7 +46,7 @@ local config = {
         ['replace_cmd'] = {
             map = "<leader>c",
             cmd = "<cmd>lua require('spectre.actions').replace_cmd()<CR>",
-            desc = "input replace vim command vim"
+            desc = "input replace vim command"
         },
         ['show_option_menu'] = {
             map = "<leader>o",

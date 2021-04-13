@@ -162,15 +162,23 @@ M.show_menu_options = function (title, content)
     vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
         help_win
     )
-
-    -- vim.fn.win_gotoid(help_win)
 end
+
 M.show_help = function()
     local help_msg = {}
-
+    local map_tbl = {};
     for _, map in pairs(state.user_config.mapping) do
-        table.insert(help_msg, string.format("%4s : %s", map.map, map.desc))
+        table.insert(map_tbl, map)
     end
+    -- sort by length
+     table.sort(map_tbl, function (a, b)
+         return (#a.map or 0) < (#b.map or 0)
+     end)
+
+    for _, map in pairs(map_tbl) do
+        table.insert(help_msg, string.format("%9s : %s", map.map, map.desc))
+    end
+
     M.show_menu_options("Mapping", help_msg)
 
 end
