@@ -146,6 +146,7 @@ M.run_replace = function()
     end
     -- is that correct i am not sure :)
     is_running = false
+    api.nvim_exec("checktime", false)
 end
 
 
