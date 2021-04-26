@@ -208,5 +208,5 @@ require('spectre').open({
 ## FAQ
 * what is Spectre?
 > I want create a `Search Panel` but this name is not cool.
-> so I get the hero name from a game.
+> I get the name of a hero on a game.
 > Spectre has a skill to find enemy on global map so I use it:)
