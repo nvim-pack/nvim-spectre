@@ -121,10 +121,8 @@ local config = {
                     desc="hidden file",
                     icon="[H]"
                 },
-                -- you can put any option you want here it can toggle with
-                -- show_option function
-                },
             },
+        },
     },
     replace_engine={
        ['sed']={
