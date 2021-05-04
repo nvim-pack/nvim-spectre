@@ -103,6 +103,28 @@ local config = {
                 -- show_option function
             }
         },
+        ['ag'] = {
+            cmd = "ag",
+            -- default args
+            args = {
+                '--vimgrep',
+                '-s'
+            } ,
+            options = {
+                ['ignore-case'] = {
+                    value= "-i",
+                    icon="[I]",
+                    desc="ignore case"
+                },
+                ['hidden'] = {
+                    value="--hidden",
+                    desc="hidden file",
+                    icon="[H]"
+                },
+                -- you can put any option you want here it can toggle with
+                -- show_option function
+                },
+            },
     },
     replace_engine={
        ['sed']={
