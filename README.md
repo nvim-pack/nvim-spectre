@@ -155,6 +155,25 @@ require('spectre').setup({
         -- show_option function
       }
     },
+    ['ag'] = {
+      cmd = "ag",
+      args = {
+        '--vimgrep',
+        '-s'
+      } ,
+      options = {
+        ['ignore-case'] = {
+          value= "-i",
+          icon="[I]",
+          desc="ignore case"
+        },
+        ['hidden'] = {
+          value="--hidden",
+          desc="hidden file",
+          icon="[H]"
+        },
+      },
+    },
   },
   replace_engine={
       ['sed']={
