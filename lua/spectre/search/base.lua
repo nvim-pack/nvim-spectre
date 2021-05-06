@@ -3,6 +3,7 @@ local Job = require("plenary.job")
 local log = require('spectre._log')
 local MAX_LINE_CHARS = 255
 local utils = require('spectre.utils')
+local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
 local base = {}
 base.__index = base
 
@@ -12,11 +13,12 @@ base.__index = base
 local function scan_paths(s_path)
     local paths = {}
     local path = ""
+    local escape_char = is_win and "^" or "\\"
 
     local i = 1
     while i <= #s_path do
         local char = s_path:sub(i, i)
-        if char == "\\" then
+        if char == escape_char then
             -- Escape next character
             if i < #s_path then
                 i = i + 1
@@ -40,6 +42,7 @@ local function scan_paths(s_path)
         table.insert(paths, path)
     end
 
+    print(vim.inspect(paths))
     return paths
 end
 
