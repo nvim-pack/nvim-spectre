@@ -11,11 +11,16 @@ ag.init = function(_, config)
     return config
 end
 
-ag.get_path_args = function(_, path)
-    if #path == 0 then
+ag.get_path_args = function(_, paths)
+    if #paths == 0 then
       return {}
     end
-    return  { '-G', path }
+
+    local pattern = ""
+    for _, path in ipairs(paths) do
+        pattern = pattern .. path .. "|"
+    end
+    return  { '-G', pattern:sub(1, #pattern - 1) }
 end
 
 return ag
