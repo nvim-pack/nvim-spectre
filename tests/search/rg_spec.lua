@@ -69,4 +69,28 @@ describe("[rg] search ", function()
 
     end)
 
+    it("search with multiple paths should not be empty", function()
+        local finish = false
+        local total = {}
+        local total_item = 0
+        local finder = rg:new({}, {
+            on_result = function(item)
+                table.insert(total, item)
+                total_item = total_item + 1
+            end,
+            on_finish = function()
+                finish = true
+            end
+        })
+        finder:search({
+            search_text = "(data|spectre)",
+            path = "**/rg_spec/*.txt **/sed_spec/*.txt"
+        })
+        vim.wait(time_wait, function()
+            return finish
+        end)
+        eq(4, total_item, "should have 4 items")
+
+    end)
+
 end)

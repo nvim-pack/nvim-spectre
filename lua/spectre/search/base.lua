@@ -3,9 +3,47 @@ local Job = require("plenary.job")
 local log = require('spectre._log')
 local MAX_LINE_CHARS = 255
 local utils = require('spectre.utils')
+local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
 local base = {}
 base.__index = base
 
+---Scan a path string and split it into multiple paths.
+---@param s_path string
+---@return string[]
+local function scan_paths(s_path)
+    local paths = {}
+    local path = ""
+    local escape_char = is_win and "^" or "\\"
+
+    local i = 1
+    while i <= #s_path do
+        local char = s_path:sub(i, i)
+        if char == escape_char then
+            -- Escape next character
+            if i < #s_path then
+                i = i + 1
+                path = path .. s_path:sub(i, i)
+            end
+        elseif char:match("%s") then
+            -- Unescaped whitespace: split here.
+            if path ~= "" then
+                table.insert(paths, path)
+            end
+            path = ""
+            i = i + s_path:sub(i, -1):match("^%s+()") - 2
+        else
+            path = path .. char
+        end
+
+        i = i + 1
+    end
+
+    if #path > 0 then
+        table.insert(paths, path)
+    end
+
+    return paths
+end
 
 base.get_path_args = function(self, path)
     print("[spectre] should implement path_args for ", self.state.cmd)
@@ -49,7 +87,7 @@ base.search = function(self, query)
         self.state.args,
     }
     if query.path then
-        local args_path = self:get_path_args(query.path)
+        local args_path = self:get_path_args(scan_paths(query.path))
         table.insert(args, args_path)
     end
 
@@ -59,7 +97,7 @@ base.search = function(self, query)
 
     -- no more args
     table.insert(args, "--")
-    args = utils.tbl_remove_dup(flatten(args))
+    args = flatten(args)
 
     table.insert(args, query.search_text)
 

@@ -15,11 +15,17 @@ rg.init = function(_, config)
     return config
 end
 
-rg.get_path_args = function(_, path)
-    if #path == 0 then
+rg.get_path_args = function(_, paths)
+    if #paths == 0 then
       return {}
     end
-    return  { '-g', path }
+
+    local args = {}
+    for _, path in ipairs(paths) do
+        table.insert(args, "-g")
+        table.insert(args, path)
+    end
+    return  args
 end
 
 
