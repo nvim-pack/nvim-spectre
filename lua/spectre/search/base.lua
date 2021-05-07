@@ -42,7 +42,6 @@ local function scan_paths(s_path)
         table.insert(paths, path)
     end
 
-    print(vim.inspect(paths))
     return paths
 end
 
