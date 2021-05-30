@@ -154,5 +154,11 @@ local config = {
     is_insert_mode = false,
 }
 
+if vim.loop.os_uname().sysname == 'Darwin' then
+    config.replace_engine.sed.cmd = "gsed"
+    if vim.fn.executable('gsed') == 0 then
+        print("You need to install gnu sed 'brew instal gnu-sed'")
+    end
+end
 return config
 
