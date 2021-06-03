@@ -113,10 +113,15 @@ M.run_replace = function()
     end
     local entries = M.get_all_entries()
     local replacer_creator = state_utils.get_replace_creator()
+    local done_item = 0
+    local error_item = 0
+    state.status_line = 'Run Replace.'
     local replacer = replacer_creator:new(
         state_utils.get_replace_engine_config(), {
             on_finish = function(result)
                 if(result.ref) then
+                    done_item = done_item + 1
+                    state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
                     local value = result.ref
                     value.text = " DONE"
                     vim.fn.setqflist(entries, 'r')
@@ -126,11 +131,14 @@ M.run_replace = function()
             end,
             on_error = function(result)
                 if(result.ref) then
+                    error_item = error_item + 1
                     local value = result.ref
                     value.text = "ERROR"
                     vim.fn.setqflist(entries, 'r')
+                    state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
                     api.nvim_buf_set_extmark(M.bufnr, config.namespace, value.display_lnum, 0,
                             { virt_text = {{" ERROR", "Error"}}, virt_text_pos = 'eol'})
+
                 end
             end
         }
@@ -146,6 +154,7 @@ M.run_replace = function()
             replace_text = state.query.replace_query,
         })
     end
+    -- state.status_line = "Replace done."
     -- is that correct i am not sure :)
     is_running = false
     api.nvim_exec("checktime", false)

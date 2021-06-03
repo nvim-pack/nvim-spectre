@@ -228,6 +228,15 @@ require('spectre').open({
 
 ```
 ## FAQ
+
+* You a statusline support custom filetype [windline](https://github.com/windwp/windline.nvim)
+
+``` lua
+    require('windline').add_status(
+        require('spectre.state_utils').status_line()
+    )
+```
+
 * what is Spectre?
 > I want create a `Search Panel` but this name is not cool.
 > I get the name of a hero on a game.

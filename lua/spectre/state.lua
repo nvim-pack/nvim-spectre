@@ -1,6 +1,7 @@
 local state = {
     -- current config
     user_config = nil,
+    status_line = '',
     query = {
         search_quey = '',
         replace_query = '',

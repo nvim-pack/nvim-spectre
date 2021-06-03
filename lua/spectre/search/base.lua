@@ -120,7 +120,7 @@ base.search = function(self, query)
 end
 
 base.stop = function(self)
-    if self.job then
+    if self.job ~= nil then
         self.job:stop()
     end
     self.job = nil

@@ -65,6 +65,7 @@ M.open = function (opts)
         is_file = false
     }, opts or {})
 
+    state.status_line = ''
     state.target_winid = api.nvim_get_current_win()
     state.target_bufnr = api.nvim_get_current_buf()
     local is_new = true
@@ -361,7 +362,8 @@ M.search_handler = function()
     return {
         on_start = function()
             state.total_item = {}
-            c_line =config.line_result
+            state.status_line = "Start search"
+            c_line = config.line_result
             total = 0
             start_time = vim.loop.hrtime()
         end,
@@ -407,6 +409,7 @@ M.search_handler = function()
             )
             c_line = c_line + 1
             total = total + 1
+            state.status_line = "Item  " .. total
             state.total_item[c_line] = item
         end,
         on_error = function (error_msg)
@@ -419,7 +422,7 @@ M.search_handler = function()
         end,
         on_finish = function()
             local end_time = ( vim.loop.hrtime() - start_time) / 1E9
-            local help_text = string.format("Total: %s match, time: %ss", total, end_time)
+            state.status_line = string.format("Total: %s match, time: %ss", total, end_time)
 
             api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
                 cfg.line_sep,
@@ -431,7 +434,7 @@ M.search_handler = function()
                 state.bufnr,
                 config.namespace_status,
                 config.line_result -2,
-                {{ help_text, 'Question' } }
+                {{ state.status_line, 'Question' } }
             )
             state.finder_instance = nil
         end

@@ -43,4 +43,39 @@ M.has_options = function(key)
     return state.options[key] == true
 end
 
+M.status_line = function(opt)
+    opt = opt or {}
+    local slant_right = opt.seprator or'';
+    local spectre = {
+        filetypes = { 'spectre_panel' },
+        active = {
+            { ' ಠ_ಠ ', { 'white', 'black' } },
+            {
+                hl_colors={
+                    empty = {'black', 'white_light'},
+                    text = {'black', 'white'},
+                    sep_left = {'black', 'white'},
+                    sep_right = {'white', 'white_light'},
+
+                },
+                text = function()
+                    if state.status_line=='' or state.status_line==nil then
+                        return { {slant_right, 'empty'}}
+                        else
+                        return {
+                            { slant_right, 'sep_left'},
+                            { state.status_line, 'text'},
+                            { slant_right, 'sep_right'}
+                        }
+                    end
+                end
+            },
+            {"%=", ''},
+            { slant_right, { 'white_light', 'black' } },
+            { ' Spectre ', { 'white', 'black', 'bold' } },
+        },
+        show_in_active = true,
+    }
+    return spectre
+end
 return M
