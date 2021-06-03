@@ -86,6 +86,13 @@ describe("[sed] replace ", function()
             search_text = [[spectre]],
             replace_text = [[data]],
             expected = "data abcdef"
+        },{
+            ignore_case = true,
+            filename = 'sed_spec/sed_multiple_quote.txt',
+            lnum = 1,
+            search_text = [[import \{ Box \} from "./box.abc"]],
+            replace_text = [[window]],
+            expected = "window"
         }
     }
     for _, test in pairs(test_sed) do

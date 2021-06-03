@@ -3,6 +3,7 @@ local config = require('spectre.config')
 local state = require('spectre.state')
 local Path = require('plenary.path')
 local state_utils=require('spectre.state_utils')
+local utils = require('spectre.utils')
 
 local M = {}
 
@@ -70,12 +71,13 @@ M.send_to_qf = function ()
     return entries
 end
 
-
+-- input that comand to run on vim
 M.replace_cmd = function()
     M.send_to_qf()
     local replace_cmd = ''
     if #state.query.search_query > 2 then
         local ignore_case = ''
+        local search_regex = utils.escape_chars(state.query.search_query)
         if state_utils.has_options('ignore-case') == true then
             ignore_case='i'
         end
@@ -83,7 +85,7 @@ M.replace_cmd = function()
             vim.fn.win_gotoid(state.target_winid)
             replace_cmd = string.format(
                 ':%%s/\\v%s/%s/g%s',
-                state.query.search_query,
+                search_regex,
                 state.query.replace_query,
                 ignore_case
             )
@@ -91,7 +93,7 @@ M.replace_cmd = function()
             replace_cmd = string.format(
                 ':%s %%s/\\v%s/%s/g%s | update',
                 config.replace_vim_cmd,
-                state.query.search_query,
+                search_regex,
                 state.query.replace_query,
                 ignore_case
             )

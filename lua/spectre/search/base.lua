@@ -106,7 +106,7 @@ base.search = function(self, query)
     if query.cwd == "" then query.cwd = nil end
 
     self.handler.on_start()
-    local job = Job:new({
+    self.job = Job:new({
         enable_recording = true ,
         command = self.state.cmd,
         cwd = query.cwd,
@@ -116,7 +116,14 @@ base.search = function(self, query)
         on_exit = function(_, value) self:on_exit(value) end
     })
 
-    job:start()
+    self.job:start()
+end
+
+base.stop = function(self)
+    if self.job then
+        self.job:stop()
+    end
+    self.job = nil
 end
 
 local function extend(child)

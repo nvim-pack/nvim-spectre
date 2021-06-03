@@ -10,6 +10,8 @@ local esc_test_data = {
     {[[ \ a. ]], [[ \\ a\. ]], " with dot"},
     {[[ \. \ ]], [[ \\. \\ ]], " with dot slash"},
     {[[ ( \\ ]], [[ \( \\ ]], " square slahs"},
+    {[[ \{ ]], [[ \{ ]], " bracket"},
+    {[[ \} ]], [[ \} ]], " bracket"},
     {[[ \\\ ]], [[ \\\ ]], " don't escape tripple slash"}
 }
 
@@ -25,6 +27,7 @@ local esc_vim_magic = {
     {[[ > ]], [[ \> ]], " >"},
     {[[ = ]], [[ \= ]], " >"},
     {[[ < ]], [[ \< ]], " ="},
+    {[[ \< ]], [[ \< ]], " <"},
 }
 
 describe('escape vim magic ', function()

@@ -27,6 +27,7 @@ local state = require('spectre.state')
 local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
 local ui = require('spectre.ui')
+local log = require('spectre._log')
 
 local M = {}
 
@@ -134,11 +135,12 @@ end
 
 
 function M.mapping_buffer(bufnr)
-    vim.cmd [[ augroup search_panel_autocmds ]]
-    vim.cmd [[ au! * <buffer> ]]
-    vim.cmd [[ au InsertEnter <buffer> lua require"spectre".on_insert_enter() ]]
-    vim.cmd [[ au InsertLeave <buffer> lua require"spectre".on_insert_leave() ]]
-    vim.cmd [[ augroup END ]]
+    vim.cmd [[augroup spectre_panel
+                au!
+                au InsertEnter <buffer> lua require"spectre".on_insert_enter()
+                au InsertLeave <buffer> lua require"spectre".on_insert_leave()
+                autocmd BufUnload <buffer> lua require("spectre").stop()
+            augroup END ]]
     vim.cmd [[ syn match Comment /.*:\d\+:\d\+:/]]
     vim.cmd [[setlocal nowrap]]
     vim.cmd [[setlocal foldexpr=spectre#foldexpr()]]
@@ -348,6 +350,7 @@ M.delete = function (line_visual)
     end
 end
 
+
 M.search_handler = function()
     local c_line = 0
     local total = 0
@@ -412,6 +415,7 @@ M.search_handler = function()
             api.nvim_buf_add_highlight(state.bufnr, config.namespace,
                 cfg.highlight.border, c_line , 0, padding)
             c_line = c_line + 1
+            state.finder_instance = nil
         end,
         on_finish = function()
             local end_time = ( vim.loop.hrtime() - start_time) / 1E9
@@ -429,14 +433,25 @@ M.search_handler = function()
                 config.line_result -2,
                 {{ help_text, 'Question' } }
             )
+            state.finder_instance = nil
         end
     }
 end
 
+
+M.stop = function()
+    log.debug("spectre stop")
+    if state.finder_instance ~= nil then
+        state.finder_instance:stop()
+        state.finder_instance = nil
+    end
+end
+
 M.search = function(opts)
+    M.stop()
     opts = opts or state.query
     local finder_creator = state_utils.get_finder_creator()
-    local finder = finder_creator:new(
+    state.finder_instance= finder_creator:new(
         state_utils.get_search_engine_config(),
         M.search_handler()
     )
@@ -455,7 +470,7 @@ M.search = function(opts)
     api.nvim_buf_add_highlight(state.bufnr, config.namespace,
         state.user_config.highlight.border, c_line -1, 0,-1)
     state.total_item = {}
-    finder:search({
+    state.finder_instance:search({
         cwd = state.cwd,
         search_text = state.query.search_query,
         path = state.query.path
