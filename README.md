@@ -229,7 +229,7 @@ require('spectre').open({
 ```
 ## FAQ
 
-* You a statusline support custom filetype [windline](https://github.com/windwp/windline.nvim)
+* add custom statusline [windline](https://github.com/windwp/windline.nvim)
 
 ``` lua
     require('windline').add_status(
