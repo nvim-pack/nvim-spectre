@@ -52,16 +52,12 @@ local get_devicons = (function()
             devicons.setup()
         end
 
-        return function(filename, disable_devicons)
-            if disable_devicons or not filename then
-                return ''
+        return function(filename, enable_icon, default)
+            if not enable_icon or not filename then
+                return default or '|' , ''
             end
             local icon, icon_highlight = devicons.get_icon(filename, string.match(filename, '%a+$'), { default = true })
-            if state.user_config.color_devicons then
-                return icon, icon_highlight
-            else
-                return icon, ''
-            end
+            return icon, icon_highlight
         end
     else
         return function(_, _)
@@ -74,23 +70,28 @@ M.render_filename = function (bufnr, namespace, line, entry)
     local u_config = state.user_config
     local filename = vim.fn.fnamemodify(entry.filename, ":t")
     local directory = vim.fn.fnamemodify(entry.filename, ":h")
-    if directory=="." then
+    if directory == "." then
         directory = ""
     else
         directory = directory .. Path.path.sep
     end
-    local icon, icon_highlight = get_devicons(filename, false)
 
-    api.nvim_buf_set_lines(state.bufnr, line, line , false,{
+    local icon_length = state.user_config.color_devicons and 4 or 2
+    local icon, icon_highlight = get_devicons(
+            filename,
+            state.user_config.color_devicons, '+')
+
+    api.nvim_buf_set_lines(state.bufnr, line, line , state.user_config.color_devicons,{
         string.format("%s %s%s:%s:%s:", icon, directory, filename,entry.lnum,entry.col),
     })
+
     local width = utils.strdisplaywidth(filename)
     local hl = {
-        {{0, 4}, icon_highlight},
+        {{0, icon_length}, icon_highlight},
         {{1, utils.strdisplaywidth(directory)}, u_config.highlight.filedirectory},
         {{0, width + 1 }, u_config.highlight.filename},
     }
-    if icon=="" then
+    if icon == "" then
         table.remove(hl, 1)
     end
     local pos = 0
