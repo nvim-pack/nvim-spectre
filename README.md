@@ -68,7 +68,7 @@ require('spectre').setup()
 
 ```
 
-Change any setting if you don't like it. ** Don't copy all ** .
+Change any setting if you don't like it. **Don't copy all** .
 It can be change when plugin update so better use a default setting.
 
 ``` lua
