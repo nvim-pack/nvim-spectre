@@ -25,9 +25,9 @@ You need install rg and sed
 
 - [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) (finder)
 - [devicons](https://github.com/kyazdani42/nvim-web-devicons) (icons)
-- [sed](https://www.gnu.org/software/sed/) (replace tool) ()
+- [sed](https://www.gnu.org/software/sed/) (replace tool)
 
-### Macos 
+### MacOs 
   you need run `brew install gnu-sed`
 
 ## Usage
