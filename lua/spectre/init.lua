@@ -370,6 +370,9 @@ M.search_handler = function()
         end,
         on_result = function (item)
             item.replace_text = ''
+            if string.match(item.filename, '^%.%/') then
+                item.filename = item.filename:sub(3, #item.filename)
+            end
             item.search_text = utils.truncate(utils.trim(item.text), 255)
             if #state.query.replace_query > 1 then
                 item.replace_text = utils.vim_replace_text(

@@ -67,6 +67,7 @@ base.on_output = function(self, output_text)
 end
 
 base.on_error = function (self, output_text)
+    print(vim.inspect(output_text))
     if output_text ~= nil then
         log.debug("search error ", output_text)
         pcall(vim.schedule_wrap( function()
@@ -84,6 +85,7 @@ end
 
 base.search = function(self, query)
     local args = flatten{
+        -- query.search_text,
         self.state.args,
     }
     if query.path then
@@ -99,11 +101,18 @@ base.search = function(self, query)
     table.insert(args, "--")
     args = flatten(args)
 
+    if  query.cwd == "" then
+        query.cwd = nil
+    end
     table.insert(args, query.search_text)
 
+    -- https://github.com/nvim-telescope/telescope.nvim/issues/907
+    -- ripgrep issue
+    table.insert(args, '.')
+
     log.debug("search cwd " .. (query.cwd or ''))
-    log.debug("search args " .. self.state.cmd, args)
-    if query.cwd == "" then query.cwd = nil end
+    log.debug("search: " .. self.state.cmd .. ' ' .. table.concat(args, ' '))
+
 
     self.handler.on_start()
     self.job = Job:new({
@@ -120,7 +129,7 @@ base.search = function(self, query)
 end
 
 base.stop = function(self)
-    if self.job ~= nil then
+    if self.job ~= nil and self.job.is_shutdown == false then
         self.job:stop()
     end
     self.job = nil
