@@ -68,6 +68,9 @@ M.send_to_qf = function ()
     local entries = M.get_all_entries()
     vim.cmd[[copen]]
     vim.fn.setqflist(entries,"r")
+    vim.fn.setqflist({}, 'r', {
+        title = string.format("Result Search: [%s]", state.query.search_query )
+    })
     return entries
 end
 
