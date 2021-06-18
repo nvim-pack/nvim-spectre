@@ -28,9 +28,9 @@ local config = {
         replace = "DiffDelete"
     },
     mapping = {
-        ['delete_line'] = {
+        ['toggle_line'] = {
             map = "dd",
-            cmd = "<cmd>lua require('spectre').delete()<CR>",
+            cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
             desc = "delete current item"
         },
         ['enter_file'] = {
