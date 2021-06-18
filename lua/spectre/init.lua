@@ -66,6 +66,7 @@ M.open = function (opts)
     }, opts or {})
 
     state.status_line = ''
+    opts.search_text = utils.trim(opts.search_text)
     state.target_winid = api.nvim_get_current_win()
     state.target_bufnr = api.nvim_get_current_buf()
     local is_new = true
@@ -149,7 +150,7 @@ function M.mapping_buffer(bufnr)
     local map_opt = {noremap = true, silent = _G.__is_dev == nil  }
     api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua require("spectre").on_insert_leave()<CR>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'v', 'd', ':lua require("spectre").delete_visual()<cr>',map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'v', 'd', ':lua require("spectre").toggle_checked()<cr>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>",map_opt)
     for _,map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
@@ -276,15 +277,15 @@ M.change_view = function(reset)
     end
 end
 
-M.delete_visual = function()
+M.toggle_checked = function()
     local startline = unpack(vim.api.nvim_buf_get_mark(0, '<'))
     local endline =  unpack(vim.api.nvim_buf_get_mark(0, '>'))
     for i = startline, endline, 1 do
-        M.delete(i)
+        M.toggle_line(i)
     end
 end
 
-M.delete = function (line_visual)
+M.toggle_line = function (line_visual)
     if can_edit_line() then
         -- delete line content
         vim.cmd[[:normal! ^d$]]
