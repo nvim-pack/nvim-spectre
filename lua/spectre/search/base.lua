@@ -129,7 +129,8 @@ base.search = function(self, query)
 end
 
 base.stop = function(self)
-    if self.job ~= nil and self.job.is_shutdown == false then
+    if self.job ~= nil and self.job.is_shutdown == nil then
+        log.debug('base search stop')
         self.job:stop()
     end
     self.job = nil

@@ -101,6 +101,9 @@ M.open = function (opts)
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
     api.nvim_buf_set_lines(state.bufnr, 0, -1, 0, {})
 
+    vim.api.nvim_buf_attach(state.bufnr, false, {
+        on_detach = M.stop,
+    })
     -- set empty line for virtual text
     local lines = {}
     local length = config.lnum_UI
@@ -363,12 +366,14 @@ M.search_handler = function()
     return {
         on_start = function()
             state.total_item = {}
+            state.is_running = true
             state.status_line = "Start search"
             c_line = config.line_result
             total = 0
             start_time = vim.loop.hrtime()
         end,
         on_result = function (item)
+            if not state.is_running then return end
             item.replace_text = ''
             if string.match(item.filename, '^%.%/') then
                 item.filename = item.filename:sub(3, #item.filename)
@@ -425,6 +430,7 @@ M.search_handler = function()
             state.finder_instance = nil
         end,
         on_finish = function()
+            if not state.is_running then return  end
             local end_time = ( vim.loop.hrtime() - start_time) / 1E9
             state.status_line = string.format("Total: %s match, time: %ss", total, end_time)
 
@@ -441,13 +447,15 @@ M.search_handler = function()
                 {{ state.status_line, 'Question' } }
             )
             state.finder_instance = nil
+            state.is_running = false
         end
     }
 end
 
 
 M.stop = function()
-    log.debug("spectre stop")
+    state.is_running = false
+    log.debug('spectre stop')
     if state.finder_instance ~= nil then
         state.finder_instance:stop()
         state.finder_instance = nil
