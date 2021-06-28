@@ -27,7 +27,7 @@ You need install rg and sed
 - [devicons](https://github.com/kyazdani42/nvim-web-devicons) (icons)
 - [sed](https://www.gnu.org/software/sed/) (replace tool)
 
-### MacOs 
+### MacOs
   you need run `brew install gnu-sed`
 
 ## Usage
@@ -202,7 +202,7 @@ require('spectre').setup({
           cmd = "sed"
       }
   },
-  replace_vim_cmd = "cfdo",
+  replace_vim_cmd = "cdo",
   is_open_target_win = true --open file on opener window
   is_insert_mode = false,  -- start open panel on is_insert_mode
 })

@@ -41,9 +41,8 @@ sed.replace = function(self, value)
         value.filename,
     })
 
-
     log.debug("replace cwd " .. (value.cwd or ''))
-    log.debug("replace args " .. self.state.cmd, args)
+    log.debug("replace cmd: " .. self.state.cmd .. ' ' .. table.concat(args, ' '))
 
     if value.cwd == "" then value.cwd = nil end
     local job = Job:new({

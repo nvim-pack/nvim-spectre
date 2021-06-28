@@ -114,10 +114,10 @@ M.escape_slash = function(query)
   return query:gsub('%\\', '\\\\')
 end
 
--- escape slash with / and '
+-- escape slash with /
 M.escape_sed = function (query)
-    return query:gsub("[%/%']", function (v)
-        return "\\" ..v
+    return query:gsub("[%/]", function (v)
+        return [[\]] ..v
     end)
 end
 
