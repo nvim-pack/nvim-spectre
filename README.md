@@ -3,7 +3,7 @@ A search panel for neovim.
 
 **Spectre** __find the enemy and replace them with dark power.__
 
-![demo](./images/demo.gif)
+![demo](https://github.com/windwp/nvim-spectre/wiki/assets/demospectre.gif)
 
 ## Why Spectre?
 * Use regex in search
