@@ -59,7 +59,7 @@ base.on_output = function(self, output_text)
             output_text = string.sub(output_text, 0, MAX_LINE_CHARS)
         end
         local t = utils.parse_line_grep(output_text)
-        if t.lnum == nil or t.col == nil then
+        if t == nil or t.lnum == nil or t.col == nil then
             return
         end
         self.handler.on_result(t)
