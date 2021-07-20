@@ -41,7 +41,11 @@ end
 
 M.open_visual = function(opts)
     opts = opts or {}
-    opts.search_text = utils.get_visual_selection()
+    if opts.select_word then
+        opts.search_text = vim.fn.expand('<cword>')
+    else
+        opts.search_text = utils.get_visual_selection()
+    end
     M.open(opts)
 end
 
