@@ -80,7 +80,7 @@ M.replace_cmd = function()
     local replace_cmd = ''
     if #state.query.search_query > 2 then
         local ignore_case = ''
-        local search_regex = utils.escape_chars(state.query.search_query)
+        local search_regex = utils.escape_vim_magic(state.query.search_query)
         if state_utils.has_options('ignore-case') == true then
             ignore_case='i'
         end
