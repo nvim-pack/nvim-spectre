@@ -6,7 +6,8 @@ local state_utils=require('spectre.state_utils')
 local utils = require('spectre.utils')
 
 local Path = require('plenary.path')
-local popup = require('popup')
+
+local popup = require "plenary.popup"
 local api = vim.api
 
 local M={}

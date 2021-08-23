@@ -17,7 +17,6 @@ It always search when you type and it is very useless on search with regex
 
 ``` lua
 Plug 'nvim-lua/plenary.nvim'
-Plug 'nvim-lua/popup.nvim'
 Plug 'windwp/nvim-spectre'
 
 ```
