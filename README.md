@@ -43,7 +43,7 @@ nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 ```
 
 **WARNING**
-* Commit your file before you replace text. It is not support undo
+* Commit your file before you replace text. It does not support undo
 * Don't use your crazy vim skill to edit result text or UI.
 * You can use `dd` to toggle result item
 
