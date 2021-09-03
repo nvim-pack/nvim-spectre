@@ -28,6 +28,9 @@ local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
 local ui = require('spectre.ui')
 local log = require('spectre._log')
+local async = require('plenary.async')
+
+local scheduler = async.util.scheduler
 
 local M = {}
 
@@ -37,7 +40,6 @@ M.setup = function(cfg)
         state.options[opt] = true
     end
 end
-
 
 M.open_visual = function(opts)
     opts = opts or {}
@@ -229,36 +231,50 @@ M.on_insert_leave = function ()
     end
 
     if line[2] >= 5 and line[2] < 7 then
-        M.do_replace_text(query)
+        M.async_replace(query)
     else
         M.search(query)
     end
 end
 
+M.async_replace = function(query)
+    state.async_id = vim.loop.hrtime()
+     async.void(function()
+        M.do_replace_text(query, state.async_id)
+    end)()
+end
 
-M.do_replace_text = function(opts)
+M.do_replace_text = function(opts, async_id)
+    -- disable folde when render
+    vim.b.spectre_fold = 1
     state.query = opts or state.query
     hl_match(state.query)
+    local count = 1
     for _, item in pairs(state.total_item) do
-        ui.render_line(
-            state.bufnr,
-            config.namespace,
-            {
-                search_query= state.query.search_query,
-                replace_query= state.query.replace_query,
-                search_text = item.search_text,
-                lnum = item.display_lnum,
-                is_replace = true
-            } ,
-            {
-                is_disable = item.disable,
-                padding_text = state.user_config.result_padding,
-                padding = #state.user_config.result_padding,
-                show_search = state.view.show_search,
-                show_replace = state.view.show_replace,
-            }
-        )
+        if state.async_id ~= async_id then
+            return
+        end
+        ui.render_line(state.bufnr, config.namespace, {
+            search_query = state.query.search_query,
+            replace_query = state.query.replace_query,
+            search_text = item.search_text,
+            lnum = item.display_lnum,
+            is_replace = true,
+        }, {
+            is_disable = item.disable,
+            padding_text = state.user_config.result_padding,
+            padding = #state.user_config.result_padding,
+            show_search = state.view.show_search,
+            show_replace = state.view.show_replace,
+        })
+        count = count + 1
+        -- delay to next scheduler after 100 time
+        if count > 100 then
+            scheduler()
+            count = 0
+        end
     end
+    vim.b.spectre_fold = 0
 end
 
 M.change_view = function(reset)
@@ -280,7 +296,7 @@ M.change_view = function(reset)
         state.view.show_replace = true
     end
     if not reset then
-        M.do_replace_text()
+        M.async_replace()
     end
 end
 
@@ -388,7 +404,7 @@ M.search_handler = function()
                     state.query.search_query,
                     state.query.replace_query,
                     item.search_text
-                );
+                )
             end
             if last_filename ~= item.filename then
                 ui.render_filename(
