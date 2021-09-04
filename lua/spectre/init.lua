@@ -146,6 +146,7 @@ end
 
 
 function M.mapping_buffer(bufnr)
+    _G.__spectre_fold = M.get_fold
     vim.cmd [[augroup spectre_panel
                 au!
                 au InsertEnter <buffer> lua require"spectre".on_insert_enter()
@@ -239,11 +240,8 @@ end
 
 M.async_replace = function(query)
     state.async_id = vim.loop.hrtime()
-     async.void(function()
-        -- disable fold when render
-        vim.b.spectre_fold = 1
+    async.void(function()
         M.do_replace_text(query, state.async_id)
-        vim.b.spectre_fold = 0
     end)()
 end
 
