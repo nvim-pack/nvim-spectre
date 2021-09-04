@@ -240,13 +240,14 @@ end
 M.async_replace = function(query)
     state.async_id = vim.loop.hrtime()
      async.void(function()
+        -- disable fold when render
+        vim.b.spectre_fold = 1
         M.do_replace_text(query, state.async_id)
+        vim.b.spectre_fold = 0
     end)()
 end
 
 M.do_replace_text = function(opts, async_id)
-    -- disable folde when render
-    vim.b.spectre_fold = 1
     state.query = opts or state.query
     hl_match(state.query)
     local count = 1
@@ -274,7 +275,6 @@ M.do_replace_text = function(opts, async_id)
             count = 0
         end
     end
-    vim.b.spectre_fold = 0
 end
 
 M.change_view = function(reset)
