@@ -19,6 +19,8 @@ local config = {
     color_devicons = true,
     line_sep_start = '------------------------------------------',
     line_sep       = '------------------------------------------',
+    open_cmd = 'vnew',
+    live_update = false,
     highlight = {
         ui = "String",
         filename = "Keyword",
@@ -63,6 +65,11 @@ local config = {
             map = "<leader>v",
             cmd = "<cmd>lua require('spectre').change_view()<CR>",
             desc = "change result view mode"
+        },
+        ['toggle_live_update']={
+            map = "tu",
+            cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
+            desc = "update change when vim write file."
         },
         -- only work if the find_engine following have that option
         ['toggle_ignore_case'] = {

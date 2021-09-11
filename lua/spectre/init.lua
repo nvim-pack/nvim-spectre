@@ -88,7 +88,7 @@ M.open = function (opts)
         end
     end
     if state.bufnr == nil or is_new then
-        vim.cmd[[vnew]]
+        vim.cmd(state.user_config.open_cmd)
     else
         if state.query.path ~= nil
            and #state.query.path > 1
@@ -98,8 +98,9 @@ M.open = function (opts)
         end
     end
 
-    vim.cmd [[setlocal buftype=nofile]]
-    vim.cmd [[setlocal nobuflisted ]]
+    vim.wo.foldenable = false
+    vim.bo.buftype = 'nofile'
+    vim.bo.buflisted = false
     state.bufnr = api.nvim_get_current_buf();
     vim.cmd(string.format("file %s/spectre", state.bufnr))
     vim.bo.filetype = config.filetype
@@ -126,7 +127,7 @@ M.open = function (opts)
     state.cwd = opts.cwd
     M.change_view("reset")
     ui.render_search_ui()
-    ui.render_header()
+    ui.render_header(state.user_config)
 
     if opts.is_insert_mode == true then
         vim.api.nvim_feedkeys('A', 'n', true)
@@ -151,7 +152,7 @@ function M.mapping_buffer(bufnr)
                 au!
                 au InsertEnter <buffer> lua require"spectre".on_insert_enter()
                 au InsertLeave <buffer> lua require"spectre".on_insert_leave()
-                autocmd BufUnload <buffer> lua require("spectre").stop()
+                autocmd BufUnload <buffer> lua require("spectre").on_close()
             augroup END ]]
     vim.cmd [[ syn match Comment /.*:\d\+:\d\+:/]]
     vim.cmd [[setlocal nowrap]]
@@ -165,6 +166,10 @@ function M.mapping_buffer(bufnr)
     for _,map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
     end
+    vim.cmd[[augroup spectre_panel_write
+        au!
+        au BufWritePre * lua require("spectre").on_write()
+        augroup END]]
 end
 
 
@@ -238,6 +243,24 @@ M.on_insert_leave = function ()
     end
 end
 
+M.on_write = function ()
+    if state.user_config.live_update == true then
+        M.search()
+    end
+end
+
+M.toggle_live_update = function()
+   state.user_config.live_update = not state.user_config.live_update
+   ui.render_header(state.user_config)
+end
+
+M.on_close = function()
+    M.stop()
+    vim.cmd[[augroup spectre_panel_write
+        au!
+        augroup END
+    ]]
+end
 M.async_replace = function(query)
     state.async_id = vim.loop.hrtime()
     async.void(function()

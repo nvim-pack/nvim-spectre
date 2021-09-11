@@ -74,6 +74,8 @@ It can be change when plugin update so better use a default setting.
 require('spectre').setup({
 
   color_devicons = true,
+  open_cmd = 'vnew',
+  live_update = false, -- auto excute search again when you write any file in vim
   line_sep_start = '┌-----------------------------------------',
   result_padding = '¦  ',
   line_sep       = '└-----------------------------------------',
@@ -118,6 +120,11 @@ require('spectre').setup({
         cmd = "<cmd>lua require('spectre').change_view()<CR>",
         desc = "change result view mode"
     },
+    ['toggle_live_update']={
+      map = "tu",
+      cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
+      desc = "update change when vim write file."
+    },
     ['toggle_ignore_case'] = {
       map = "ti",
       cmd = "<cmd>lua require('spectre').change_options('ignore-case')<CR>",
@@ -153,7 +160,7 @@ require('spectre').setup({
           desc="hidden file",
           icon="[H]"
         },
-        -- you can put any option you want here it can toggle with
+        -- you can put any rg search option you want here it can toggle with
         -- show_option function
       }
     },
