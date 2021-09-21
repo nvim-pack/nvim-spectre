@@ -131,7 +131,7 @@ end
 base.stop = function(self)
     if self.job ~= nil and self.job.is_shutdown == nil then
         log.debug('base search stop')
-        self.job:stop()
+        self.job:shutdown()
     end
     self.job = nil
 end
