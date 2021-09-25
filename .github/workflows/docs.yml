@@ -26,7 +26,7 @@ jobs:
       - name: panvimdoc
         uses: kdheepak/panvimdoc@v2.7.1
         with:
-          vimdoc: nvim-spectre
+          vimdoc: spectre
           description: a search panel for neovim.
       - name: Create PR
         run: |
