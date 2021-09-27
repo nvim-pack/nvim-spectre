@@ -137,7 +137,7 @@ end
 function M.render_header(opts)
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_header, 0, config.lnum_UI)
     local help_text = string.format(
-        "[Nvim Spectre] (Search by %s) %s (Replace by %s)  Mapping(?)",
+        "[Nvim Spectre] (Search by %s) %s (Replace by %s) (Press ? for mappings)",
         state.user_config.default.find.cmd,
         opts.live_update and '(Auto update)' or '',
         state.user_config.default.replace.cmd
