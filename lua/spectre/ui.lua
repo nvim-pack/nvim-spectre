@@ -159,12 +159,21 @@ M.show_menu_options = function (title, content)
     })
 
     vim.api.nvim_win_set_option(help_win, 'winblend', 0)
-    vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
+    M.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
         preview.border.win_id
     )
-    vim.lsp.util.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
+    M.close_preview_autocmd({"CursorMoved", "CursorMovedI", "BufHidden", "BufLeave"},
         help_win
     )
+end
+
+M.close_preview_autocmd = function(events, win_id)
+    vim.api.nvim_command(
+        string.format(
+            'autocmd %s <buffer> ++once lua pcall(vim.api.nvim_win_close, %d, true)',
+            table.concat(events, ','),
+            win_id
+        ))
 end
 
 M.show_help = function()
