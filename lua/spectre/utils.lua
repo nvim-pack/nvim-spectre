@@ -61,45 +61,22 @@ M.escape_chars = function(query)
     )
 end
 
-
--- copy from telescope
-M.strdisplaywidth = (function()
-  if jit and Path.path.sep ~= '\\' then
-    local ffi = require('ffi')
-    ffi.cdef[[
-      typedef unsigned char char_u;
-      int linetabsize_col(int startcol, char_u *s);
-    ]]
-
-    return function(str, col)
-      local startcol = col or 0
-      local s = ffi.new('char[?]', #str + 1)
-      ffi.copy(s, str)
-      return ffi.C.linetabsize_col(startcol, s) - startcol
-    end
-  else
-    return function(str, col)
-      return #str - (col or 0)
-    end
-  end
-end)()
-
 function M.trim(s)
   return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
 end
 
 M.truncate = function(str, len)
   str = tostring(str) -- We need to make sure its an actually a string and not a number
-  if M.strdisplaywidth(str) <= len then
+  if vim.api.nvim_strwidth(str) <= len then
     return str
   end
   local charlen = 0
   local cur_len = 0
   local result = ''
-  local len_of_dots = M.strdisplaywidth('…')
+  local len_of_dots = vim.api.nvim_strwidth('…')
   while true do
     local part = M.strcharpart(str, charlen, 1)
-    cur_len = cur_len + M.strdisplaywidth(part)
+    cur_len = cur_len + vim.api.nvim_strwidth(part)
     if (cur_len + len_of_dots) > len then
       result = result .. '…'
       break
