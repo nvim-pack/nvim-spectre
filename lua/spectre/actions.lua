@@ -128,7 +128,7 @@ M.run_replace = function()
                     local value = result.ref
                     value.text = " DONE"
                     vim.fn.setqflist(entries, 'r')
-                    api.nvim_buf_set_extmark(M.bufnr, config.namespace, value.display_lnum, 0,
+                    api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
                             { virt_text = {{" DONE", "String"}}, virt_text_pos = 'eol'})
                 end
             end,
@@ -139,7 +139,7 @@ M.run_replace = function()
                     value.text = "ERROR"
                     vim.fn.setqflist(entries, 'r')
                     state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
-                    api.nvim_buf_set_extmark(M.bufnr, config.namespace, value.display_lnum, 0,
+                    api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
                             { virt_text = {{" ERROR", "Error"}}, virt_text_pos = 'eol'})
 
                 end
