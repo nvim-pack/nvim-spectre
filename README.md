@@ -39,7 +39,19 @@ nnoremap <leader>sw :lua require('spectre').open_visual({select_word=true})<CR>
 vnoremap <leader>s :lua require('spectre').open_visual()<CR>
 "  search in current file
 nnoremap <leader>sp :lua require('spectre').open_file_search()<cr>
+```
 
+``` lua
+local opts = { noremap = true, silent = true }
+
+-- Shorten function name
+local keymap = vim.api.nvim_set_keymap
+
+-- Spectre: Find & replace
+keymap("n", "<leader>S", "<CMD>lua require 'spectre'.open()<CR>", opts) -- Open
+keymap("n", "<leader>sw", "<CMD>lua require 'spectre'.open_visual({select_word=true})<CR>", opts) -- Current word
+keymap("n", "<leader>s", "<CMD>lua require 'spectre'.open_visual()<CR>", opts) -- Search all files
+keymap("n", "<leader>sp", "<CMD>lua require 'spectre'.open_file_search()<CR>", opts) -- Search in current file
 ```
 
 **WARNING**
