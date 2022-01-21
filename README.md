@@ -30,8 +30,8 @@ You need install rg and sed
   you need run `brew install gnu-sed`
 
 ## Usage
-
 ``` vim
+# keybindings in your .vimrc
 nnoremap <leader>S :lua require('spectre').open()<CR>
 
 "search current word
@@ -42,6 +42,7 @@ nnoremap <leader>sp :lua require('spectre').open_file_search()<cr>
 ```
 
 ``` lua
+-- Keybindings in your init.lua
 local opts = { noremap = true, silent = true }
 
 -- Shorten function name
