@@ -31,7 +31,7 @@ You need install rg and sed
 
 ## Usage
 ``` vim
-# keybindings in your .vimrc
+" keybindings in your .vimrc
 nnoremap <leader>S :lua require('spectre').open()<CR>
 
 "search current word
