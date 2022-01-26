@@ -32,11 +32,11 @@ You need install rg and sed
 ## Usage
 
 ``` vim
-nnoremap <leader>S :lua require('spectre').open()<CR>
+nnoremap <leader>S :lua require('spectre').open()<cr>
 
 "search current word
-nnoremap <leader>sw :lua require('spectre').open_visual({select_word=true})<CR>
-vnoremap <leader>s :lua require('spectre').open_visual()<CR>
+nnoremap <leader>sw :lua require('spectre').open_visual({select_word=true})<cr>
+vnoremap <leader>s :lua require('spectre').open_visual()<cr>
 "  search in current file
 nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 
