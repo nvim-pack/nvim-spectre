@@ -1,7 +1,6 @@
 local api = vim.api
 local M = {}
 
-local Path = require('plenary.path')
 local Job = require("plenary.job")
 
 local config = require('spectre.config')
