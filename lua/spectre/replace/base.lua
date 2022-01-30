@@ -14,7 +14,6 @@ base.on_error = function (self, value, ref)
             self.handler.on_error({
                 ref = ref
             })
-            return
         end))
     end
 end
