@@ -93,7 +93,14 @@ end
 -- escape slash with /
 M.escape_sed = function (query, escape_all)
     if escape_all then
-      return M.escape_chars(query)
+    local regex = string.gsub([[ (\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\])@! ]]," ","")
+
+    return vim.fn.substitute(
+        query,
+        "\\v"..regex,
+        [[\\\0]],
+        'g'
+    )
     end
 
     return query:gsub("[%/]", function (v)
