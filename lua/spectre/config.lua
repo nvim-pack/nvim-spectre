@@ -82,6 +82,11 @@ local config = {
             cmd = "<cmd>lua require('spectre').change_options('hidden')<CR>",
             desc = "toggle search hidden"
         },
+        ['toggle_string_search'] = {
+          map = "ts",
+          cmd = "<cmd>lua require('spectre').change_options('string')<CR>",
+          desc = "toggle string search mode",
+        },
     },
     find_engine = {
         ['rg'] = {
@@ -104,7 +109,11 @@ local config = {
                     value="--hidden",
                     desc="hidden file",
                     icon="[H]"
-
+                },
+                ['string'] = {
+                    value = "--fixed-strings",
+                    desc = "fixed string mode",
+                    icon = "[S]"
                 },
                 -- you can put any option you want here it can toggle with
                 -- show_option function
@@ -143,6 +152,11 @@ local config = {
                         value= "--ignore-case",
                         icon="[I]",
                         desc="ignore case"
+                },
+                ['string'] = {
+                        value = "--string-mode",
+                        desc = "fixed string mode",
+                        icon = "[S]"
                 },
             }
         },

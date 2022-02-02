@@ -21,7 +21,8 @@ local state = {
     --for options
     options={
         ['ignore-case'] = false,
-        ['hidden'] = false
+        ['hidden'] = false,
+        ['string'] = false
     }
 }
 
