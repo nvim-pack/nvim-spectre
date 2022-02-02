@@ -40,7 +40,13 @@ end
 -- help /ordinary-atom
 -- help non-greedy
 -- escape >=< to \> \= \< but if it dont have \>
-M.escape_vim_magic=function (query)
+M.escape_vim_magic = function (query)
+    local state_utils = require('spectre.state_utils')
+
+    if state_utils.has_options('string') == true then
+      query = M.escape_chars(query)
+    end
+
     local regex = string.gsub([[ (\\)@<![><=](\\)@! ]]," ","")
       return vim.fn.substitute(
         query,
@@ -51,7 +57,8 @@ M.escape_vim_magic=function (query)
 end
 -- escape_chars but don't escape it if have slash before or after !
 M.escape_chars = function(query)
-    local regex = string.gsub([[ (\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\\{\}])@! ]]," ","")
+    local regex = string.gsub([[ (\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\])@! ]]," ","")
+
     return vim.fn.substitute(
         query,
         "\\v"..regex,
@@ -91,16 +98,11 @@ M.escape_slash = function(query)
 end
 
 -- escape slash with /
-M.escape_sed = function (query, escape_all)
-    if escape_all then
-    local regex = string.gsub([[ (\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\])@! ]]," ","")
+M.escape_sed = function (query)
+    local state_utils = require('spectre.state_utils')
 
-    return vim.fn.substitute(
-        query,
-        "\\v"..regex,
-        [[\\\0]],
-        'g'
-    )
+    if state_utils.has_options('string') == true then
+      query = M.escape_chars(query)
     end
 
     return query:gsub("[%/]", function (v)
@@ -153,7 +155,7 @@ end
 --- use vim function substitute with magic mode
 --- need to verify that query is work in vim when you run command
 function M.vim_replace_text(search_text, replace_text, search_line)
-    local text=vim.fn.substitute(
+    local text = vim.fn.substitute(
         search_line,
         "\\v"..M.escape_vim_magic(search_text),
         replace_text,
