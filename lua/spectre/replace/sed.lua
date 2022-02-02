@@ -19,7 +19,6 @@ end
 
 sed.replace = function(self, value)
     local pattern = self.state.pattern
-    local string_mode = false
 
     if self.state.options_value ~= nil then
         for _,v in pairs(self.state.options_value) do
