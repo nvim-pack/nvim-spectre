@@ -91,7 +91,11 @@ M.escape_slash = function(query)
 end
 
 -- escape slash with /
-M.escape_sed = function (query)
+M.escape_sed = function (query, escape_all)
+    if escape_all then
+      return M.escape_chars(query)
+    end
+
     return query:gsub("[%/]", function (v)
         return [[\]] ..v
     end)

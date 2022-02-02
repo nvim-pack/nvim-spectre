@@ -19,11 +19,14 @@ end
 
 sed.replace = function(self, value)
     local pattern = self.state.pattern
+    local string_mode = false
 
     if self.state.options_value ~= nil then
         for _,v in pairs(self.state.options_value) do
             if v == '--ignore-case'  then
                 pattern = pattern .. "i"
+            elseif v == '--string-mode' then
+                string_mode = true
             end
         end
     end
@@ -32,8 +35,8 @@ sed.replace = function(self, value)
         pattern,
         value.lnum,
         value.lnum,
-        utils.escape_sed(value.search_text),
-        utils.escape_sed(value.replace_text)
+        utils.escape_sed(value.search_text, string_mode),
+        utils.escape_sed(value.replace_text, string_mode)
     )
     local args = vim.tbl_flatten({
         self.state.args,
