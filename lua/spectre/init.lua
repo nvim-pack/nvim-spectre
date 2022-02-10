@@ -159,10 +159,12 @@ function M.mapping_buffer(bufnr)
     vim.cmd [[setlocal foldexpr=spectre#foldexpr()]]
     vim.cmd [[setlocal foldmethod=expr]]
     local map_opt = {noremap = true, silent = _G.__is_dev == nil  }
-    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x:lua require("spectre").on_insert_leave()<CR>',map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x<cmd>lua require("spectre").on_insert_leave()<CR>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'v', 'd', ':lua require("spectre").toggle_checked()<cr>',map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<cmd>lua require("spectre").toggle_checked()<cr>',map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>",map_opt)
+    vim.api.nvim_command([[command! -nargs=* Spectre lua require("spectre").open()]])
+
     for _,map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
     end
