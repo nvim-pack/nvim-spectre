@@ -513,7 +513,9 @@ M.search = function(opts)
         state_utils.get_search_engine_config(),
         M.search_handler()
     )
-    if #opts.search_query < 2 then return end
+    if not opts.search_query or #opts.search_query < 2 then
+        return
+    end
     state.query = opts
     -- clear old search result
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
