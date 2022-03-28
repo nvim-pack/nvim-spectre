@@ -53,7 +53,7 @@ end
 
 M.open_file_search = function()
     M.open({
-        path = vim.fn.expand("%")
+        path = vim.fn.fnameescape(vim.fn.expand("%"))
     })
 end
 
