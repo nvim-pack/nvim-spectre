@@ -15,11 +15,16 @@ It always search when you type and it is very useless on search with regex
 
 ## Installation
 
+- With [vim-plug](https://github.com/junegunn/vim-plug):
 ``` lua
 Plug 'nvim-lua/plenary.nvim'
 Plug 'windwp/nvim-spectre'
-
 ```
+- With [packer](https://github.com/wbthomason/packer.nvim):
+```lua
+use({ "nvim-pack/nvim-spectre", requires = { "kyazdani42/nvim-web-devicons" } })
+```
+
 You need install rg and sed
 
 - [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) (finder)
@@ -31,6 +36,7 @@ You need install rg and sed
 
 ## Usage
 
+- With `init.vim`:
 ``` vim
 nnoremap <leader>S <cmd>lua require('spectre').open()<CR>
 
@@ -40,6 +46,15 @@ vnoremap <leader>s <cmd>lua require('spectre').open_visual()<CR>
 "  search in current file
 nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 " run command :Spectre
+```
+- With `init.lua`:
+```lua
+vim.cmd [[ nnoremap <leader>S <cmd>lua require('spectre').open()<CR> ]]
+--search current word
+vim.cmd [[ nnoremap <leader>sw <cmd>lua require('spectre').open_visual({select_word=true})<CR> ]]
+vim.cmd [[ vnoremap <leader>s <cmd>lua require('spectre').open_visual()<CR> ]]
+--  search in current file
+vim.cmd [[ nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr> ]]
 ```
 
 **WARNING**
