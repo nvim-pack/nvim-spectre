@@ -58,19 +58,21 @@ you need run `brew install gnu-sed`
 USAGE                                                          *spectre-usage*
 
 >
-    nnoremap <leader>S :lua require('spectre').open()<CR>
+    nnoremap <leader>S <cmd>lua require('spectre').open()<CR>
     
     "search current word
-    nnoremap <leader>sw :lua require('spectre').open_visual({select_word=true})<CR>
-    vnoremap <leader>s :lua require('spectre').open_visual()<CR>
+    nnoremap <leader>sw <cmd>lua require('spectre').open_visual({select_word=true})<CR>
+    vnoremap <leader>s <cmd>lua require('spectre').open_visual()<CR>
     "  search in current file
     nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
+    " run command :Spectre
 <
 
 
 **WARNING** * Commit your file before you replace text. It does not support
 undo * Don’t use your crazy vim skill to edit result text or UI. * You can
-use `dd` to toggle result item
+use `dd` to toggle result item * You need to use `<esc>` not `<c-c>` to leave
+insert mode.
 
 REGEX ISSUE                                              *spectre-regex-issue*
 
@@ -137,6 +139,11 @@ change when plugin update so better use a default setting.
             map = "<leader>o",
             cmd = "<cmd>lua require('spectre').show_options()<CR>",
             desc = "show option"
+        },
+        ['run_current_replace'] = {
+          map = "<leader>rc",
+          cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
+          desc = "replace current line"
         },
         ['run_replace'] = {
             map = "<leader>R",
