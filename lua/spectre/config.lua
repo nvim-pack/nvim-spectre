@@ -55,6 +55,11 @@ local config = {
             cmd = "<cmd>lua require('spectre').show_options()<CR>",
             desc = "show option"
         },
+        ['run_current_replace'] = {
+            map = "<leader>rc",
+            cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
+            desc = "replace current item"
+        },
         ['run_replace'] = {
             map = "<leader>R",
             cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>",

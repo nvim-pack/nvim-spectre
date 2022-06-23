@@ -46,6 +46,7 @@ nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
 * Commit your file before you replace text. It does not support undo
 * Don't use your crazy vim skill to edit result text or UI.
 * You can use `dd` to toggle result item
+* You need to use `<esc>` not `<c-c>` to leave insert mode.
 
 
 ## Regex Issue
@@ -109,6 +110,11 @@ require('spectre').setup({
         map = "<leader>o",
         cmd = "<cmd>lua require('spectre').show_options()<CR>",
         desc = "show option"
+    },
+    ['run_current_replace'] = {
+      map = "<leader>rc",
+      cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
+      desc = "replace current line"
     },
     ['run_replace'] = {
         map = "<leader>R",
