@@ -1,16 +1,15 @@
-
 local base = {}
 base.__index = base
 
 base.on_output = function(self, value)
-    pcall(vim.schedule_wrap( function()
+    pcall(vim.schedule_wrap(function()
         self.handler.on_result(value)
     end))
 end
 
-base.on_error = function (self, value, ref)
+base.on_error = function(self, value, ref)
     if value ~= 0 then
-        pcall(vim.schedule_wrap( function()
+        pcall(vim.schedule_wrap(function()
             self.handler.on_error({
                 ref = ref
             })
@@ -20,7 +19,7 @@ end
 
 base.on_exit = function(self, value, ref)
     if value == 0 then
-        pcall(vim.schedule_wrap( function()
+        pcall(vim.schedule_wrap(function()
             self.handler.on_finish({
                 ref = ref
             })
@@ -53,7 +52,8 @@ local function extend(child)
         meta.__index = vim.tbl_extend('force', base, child)
         return setmetatable(replace, meta)
     end
+
     return creator
 end
 
-return {extend = extend}
+return { extend = extend }

@@ -15,13 +15,13 @@ local config = {
     -- color_devicons = true,
     -- line_sep = '├──────────────────────────────────────',
     -- line_sep_start = '┌-----------------------------------------',
-    result_padding = '¦  ',
-    color_devicons = true,
-    line_sep_start = '------------------------------------------',
-    line_sep       = '------------------------------------------',
-    open_cmd = 'vnew',
-    live_update = false,
-    highlight = {
+    result_padding     = '¦  ',
+    color_devicons     = true,
+    line_sep_start     = '------------------------------------------',
+    line_sep           = '------------------------------------------',
+    open_cmd           = 'vnew',
+    live_update        = false,
+    highlight          = {
         ui = "String",
         filename = "Keyword",
         filedirectory = "Comment",
@@ -29,7 +29,7 @@ local config = {
         border = "Comment",
         replace = "DiffDelete"
     },
-    mapping = {
+    mapping            = {
         ['toggle_line'] = {
             map = "dd",
             cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
@@ -71,7 +71,7 @@ local config = {
             cmd = "<cmd>lua require('spectre').change_view()<CR>",
             desc = "change result view mode"
         },
-        ['toggle_live_update']={
+        ['toggle_live_update'] = {
             map = "tu",
             cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
             desc = "update change when vim write file."
@@ -88,7 +88,7 @@ local config = {
             desc = "toggle search hidden"
         },
     },
-    find_engine = {
+    find_engine        = {
         ['rg'] = {
             cmd = "rg",
             -- default args
@@ -98,17 +98,17 @@ local config = {
                 '--with-filename',
                 '--line-number',
                 '--column',
-            } ,
+            },
             options = {
                 ['ignore-case'] = {
-                        value= "--ignore-case",
-                        icon="[I]",
-                        desc="ignore case"
+                    value = "--ignore-case",
+                    icon = "[I]",
+                    desc = "ignore case"
                 },
                 ['hidden'] = {
-                    value="--hidden",
-                    desc="hidden file",
-                    icon="[H]"
+                    value = "--hidden",
+                    desc = "hidden file",
+                    icon = "[H]"
 
                 },
                 -- you can put any option you want here it can toggle with
@@ -121,23 +121,23 @@ local config = {
             args = {
                 '--vimgrep',
                 '-s'
-            } ,
+            },
             options = {
                 ['ignore-case'] = {
-                    value= "-i",
-                    icon="[I]",
-                    desc="ignore case"
+                    value = "-i",
+                    icon = "[I]",
+                    desc = "ignore case"
                 },
                 ['hidden'] = {
-                    value="--hidden",
-                    desc="hidden file",
-                    icon="[H]"
+                    value = "--hidden",
+                    desc = "hidden file",
+                    icon = "[H]"
                 },
             },
         },
     },
-    replace_engine={
-       ['sed']={
+    replace_engine     = {
+        ['sed'] = {
             cmd = "sed",
             args = {
                 '-i',
@@ -145,25 +145,25 @@ local config = {
             },
             options = {
                 ['ignore-case'] = {
-                        value= "--ignore-case",
-                        icon="[I]",
-                        desc="ignore case"
+                    value = "--ignore-case",
+                    icon = "[I]",
+                    desc = "ignore case"
                 },
             }
         },
     },
-    default = {
+    default            = {
         find = {
             cmd = "rg",
-            options = {"ignore-case"}
+            options = { "ignore-case" }
         },
-        replace={
+        replace = {
             cmd = "sed"
         }
     },
-    replace_vim_cmd = "cdo",
+    replace_vim_cmd    = "cdo",
     is_open_target_win = true,
-    is_insert_mode = false,
+    is_insert_mode     = false,
 }
 
 if vim.loop.os_uname().sysname == 'Darwin' then
@@ -173,4 +173,3 @@ if vim.loop.os_uname().sysname == 'Darwin' then
     end
 end
 return config
-

@@ -1,4 +1,4 @@
-local plenary=require('plenary.reload')
+local plenary = require('plenary.reload')
 
 -- try to do hot reload with lua
 -- sometime it break your neovim:)
@@ -57,12 +57,12 @@ M.open_file_search = function()
     })
 end
 
-M.open = function (opts)
+M.open = function(opts)
     if state.user_config == nil then
         M.setup()
     end
 
-    opts = vim.tbl_extend('force',{
+    opts = vim.tbl_extend('force', {
         cwd = nil,
         is_insert_mode = state.user_config.is_insert_mode,
         search_text = '',
@@ -91,9 +91,9 @@ M.open = function (opts)
         vim.cmd(state.user_config.open_cmd)
     else
         if state.query.path ~= nil
-           and #state.query.path > 1
-           and opts.path == ''
-           then
+            and #state.query.path > 1
+            and opts.path == ''
+        then
             opts.path = state.query.path
         end
     end
@@ -118,10 +118,10 @@ M.open = function (opts)
         table.insert(lines, "")
     end
     api.nvim_buf_set_lines(state.bufnr, 0, 0, 0, lines)
-    api.nvim_buf_set_lines(state.bufnr, 2, 2, 0, {opts.search_text})
-    api.nvim_buf_set_lines(state.bufnr, 4, 4, 0, {opts.replace_text})
-    api.nvim_buf_set_lines(state.bufnr, 6, 6, 0, {opts.path})
-    api.nvim_win_set_cursor(0,{3, 0})
+    api.nvim_buf_set_lines(state.bufnr, 2, 2, 0, { opts.search_text })
+    api.nvim_buf_set_lines(state.bufnr, 4, 4, 0, { opts.replace_text })
+    api.nvim_buf_set_lines(state.bufnr, 6, 6, 0, { opts.path })
+    api.nvim_win_set_cursor(0, { 3, 0 })
 
 
     state.cwd = opts.cwd
@@ -158,37 +158,34 @@ function M.mapping_buffer(bufnr)
     vim.cmd [[setlocal nowrap]]
     vim.cmd [[setlocal foldexpr=spectre#foldexpr()]]
     vim.cmd [[setlocal foldmethod=expr]]
-    local map_opt = {noremap = true, silent = _G.__is_dev == nil  }
-    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x<cmd>lua require("spectre").on_insert_leave()<CR>',map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>',map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>',map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>",map_opt)
+    local map_opt = { noremap = true, silent = _G.__is_dev == nil }
+    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x<cmd>lua require("spectre").on_insert_leave()<CR>', map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>', map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>', map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
     vim.api.nvim_command([[command! -nargs=* Spectre lua require("spectre").open()]])
 
-    for _,map in pairs(state.user_config.mapping) do
+    for _, map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
     end
-    vim.cmd[[augroup spectre_panel_write
+    vim.cmd [[augroup spectre_panel_write
         au!
         au BufWritePre * lua require("spectre").on_write()
         augroup END]]
 end
 
-
-
 local function hl_match(opts)
     if #opts.search_query > 0 then
         api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-            state.user_config.highlight.search, 2, 0,-1)
+            state.user_config.highlight.search, 2, 0, -1)
     end
-    if #opts.replace_query>0 then
+    if #opts.replace_query > 0 then
         api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-            state.user_config.highlight.replace, 4, 0,-1)
+            state.user_config.highlight.replace, 4, 0, -1)
     end
 end
 
-
-local function can_edit_line ()
+local function can_edit_line()
     local line = vim.fn.getpos('.')
     if line[2] > config.lnum_UI then
         return false
@@ -196,7 +193,7 @@ local function can_edit_line ()
     return true
 end
 
-M.on_insert_enter = function ()
+M.on_insert_enter = function()
     if can_edit_line() then return end
     local key = api.nvim_replace_termcodes("<esc>", true, false, true)
     api.nvim_feedkeys(key, "m", true)
@@ -204,7 +201,7 @@ M.on_insert_enter = function ()
 end
 
 
-M.on_insert_leave = function ()
+M.on_insert_leave = function()
     if not can_edit_line() then return end
     local lines = api.nvim_buf_get_lines(state.bufnr, 0, config.lnum_UI, false)
 
@@ -245,20 +242,20 @@ M.on_insert_leave = function ()
     end
 end
 
-M.on_write = function ()
+M.on_write = function()
     if state.user_config.live_update == true then
         M.search()
     end
 end
 
 M.toggle_live_update = function()
-   state.user_config.live_update = not state.user_config.live_update
-   ui.render_header(state.user_config)
+    state.user_config.live_update = not state.user_config.live_update
+    ui.render_header(state.user_config)
 end
 
 M.on_close = function()
     M.stop()
-    vim.cmd[[augroup spectre_panel_write
+    vim.cmd [[augroup spectre_panel_write
         au!
         augroup END
     ]]
@@ -325,22 +322,22 @@ end
 
 M.toggle_checked = function()
     local startline = unpack(vim.api.nvim_buf_get_mark(0, '<'))
-    local endline =  unpack(vim.api.nvim_buf_get_mark(0, '>'))
+    local endline = unpack(vim.api.nvim_buf_get_mark(0, '>'))
     for i = startline, endline, 1 do
         M.toggle_line(i)
     end
 end
 
-M.toggle_line = function (line_visual)
+M.toggle_line = function(line_visual)
     if can_edit_line() then
         -- delete line content
-        vim.cmd[[:normal! ^d$]]
+        vim.cmd [[:normal! ^d$]]
         return false
     end
     local lnum = line_visual or unpack(vim.api.nvim_win_get_cursor(0))
     local item = state.total_item[lnum]
-    if item  ~= nil and item.display_lnum == lnum - 1 then
-        item.disable =  not item.disable
+    if item ~= nil and item.display_lnum == lnum - 1 then
+        item.disable = not item.disable
         ui.render_line(
             state.bufnr,
             config.namespace,
@@ -350,7 +347,7 @@ M.toggle_line = function (line_visual)
                 search_text = item.search_text,
                 lnum = item.display_lnum,
                 is_replace = true
-            } ,
+            },
             {
                 is_disable = item.disable,
                 padding_text = state.user_config.result_padding,
@@ -382,7 +379,7 @@ M.toggle_line = function (line_visual)
                         search_text = item.search_text,
                         lnum = item.display_lnum,
                         is_replace = true
-                    } ,
+                    },
                     {
                         is_disable = item.disable,
                         padding_text = state.user_config.result_padding,
@@ -402,8 +399,8 @@ end
 M.search_handler = function()
     local c_line = 0
     local total = 0
-    local start_time=0
-    local padding=#state.user_config.result_padding
+    local start_time = 0
+    local padding = #state.user_config.result_padding
     local cfg = state.user_config
     local last_filename = ''
     return {
@@ -415,7 +412,7 @@ M.search_handler = function()
             total = 0
             start_time = vim.loop.hrtime()
         end,
-        on_result = function (item)
+        on_result = function(item)
             if not state.is_running then return end
             item.replace_text = ''
             if string.match(item.filename, '^%.%/') then
@@ -445,14 +442,14 @@ M.search_handler = function()
                 state.bufnr,
                 config.namespace,
                 {
-                    search_query= state.query.search_query,
-                    replace_query= state.query.replace_query,
+                    search_query = state.query.search_query,
+                    replace_query = state.query.replace_query,
                     search_text = item.search_text,
                     lnum = item.display_lnum,
                     is_replace = false
-                } ,
+                },
                 {
-                    is_disable=item.disable,
+                    is_disable = item.disable,
                     padding_text = cfg.result_padding,
                     padding = padding,
                     show_search = state.view.show_search,
@@ -464,30 +461,30 @@ M.search_handler = function()
             state.status_line = "Item  " .. total
             state.total_item[c_line] = item
         end,
-        on_error = function (error_msg)
+        on_error = function(error_msg)
             api.nvim_buf_set_lines(state.bufnr, c_line, c_line + 1, false,
-                {cfg.result_padding .. error_msg })
+                { cfg.result_padding .. error_msg })
             api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-                cfg.highlight.border, c_line , 0, padding)
+                cfg.highlight.border, c_line, 0, padding)
             c_line = c_line + 1
             state.finder_instance = nil
         end,
         on_finish = function()
-            if not state.is_running then return  end
-            local end_time = ( vim.loop.hrtime() - start_time) / 1E9
+            if not state.is_running then return end
+            local end_time = (vim.loop.hrtime() - start_time) / 1E9
             state.status_line = string.format("Total: %s match, time: %ss", total, end_time)
 
-            api.nvim_buf_set_lines(state.bufnr, c_line, c_line , false,{
+            api.nvim_buf_set_lines(state.bufnr, c_line, c_line, false, {
                 cfg.line_sep,
             })
             api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-                    cfg.highlight.border, c_line , 0, -1)
+                cfg.highlight.border, c_line, 0, -1)
 
             state.vt.status_id = utils.write_virtual_text(
                 state.bufnr,
                 config.namespace_status,
-                config.line_result -2,
-                {{ state.status_line, 'Question' } }
+                config.line_result - 2,
+                { { state.status_line, 'Question' } }
             )
             state.finder_instance = nil
             state.is_running = false
@@ -509,7 +506,7 @@ M.search = function(opts)
     M.stop()
     opts = opts or state.query
     local finder_creator = state_utils.get_finder_creator()
-    state.finder_instance= finder_creator:new(
+    state.finder_instance = finder_creator:new(
         state_utils.get_search_engine_config(),
         M.search_handler()
     )
@@ -519,16 +516,16 @@ M.search = function(opts)
     state.query = opts
     -- clear old search result
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
-    api.nvim_buf_set_lines(state.bufnr, config.line_result -1, -1, false,{})
+    api.nvim_buf_set_lines(state.bufnr, config.line_result - 1, -1, false, {})
     hl_match(opts)
     local c_line = config.line_result
-    api.nvim_buf_set_lines( state.bufnr,
-        c_line -1, c_line -1,
+    api.nvim_buf_set_lines(state.bufnr,
+        c_line - 1, c_line - 1,
         false,
-        { state.user_config.line_sep_start}
+        { state.user_config.line_sep_start }
     )
     api.nvim_buf_add_highlight(state.bufnr, config.namespace,
-        state.user_config.highlight.border, c_line -1, 0,-1)
+        state.user_config.highlight.border, c_line - 1, 0, -1)
     state.total_item = {}
     state.finder_instance:search({
         cwd = state.cwd,
@@ -556,12 +553,12 @@ end
 
 M.show_options = function()
     local option_cmd = ui.show_options()
-    vim.defer_fn(function ()
+    vim.defer_fn(function()
         local char = vim.fn.getchar() - 48
         if option_cmd[char] then
             M.change_options(option_cmd[char])
         end
-    end,200)
+    end, 200)
 end
 
 M.get_fold = function(lnum)
@@ -584,4 +581,3 @@ M.get_fold = function(lnum)
 end
 
 return M
-

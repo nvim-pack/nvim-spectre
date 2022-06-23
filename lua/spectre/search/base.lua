@@ -3,7 +3,7 @@ local Job = require("plenary.job")
 local log = require('spectre._log')
 local MAX_LINE_CHARS = 255
 local utils = require('spectre.utils')
-local is_win = vim.api.nvim_call_function("has", {"win32"}) == 1
+local is_win = vim.api.nvim_call_function("has", { "win32" }) == 1
 local base = {}
 base.__index = base
 
@@ -47,12 +47,12 @@ end
 
 base.get_path_args = function(self, path)
     print("[spectre] should implement path_args for ", self.state.cmd)
-    return {path}
+    return { path }
 end
 
 
 base.on_output = function(self, output_text)
-    pcall(vim.schedule_wrap( function()
+    pcall(vim.schedule_wrap(function()
         if output_text == nil then return end
         -- it make vim broken with  (min.js) file has a long line
         if string.len(output_text) > MAX_LINE_CHARS then
@@ -66,24 +66,24 @@ base.on_output = function(self, output_text)
     end))
 end
 
-base.on_error = function (self, output_text)
+base.on_error = function(self, output_text)
     print(vim.inspect(output_text))
     if output_text ~= nil then
         log.debug("search error ", output_text)
-        pcall(vim.schedule_wrap( function()
+        pcall(vim.schedule_wrap(function()
             self.handler.on_error(output_text)
         end))
     end
 end
 
 base.on_exit = function(self, value)
-    pcall(vim.schedule_wrap( function()
+    pcall(vim.schedule_wrap(function()
         self.handler.on_finish(value)
     end))
 end
 
 base.search = function(self, query)
-    local args = flatten{
+    local args = flatten {
         -- query.search_text,
         self.state.args,
     }
@@ -100,7 +100,7 @@ base.search = function(self, query)
     table.insert(args, "--")
     args = flatten(args)
 
-    if  query.cwd == "" then
+    if query.cwd == "" then
         query.cwd = nil
     end
     table.insert(args, query.search_text)
@@ -115,7 +115,7 @@ base.search = function(self, query)
 
     self.handler.on_start()
     self.job = Job:new({
-        enable_recording = true ,
+        enable_recording = true,
         command = self.state.cmd,
         cwd = query.cwd,
         args = args,
@@ -160,7 +160,8 @@ local function extend(child)
         meta.__index = vim.tbl_extend('force', base, child)
         return setmetatable(search, meta)
     end
+
     return creator
 end
 
-return {extend = extend}
+return { extend = extend }

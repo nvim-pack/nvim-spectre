@@ -1,12 +1,11 @@
-
 local Job = require("plenary.job")
 local utils = require('spectre.utils')
-local log= require('spectre._log')
+local log = require('spectre._log')
 
-local sed={}
+local sed = {}
 
 sed.init = function(_, config)
-    config = vim.tbl_extend('force',{
+    config = vim.tbl_extend('force', {
         cmd = "sed",
         pattern = "%s,%ss/%s/%s/g",
         args = {
@@ -21,8 +20,8 @@ sed.replace = function(self, value)
     local pattern = self.state.pattern
 
     if self.state.options_value ~= nil then
-        for _,v in pairs(self.state.options_value) do
-            if v == '--ignore-case'  then
+        for _, v in pairs(self.state.options_value) do
+            if v == '--ignore-case' then
                 pattern = pattern .. "i"
             end
         end

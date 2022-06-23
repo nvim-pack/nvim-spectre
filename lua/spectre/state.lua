@@ -11,15 +11,13 @@ local state = {
     -- display text and highlight on result
     view = {
         mode = "both",
-        search=true,
-        replace=true
+        search = true,
+        replace = true
     },
     -- virtual text namespace
-    vt = {
-
-    },
+    vt = {},
     --for options
-    options={
+    options = {
         ['ignore-case'] = false,
         ['hidden'] = false
     }

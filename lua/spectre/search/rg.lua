@@ -1,8 +1,7 @@
-
 local rg = {}
 
 rg.init = function(_, config)
-    config = vim.tbl_extend('force',{
+    config = vim.tbl_extend('force', {
         cmd = "rg",
         args = {
             '--color=never',
@@ -17,7 +16,7 @@ end
 
 rg.get_path_args = function(_, paths)
     if #paths == 0 then
-      return {}
+        return {}
     end
 
     local args = {}
@@ -25,7 +24,7 @@ rg.get_path_args = function(_, paths)
         table.insert(args, "-g")
         table.insert(args, path)
     end
-    return  args
+    return args
 end
 
 
