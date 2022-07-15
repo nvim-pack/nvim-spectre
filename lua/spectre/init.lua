@@ -545,7 +545,7 @@ M.change_options = function(key)
         state.options[key] = false
     end
     state.options[key] = not state.options[key]
-    if #state.query.search_query > 0 then
+    if state.query.search_query ~= nil then
         ui.render_search_ui()
         M.search()
     end

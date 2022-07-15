@@ -144,39 +144,10 @@ function M.render_header(opts)
     utils.write_virtual_text(state.bufnr, config.namespace_header, 0, { { help_text, 'Comment' } })
 end
 
----@private
---- Creates autocommands to close a preview window when events happen.
----
----@param events table list of events
----@param winnr number window id of preview window
----@param bufnrs table list of buffers where the preview window will remain visible
----@see |autocmd-events|
-local function close_preview_autocmd(events, winnr, bufnrs)
-    local augroup = 'preview_window_' .. winnr
-
-    -- close the preview window when entered a buffer that is not
-    -- the floating window buffer or the buffer that spawned it
-    vim.cmd(string.format([[
-    augroup %s
-      autocmd!
-      autocmd BufEnter * lua vim.lsp.util._close_preview_window(%d, {%s})
-    augroup end
-  ]] , augroup, winnr, table.concat(bufnrs, ',')))
-
-    if #events > 0 then
-        vim.cmd(string.format([[
-      augroup %s
-        autocmd %s <buffer> lua vim.lsp.util._close_preview_window(%d)
-      augroup end
-    ]]   , augroup, table.concat(events, ','), winnr))
-    end
-end
-
 M.show_menu_options = function(title, content)
     local win_width, win_height = vim.lsp.util._make_floating_popup_size(content, {})
     local help_win, preview = popup.create(content, {
         title   = title,
-        border  = true,
         padding = { 1, 1, 1, 1 },
         enter   = false,
         width   = win_width + 2,
@@ -186,11 +157,10 @@ M.show_menu_options = function(title, content)
     })
 
     vim.api.nvim_win_set_option(help_win, 'winblend', 0)
-    close_preview_autocmd({ "CursorMoved", "CursorMovedI", "BufHidden", "BufLeave" },
-        preview.border.win_id, { preview.bufnr }
-    )
-    close_preview_autocmd({ "CursorMoved", "CursorMovedI", "BufHidden", "BufLeave" },
-        help_win, { preview.bufnr }
+    vim.api.nvim_command(
+        "autocmd CursorMoved,CursorMovedI,BufHidden,BufLeave <buffer> ++once lua pcall(vim.api.nvim_win_close, "
+        .. help_win
+        .. ", true)"
     )
 end
 
