@@ -545,12 +545,10 @@ M.change_options = function(key)
         state.options[key] = false
     end
     state.options[key] = not state.options[key]
-    pcall(function()
-        if #state.query.search_query > 0 then
-            ui.render_search_ui()
-            M.search()
-        end
-    end)
+    if state.query.search_query ~= nil then
+        ui.render_search_ui()
+        M.search()
+    end
 end
 
 M.show_options = function()
