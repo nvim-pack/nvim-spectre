@@ -57,6 +57,15 @@ M.open_file_search = function()
     })
 end
 
+M.close = function()
+    if state.bufnr ~= nil then
+        local wins = vim.fn.win_findbuf(state.bufnr)
+        for _, win_id in pairs(wins) do
+            vim.api.nvim_win_close(win_id, true);
+        end
+    end
+end
+
 M.open = function(opts)
     if state.user_config == nil then
         M.setup()
@@ -68,6 +77,7 @@ M.open = function(opts)
         search_text = '',
         replace_text = '',
         path = '',
+        is_close = false, -- close an exists instance of spectre then open new
         is_file = false
     }, opts or {})
 
@@ -75,9 +85,13 @@ M.open = function(opts)
     opts.search_text = utils.trim(opts.search_text)
     state.target_winid = api.nvim_get_current_win()
     state.target_bufnr = api.nvim_get_current_buf()
+    if opts.is_close then
+        M.close()
+    end
+
     local is_new = true
     --check reopen panel by reuse bufnr
-    if state.bufnr ~= nil then
+    if state.bufnr ~= nil and not opts.is_close then
         local wins = vim.fn.win_findbuf(state.bufnr)
         if #wins >= 1 then
             for _, win_id in pairs(wins) do

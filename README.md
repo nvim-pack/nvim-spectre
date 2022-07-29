@@ -235,7 +235,8 @@ require('spectre').open({
   cwd = "~/.config/nvim",
   search_text="test",
   replace_text="test",
-  path="lua/**/*.lua"
+  path="lua/**/*.lua",
+  is_close = false, --  close an exists instance of spectre and open new
 })
 
 ```
