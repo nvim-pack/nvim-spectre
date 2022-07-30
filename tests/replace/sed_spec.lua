@@ -21,7 +21,7 @@ describe('[sed] replace ', function()
         helpers.checkoutfile(filename)
         local finish = false
         local replacer = sed:new({}, {
-            on_finish = function()
+            on_done = function()
                 finish = true
             end,
         })

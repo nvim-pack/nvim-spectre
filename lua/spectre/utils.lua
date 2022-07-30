@@ -183,7 +183,7 @@ M.get_hl_line_text = function(opts, regex)
     result.text = opts.search_text
     if search_match then
         result.search = match_text_line(search_match, opts.search_text, 0)
-        if opts.replace_query and opts.show_replace ~= false then
+        if opts.replace_query and #opts.replace_query > 0 and opts.show_replace ~= false then
             local replace_match = regex.replace_all(opts.search_query, opts.replace_query, search_match)
             local replace_length = #replace_match
             local total_increase = 0

@@ -1,7 +1,6 @@
 ---@class SpectreState
 local state = {
     -- current config
-    user_config = nil,
     status_line = '',
     query = {
         search_quey = '',
@@ -22,7 +21,12 @@ local state = {
         ['ignore-case'] = false,
         ['hidden'] = false
     },
-    regex = nil
+    regex = nil,
+    user_config = nil,
+    bufnr = nil,
+    cwd = nil,
+    target_winid = nil,
+    total_item = {}
 }
 
 if _G.__is_dev then

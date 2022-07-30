@@ -15,12 +15,6 @@ local M = {}
 ---@params regex RegexEngine
 M.render_line = function(
     bufnr, namespace, text_opts, view_opts, regex)
-    print(vim.inspect(regex))
-    if regex == nil then
-        print("render line")
-        vim.api.nvim_err_writeln(debug.traceback())
-        return
-    end
     local cfg = state.user_config
     local diff = utils.get_hl_line_text({
         search_query = text_opts.search_query,

@@ -140,7 +140,7 @@ M.run_replace = function(entries)
     state.status_line = 'Run Replace.'
     local replacer = replacer_creator:new(
         state_utils.get_replace_engine_config(), {
-        on_finish = function(result)
+        on_done = function(result)
             if (result.ref) then
                 done_item = done_item + 1
                 state.status_line = "Replace: " .. done_item .. " Error:" .. error_item

@@ -71,6 +71,16 @@ local config = {
             cmd = "<cmd>lua require('spectre').change_view()<CR>",
             desc = "change result view mode"
         },
+        ['change_replace_sed'] = {
+            map = "trs",
+            cmd = "<cmd>lua require('spectre').change_engine_replace('sed')<CR>",
+            desc = "use sed to replace"
+        },
+        ['change_replace_oxi'] = {
+            map = "tro",
+            cmd = "<cmd>lua require('spectre').change_engine_replace('oxi')<CR>",
+            desc = "use oxi to replace"
+        },
         ['toggle_live_update'] = {
             map = "tu",
             cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
@@ -156,7 +166,7 @@ local config = {
             args = {},
             options = {
                 ['ignore-case'] = {
-                    value = "--ignore-case",
+                    value = "i",
                     icon = "[I]",
                     desc = "ignore case"
                 },

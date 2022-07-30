@@ -1,5 +1,3 @@
-local plenary = require('plenary.reload')
-
 -- try to do hot reload with lua
 -- sometime it break your neovim:)
 -- run that command and feel
@@ -14,7 +12,7 @@ if _G._require == nil then
         _G._require = require
         _G.require = function(path)
             if string.find(path, '^spectre[^_]*$') ~= nil then
-                plenary.reload_module(path)
+                package.loaded[path] = nil
             end
             return _G._require(path)
         end
@@ -67,6 +65,7 @@ M.close = function()
 end
 
 M.open = function(opts)
+    log.debug("Start")
     if state.user_config == nil then
         M.setup()
     end
@@ -79,7 +78,7 @@ M.open = function(opts)
         path = '',
         is_close = false, -- close an exists instance of spectre then open new
         is_file = false
-    }, opts) or {}
+    }, opts or {}) or {}
 
     state.status_line = ''
     opts.search_text = utils.trim(opts.search_text)
@@ -554,18 +553,35 @@ M.search = function(opts)
         search_text = state.query.search_query,
         path = state.query.path
     })
+    M.init_regex()
+end
 
-    if state_utils.get_replace_engine_config().cmd == 'oxi' then
+M.init_regex = function()
+    local replace_config = state_utils.get_replace_engine_config()
+    if replace_config.cmd == 'oxi' then
         state.regex = require('spectre.regex.rust')
     else
         state.regex = require('spectre.regex.vim')
     end
+    state.regex.change_options(replace_config.options_value)
 end
-
 
 
 M.show_help = function()
     ui.show_help()
+end
+
+M.change_engine_replace = function(engine_name)
+    if state.user_config.replace_engine[engine_name] then
+        state.user_config.default.replace.cmd = engine_name
+        M.init_regex()
+        vim.notify("change replace engine to: " .. engine_name)
+        ui.render_header(state.user_config)
+        M.search()
+        return
+    else
+        vim.notify(string.format("engine %s not found " .. engine_name))
+    end
 end
 
 M.change_options = function(key)
@@ -573,6 +589,7 @@ M.change_options = function(key)
         state.options[key] = false
     end
     state.options[key] = not state.options[key]
+    state.regex.change_options(state_utils.get_replace_engine_config().options_value)
     if state.query.search_query ~= nil then
         ui.render_search_ui()
         M.search()
@@ -581,6 +598,7 @@ end
 
 M.show_options = function()
     local option_cmd = ui.show_options()
+    ---@diagnostic disable-next-line: param-type-mismatch
     vim.defer_fn(function()
         local char = vim.fn.getchar() - 48
         if option_cmd[char] then

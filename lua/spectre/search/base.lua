@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch
 local flatten = vim.tbl_flatten
 local Job = require("plenary.job")
 local log = require('spectre._log')
@@ -67,9 +68,8 @@ base.on_output = function(self, output_text)
 end
 
 base.on_error = function(self, output_text)
-    print(vim.inspect(output_text))
     if output_text ~= nil then
-        log.debug("search error ", output_text)
+        log.debug("search error " .. output_text)
         pcall(vim.schedule_wrap(function()
             self.handler.on_error(output_text)
         end))

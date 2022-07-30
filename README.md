@@ -126,6 +126,16 @@ require('spectre').setup({
         cmd = "<cmd>lua require('spectre').change_view()<CR>",
         desc = "change result view mode"
     },
+    ['change_replace_sed'] = {
+      map = "th",
+      cmd = "<cmd>lua require('spectre').change_replace_engine('sed')<CR>",
+      desc = "use sed to replace"
+    },
+    ['change_replace_oxi'] = {
+      map = "th",
+      cmd = "<cmd>lua require('spectre').change_replace_engine('oxi')<CR>",
+      desc = "use oxi to replace"
+    },
     ['toggle_live_update']={
       map = "tu",
       cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",

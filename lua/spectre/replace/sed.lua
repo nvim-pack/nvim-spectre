@@ -4,7 +4,6 @@ local log = require('spectre._log')
 
 local sed = {}
 
-sed.regex = require("spectre.regex.vim")
 
 sed.init = function(_, config)
     config = vim.tbl_extend('force', {
@@ -20,7 +19,6 @@ end
 
 sed.replace = function(self, value)
     local pattern = self.state.pattern
-
     if self.state.options_value ~= nil then
         for _, v in pairs(self.state.options_value) do
             if v == '--ignore-case' then
@@ -50,9 +48,9 @@ sed.replace = function(self, value)
         command = self.state.cmd,
         cwd = value.cwd,
         args = args,
-        on_stdout = function(_, v) self:on_output(v, value) end,
+        on_stdout = function(_, v) end,
         on_stderr = function(_, v) self:on_error(v, value) end,
-        on_exit = function(_, v) self:on_exit(v, value) end
+        on_exit = function(_, v) self:on_done(v, value) end
     })
     job:sync()
 end

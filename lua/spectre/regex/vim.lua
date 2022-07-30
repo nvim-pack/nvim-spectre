@@ -3,6 +3,8 @@ local utils = require('spectre.utils')
 ---@class RegexEngine
 local vim_regex = {}
 
+vim_regex.change_options = function(_) end
+
 vim_regex.matchstr = function(search_text, search_query)
     local ok, match = pcall(
         vim.fn.matchstr,
@@ -44,6 +46,9 @@ vim_regex.match_text_line = function(match, str, padding)
         end
     end
     return col_tbl
+end
+
+vim_regex.replace_file = function(filepath, lnum, search_query, replace_query)
 end
 
 return vim_regex
