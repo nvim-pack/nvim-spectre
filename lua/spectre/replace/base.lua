@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch
 local base = {}
 base.__index = base
 

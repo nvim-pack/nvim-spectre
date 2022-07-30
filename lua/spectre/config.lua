@@ -151,6 +151,17 @@ local config = {
                 },
             }
         },
+        ['oxi'] = {
+            cmd = 'oxi',
+            args = {},
+            options = {
+                ['ignore-case'] = {
+                    value = "--ignore-case",
+                    icon = "[I]",
+                    desc = "ignore case"
+                },
+            }
+        }
     },
     default            = {
         find = {

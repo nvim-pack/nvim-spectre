@@ -12,8 +12,15 @@ local api = vim.api
 local M = {}
 
 
+---@params regex RegexEngine
 M.render_line = function(
-    bufnr, namespace, text_opts, view_opts)
+    bufnr, namespace, text_opts, view_opts, regex)
+    print(vim.inspect(regex))
+    if regex == nil then
+        print("render line")
+        vim.api.nvim_err_writeln(debug.traceback())
+        return
+    end
     local cfg = state.user_config
     local diff = utils.get_hl_line_text({
         search_query = text_opts.search_query,
@@ -21,7 +28,7 @@ M.render_line = function(
         search_text = text_opts.search_text,
         show_search = view_opts.show_search,
         show_replace = view_opts.show_replace,
-    })
+    }, regex)
     local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
     api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
         view_opts.padding_text .. diff.text,
@@ -146,7 +153,7 @@ end
 
 M.show_menu_options = function(title, content)
     local win_width, win_height = vim.lsp.util._make_floating_popup_size(content, {})
-    local help_win, preview = popup.create(content, {
+    local help_win = popup.create(content, {
         title   = title,
         padding = { 1, 1, 1, 1 },
         enter   = false,

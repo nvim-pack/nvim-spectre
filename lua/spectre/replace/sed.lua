@@ -4,6 +4,8 @@ local log = require('spectre._log')
 
 local sed = {}
 
+sed.regex = require("spectre.regex.vim")
+
 sed.init = function(_, config)
     config = vim.tbl_extend('force', {
         cmd = "sed",

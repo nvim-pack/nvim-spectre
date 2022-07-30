@@ -1,3 +1,4 @@
+---@class SpectreState
 local state = {
     -- current config
     user_config = nil,
@@ -20,7 +21,8 @@ local state = {
     options = {
         ['ignore-case'] = false,
         ['hidden'] = false
-    }
+    },
+    regex = nil
 }
 
 if _G.__is_dev then

@@ -79,7 +79,7 @@ M.open = function(opts)
         path = '',
         is_close = false, -- close an exists instance of spectre then open new
         is_file = false
-    }, opts or {})
+    }, opts) or {}
 
     state.status_line = ''
     opts.search_text = utils.trim(opts.search_text)
@@ -120,7 +120,7 @@ M.open = function(opts)
     vim.bo.filetype = config.filetype
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_status, 0, -1)
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
-    api.nvim_buf_set_lines(state.bufnr, 0, -1, 0, {})
+    api.nvim_buf_set_lines(state.bufnr, 0, -1, false, {})
 
     vim.api.nvim_buf_attach(state.bufnr, false, {
         on_detach = M.stop,
@@ -131,10 +131,10 @@ M.open = function(opts)
     for _ = 1, length, 1 do
         table.insert(lines, "")
     end
-    api.nvim_buf_set_lines(state.bufnr, 0, 0, 0, lines)
-    api.nvim_buf_set_lines(state.bufnr, 2, 2, 0, { opts.search_text })
-    api.nvim_buf_set_lines(state.bufnr, 4, 4, 0, { opts.replace_text })
-    api.nvim_buf_set_lines(state.bufnr, 6, 6, 0, { opts.path })
+    api.nvim_buf_set_lines(state.bufnr, 0, 0, false, lines)
+    api.nvim_buf_set_lines(state.bufnr, 2, 2, false, { opts.search_text })
+    api.nvim_buf_set_lines(state.bufnr, 4, 4, false, { opts.replace_text })
+    api.nvim_buf_set_lines(state.bufnr, 6, 6, false, { opts.path })
     api.nvim_win_set_cursor(0, { 3, 0 })
 
 
@@ -289,19 +289,25 @@ M.do_replace_text = function(opts, async_id)
         if state.async_id ~= async_id then
             return
         end
-        ui.render_line(state.bufnr, config.namespace, {
-            search_query = state.query.search_query,
-            replace_query = state.query.replace_query,
-            search_text = item.search_text,
-            lnum = item.display_lnum,
-            is_replace = true,
-        }, {
-            is_disable = item.disable,
-            padding_text = state.user_config.result_padding,
-            padding = #state.user_config.result_padding,
-            show_search = state.view.show_search,
-            show_replace = state.view.show_replace,
-        })
+        ui.render_line(
+            state.bufnr,
+            config.namespace,
+            {
+                search_query = state.query.search_query,
+                replace_query = state.query.replace_query,
+                search_text = item.search_text,
+                lnum = item.display_lnum,
+                is_replace = true,
+            },
+            {
+                is_disable = item.disable,
+                padding_text = state.user_config.result_padding,
+                padding = #state.user_config.result_padding,
+                show_search = state.view.show_search,
+                show_replace = state.view.show_replace,
+            },
+            state.regex
+        )
         count = count + 1
         -- delay to next scheduler after 100 time
         if count > 100 then
@@ -368,7 +374,8 @@ M.toggle_line = function(line_visual)
                 padding = #state.user_config.result_padding,
                 show_search = state.view.show_search,
                 show_replace = state.view.show_replace
-            }
+            },
+            state.regex
         )
 
         return
@@ -400,7 +407,7 @@ M.toggle_line = function(line_visual)
                         padding = #state.user_config.result_padding,
                         show_search = state.view.show_search,
                         show_replace = state.view.show_replace
-                    }
+                    }, state.regex
                 )
                 index = index + 1
                 item = state.total_item[index]
@@ -415,7 +422,7 @@ M.search_handler = function()
     local total = 0
     local start_time = 0
     local padding = #state.user_config.result_padding
-    local cfg = state.user_config
+    local cfg = state.user_config or {}
     local last_filename = ''
     return {
         on_start = function()
@@ -434,7 +441,7 @@ M.search_handler = function()
             end
             item.search_text = utils.truncate(utils.trim(item.text), 255)
             if #state.query.replace_query > 1 then
-                item.replace_text = utils.vim_replace_text(
+                item.replace_text = state.regex.replace_all(
                     state.query.search_query,
                     state.query.replace_query,
                     item.search_text
@@ -468,7 +475,8 @@ M.search_handler = function()
                     padding = padding,
                     show_search = state.view.show_search,
                     show_replace = state.view.show_replace
-                }
+                },
+                state.regex
             )
             c_line = c_line + 1
             total = total + 1
@@ -546,6 +554,12 @@ M.search = function(opts)
         search_text = state.query.search_query,
         path = state.query.path
     })
+
+    if state_utils.get_replace_engine_config().cmd == 'oxi' then
+        state.regex = require('spectre.regex.rust')
+    else
+        state.regex = require('spectre.regex.vim')
+    end
 end
 
 
