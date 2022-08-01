@@ -62,7 +62,7 @@ fn get_static_regex(pattern: String) -> Result<&'static Mutex<Regex>, String> {
 
 /// Similar to vim.fn.matchstr()
 /// get the match of the search_query
-/// return empty string if no match
+/// it return empty string when the text is not match
 fn matchstr(search_text: String, search_query: String) -> String {
     if let Ok(r) = get_static_regex(search_query) {
         let regex = r.lock().unwrap();
@@ -79,7 +79,7 @@ fn matchstr(search_text: String, search_query: String) -> String {
     String::new()
 }
 
-/// Replace all the matchy in the text
+/// Replaces all non-overlapping matches in `text` with the replacement provided.
 fn replace_all(search_query: String, replace_query: String, text: String) -> String {
     if let Ok(r) = get_static_regex(search_query) {
         let regex = r.lock().unwrap();

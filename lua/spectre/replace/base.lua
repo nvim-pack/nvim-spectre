@@ -13,14 +13,14 @@ base.on_error = function(self, value, ref)
 end
 
 base.on_done= function(self, value, ref)
-    if value == 0 then
+    if value == 0 or value == true then
         pcall(vim.schedule_wrap(function()
             self.handler.on_done({
                 ref = ref
             })
         end))
     else
-        base.on_error(self, value)
+        base.on_error(self, value, ref)
     end
 end
 

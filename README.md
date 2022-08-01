@@ -128,12 +128,12 @@ require('spectre').setup({
     },
     ['change_replace_sed'] = {
       map = "th",
-      cmd = "<cmd>lua require('spectre').change_replace_engine('sed')<CR>",
+      cmd = "<cmd>lua require('spectre').change_engine_replace('sed')<CR>",
       desc = "use sed to replace"
     },
     ['change_replace_oxi'] = {
       map = "th",
-      cmd = "<cmd>lua require('spectre').change_replace_engine('oxi')<CR>",
+      cmd = "<cmd>lua require('spectre').change_engine_replace('oxi')<CR>",
       desc = "use oxi to replace"
     },
     ['toggle_live_update']={
@@ -203,14 +203,26 @@ require('spectre').setup({
   replace_engine={
       ['sed']={
           cmd = "sed",
-          args = nil
+          args = nil,
+          options = {
+            ['ignore-case'] = {
+              value= "--ignore-case",
+              icon="[I]",
+              desc="ignore case"
+            },
+          }
       },
-      options = {
-        ['ignore-case'] = {
-          value= "--ignore-case",
-          icon="[I]",
-          desc="ignore case"
-        },
+      -- call rust code by nvim-oxi to replace
+      ['oxi'] = {
+        cmd = 'oxi',
+        args = {},
+        options = {
+          ['ignore-case'] = {
+            value = "i",
+            icon = "[I]",
+            desc = "ignore case"
+          },
+        }
       }
   },
   default = {
@@ -250,6 +262,23 @@ require('spectre').open({
 })
 
 ```
+## Replace Method
+
+There are 2 replace method sed and oxi.
+
+| Sed                        | oxi                                 |
+|----------------------------|-------------------------------------|
+| group number by '\0'       | group number by '$0'                |
+| use vim to highlight on UI | use rust to highlight on UI         |
+| use sed to replace         | use rust to replace                 |
+| run sed command            | call rust code directly by nvim-oxi |
+
+Install oxi: 
+- you need install cargo and run command:
+[build.sh](./build.sh)
+- set default replace command to "oxi" on setup()
+
+
 ## FAQ
 
 * add custom statusline [windline](https://github.com/windwp/windline.nvim)
