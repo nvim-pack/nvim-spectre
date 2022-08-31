@@ -193,4 +193,10 @@ if vim.loop.os_uname().sysname == 'Darwin' then
         print("You need to install gnu sed 'brew install gnu-sed'")
     end
 end
+
+if vim.loop.os_uname().sysname == 'Windows_NT' then
+    if vim.fn.executable('sed') == 0 then
+        print("You need to install gnu sed with 'scoop install sed' or 'choco install sed'")
+    end
+end
 return config
