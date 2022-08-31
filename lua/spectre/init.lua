@@ -52,7 +52,7 @@ end
 M.open_file_search = function()
     local path = vim.fn.fnameescape(vim.fn.expand('%:p:.'))
 
-    if vim.fn.has('win64') or vim.fn.has('win32') or vim.fn.has('win16') then
+    if vim.loop.os_uname().sysname == 'Windows_NT' then
         path = vim.fn.substitute(path, '\\', '/', 'g')
     end
 
