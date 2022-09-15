@@ -177,6 +177,7 @@ function M.mapping_buffer(bufnr)
     vim.cmd [[setlocal foldmethod=expr]]
     local map_opt = { noremap = true, silent = _G.__is_dev == nil }
     api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x<cmd>lua require("spectre").on_insert_leave()<CR>', map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', 'p', "p<cmd>lua require('spectre').on_insert_leave()<cr>", {})
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
