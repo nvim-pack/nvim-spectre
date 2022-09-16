@@ -171,10 +171,9 @@ function M.mapping_buffer(bufnr)
                 au InsertLeave <buffer> lua require"spectre".on_search_change()
                 autocmd BufUnload <buffer> lua require("spectre").on_close()
             augroup END ]]
-    vim.cmd [[ syn match Comment /.*:\d\+:\d\+:/]]
-    vim.cmd [[setlocal nowrap]]
-    vim.cmd [[setlocal foldexpr=spectre#foldexpr()]]
-    vim.cmd [[setlocal foldmethod=expr]]
+    vim.opt_local.wrap = false
+    vim.opt_local.foldexpr = "spectre#foldexpr()"
+    vim.opt_local.foldmethod = "expr"
     local map_opt = { noremap = true, silent = _G.__is_dev == nil }
     api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x<cmd>lua require("spectre").on_search_change()<CR>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'p', "p<cmd>lua require('spectre').on_search_change()<cr>", map_opt)
