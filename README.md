@@ -127,12 +127,12 @@ require('spectre').setup({
         desc = "change result view mode"
     },
     ['change_replace_sed'] = {
-      map = "th",
+      map = "trs",
       cmd = "<cmd>lua require('spectre').change_engine_replace('sed')<CR>",
       desc = "use sed to replace"
     },
     ['change_replace_oxi'] = {
-      map = "th",
+      map = "tro",
       cmd = "<cmd>lua require('spectre').change_engine_replace('oxi')<CR>",
       desc = "use oxi to replace"
     },
@@ -276,8 +276,18 @@ There are 2 replace method sed and oxi.
 Install oxi: 
 - you need install cargo and run command:
 [build.sh](./build.sh)
-- set default replace command to "oxi" on setup()
+[nvim-oxi](https://github.com/noib3/nvim-oxi)
 
+- set default replace command to "oxi" on setup()
+```lua
+require('spectre').setup({
+    default = {
+        replace = {
+            cmd = "oxi"
+       }
+    }
+  )
+```
 
 ## FAQ
 
