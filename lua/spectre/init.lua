@@ -168,7 +168,7 @@ function M.mapping_buffer(bufnr)
     vim.cmd [[augroup spectre_panel
                 au!
                 au InsertEnter <buffer> lua require"spectre".on_insert_enter()
-                au InsertLeave <buffer> lua require"spectre".on_insert_leave()
+                au InsertLeave <buffer> lua require"spectre".on_search_change()
                 autocmd BufUnload <buffer> lua require("spectre").on_close()
             augroup END ]]
     vim.cmd [[ syn match Comment /.*:\d\+:\d\+:/]]
@@ -176,8 +176,10 @@ function M.mapping_buffer(bufnr)
     vim.cmd [[setlocal foldexpr=spectre#foldexpr()]]
     vim.cmd [[setlocal foldmethod=expr]]
     local map_opt = { noremap = true, silent = _G.__is_dev == nil }
-    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x<cmd>lua require("spectre").on_insert_leave()<CR>', map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'n', 'p', "p<cmd>lua require('spectre').on_insert_leave()<cr>", {})
+    api.nvim_buf_set_keymap(bufnr, 'n', 'x', 'x<cmd>lua require("spectre").on_search_change()<CR>', map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', 'p', "p<cmd>lua require('spectre').on_search_change()<cr>", map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'v', 'p', "p<cmd>lua require('spectre').on_search_change()<cr>", map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'v', 'P', "P<cmd>lua require('spectre').on_search_change()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
@@ -219,7 +221,7 @@ M.on_insert_enter = function()
 end
 
 
-M.on_insert_leave = function()
+M.on_search_change = function()
     if not can_edit_line() then return end
     local lines = api.nvim_buf_get_lines(state.bufnr, 0, config.lnum_UI, false)
 
