@@ -97,6 +97,11 @@ local config = {
             cmd = "<cmd>lua require('spectre').change_options('hidden')<CR>",
             desc = "toggle search hidden"
         },
+        ['resume_last_search'] = {
+            map = "<leader>l",
+            cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
+            desc = "resume last search before close"
+        },
     },
     find_engine        = {
         ['rg'] = {

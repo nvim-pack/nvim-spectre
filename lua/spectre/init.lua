@@ -128,23 +128,12 @@ M.open = function(opts)
     vim.api.nvim_buf_attach(state.bufnr, false, {
         on_detach = M.stop,
     })
-    -- set empty line for virtual text
-    local lines = {}
-    local length = config.lnum_UI
-    for _ = 1, length, 1 do
-        table.insert(lines, "")
-    end
-    api.nvim_buf_set_lines(state.bufnr, 0, 0, false, lines)
-    api.nvim_buf_set_lines(state.bufnr, 2, 2, false, { opts.search_text })
-    api.nvim_buf_set_lines(state.bufnr, 4, 4, false, { opts.replace_text })
-    api.nvim_buf_set_lines(state.bufnr, 6, 6, false, { opts.path })
-    api.nvim_win_set_cursor(0, { 3, 0 })
+    ui.render_text_query(opts)
 
 
     state.cwd = opts.cwd
     M.change_view("reset")
     ui.render_search_ui()
-    ui.render_header(state.user_config)
 
     if opts.is_insert_mode == true then
         vim.api.nvim_feedkeys('A', 'n', true)
@@ -277,7 +266,18 @@ end
 
 M.on_close = function()
     M.stop()
-    vim.api.nvim_create_augroup("spectre_panel_write",{clear = true})
+    vim.api.nvim_create_augroup("spectre_panel_write", { clear = true })
+    state.query_backup = vim.tbl_extend("force", state.query, {})
+end
+
+M.resume_last_search = function()
+    ui.render_text_query({
+        replace_text = state.query_backup.replace_query,
+        search_text = state.query_backup.search_query,
+        path = state.query_backup.path
+    })
+    ui.render_search_ui()
+    M.search(state.query_backup)
 end
 
 M.async_replace = function(query)

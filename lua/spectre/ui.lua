@@ -132,6 +132,7 @@ function M.render_search_ui()
         utils.write_virtual_text(state.bufnr, config.namespace_ui, c_line, vt_text)
         c_line = c_line + 2
     end
+    M.render_header(state.user_config)
 end
 
 function M.render_header(opts)
@@ -213,4 +214,19 @@ M.show_find_engine = function()
         i = i + 1
     end
 end
+
+M.render_text_query = function (opts)
+    -- set empty line for virtual text
+    local lines = {}
+    local length = config.lnum_UI
+    for _ = 1, length, 1 do
+        table.insert(lines, "")
+    end
+    api.nvim_buf_set_lines(state.bufnr, 0, 0, false, lines)
+    api.nvim_buf_set_lines(state.bufnr, 2, 2, false, { opts.search_text })
+    api.nvim_buf_set_lines(state.bufnr, 4, 4, false, { opts.replace_text })
+    api.nvim_buf_set_lines(state.bufnr, 6, 6, false, { opts.path })
+    api.nvim_win_set_cursor(0, { 3, 0 })
+end
+
 return M
