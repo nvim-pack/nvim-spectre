@@ -187,10 +187,13 @@ function M.mapping_buffer(bufnr)
     for _, map in pairs(state.user_config.mapping) do
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
     end
-    vim.cmd [[augroup spectre_panel_write
-        au!
-        au BufWritePre * lua require("spectre").on_write()
-        augroup END]]
+
+    vim.api.nvim_create_autocmd("BufWritePre", {
+        group = vim.api.nvim_create_augroup("spectre_panel_write", { clear = true }),
+        pattern = "*",
+        callback = require('spectre').on_write,
+        desc = "spectre write autocmd"
+    })
 end
 
 local function hl_match(opts)
@@ -274,11 +277,9 @@ end
 
 M.on_close = function()
     M.stop()
-    vim.cmd [[augroup spectre_panel_write
-        au!
-        augroup END
-    ]]
+    vim.api.nvim_create_augroup("spectre_panel_write",{clear = true})
 end
+
 M.async_replace = function(query)
     state.async_id = vim.loop.hrtime()
     async.void(function()
