@@ -271,6 +271,7 @@ M.on_close = function()
 end
 
 M.resume_last_search = function()
+    if not state.query_backup then return end
     ui.render_text_query({
         replace_text = state.query_backup.replace_query,
         search_text = state.query_backup.search_query,
