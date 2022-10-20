@@ -89,7 +89,7 @@ M.render_filename = function(bufnr, namespace, line, entry)
     local width = vim.api.nvim_strwidth(filename)
     local hl = {
         { { 0, icon_length }, icon_highlight },
-        { { 1, vim.api.nvim_strwidth(directory) }, u_config.highlight.filedirectory },
+        { { 0, vim.api.nvim_strwidth(directory) }, u_config.highlight.filedirectory },
         { { 0, width + 1 }, u_config.highlight.filename },
     }
     if icon == "" then
