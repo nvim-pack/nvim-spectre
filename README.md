@@ -294,6 +294,11 @@ require('spectre').setup({
   )
 ```
 
+## Sponsors
+
+Thanks to everyone who sponsors my projects and makes continued development maintenance possible!
+<!-- patreon --><a href="https://github.com/t4t5"><img src="https://github.com/t4t5.png" width="60px" alt="" /></a><!-- patreon-->
+
 ## FAQ
 
 * add custom statusline [windline](https://github.com/windwp/windline.nvim)
