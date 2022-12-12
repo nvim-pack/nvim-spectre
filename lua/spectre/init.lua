@@ -81,7 +81,8 @@ M.open = function(opts)
         replace_text = '',
         path = '',
         is_close = false, -- close an exists instance of spectre then open new
-        is_file = false
+        is_file = false,
+        open_cmd = nil
     }, opts or {}) or {}
 
     state.status_line = ''
@@ -105,7 +106,7 @@ M.open = function(opts)
         end
     end
     if state.bufnr == nil or is_new then
-        vim.cmd(state.user_config.open_cmd)
+        vim.cmd(opts.open_cmd or state.user_config.open_cmd)
     else
         if state.query.path ~= nil
             and #state.query.path > 1
