@@ -170,6 +170,8 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'v', 'P', "P<cmd>lua require('spectre').on_search_change()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>', map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', 'o', 'ji', map_opt) -- don't append line on can make the UI wrong
+    api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)  
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
 
     for _, map in pairs(state.user_config.mapping) do
@@ -233,7 +235,7 @@ M.on_search_change = function()
         end
     end
     local line = vim.fn.getpos('.')
-    -- check path to verify search in 1  current file
+    -- check path to verify search in current file
     if state.target_winid ~= nil then
         local ok, bufnr = pcall(api.nvim_win_get_buf, state.target_winid)
         if ok then
