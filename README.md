@@ -39,8 +39,13 @@ nnoremap <leader>sw <cmd>lua require('spectre').open_visual({select_word=true})<
 vnoremap <leader>s <esc>:lua require('spectre').open_visual()<CR>
 "  search in current file
 nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
-" run command :Spectre
 ```
+
+Or use command: `Spectre`:
+* `%` will expand to current file.
+* arguments that can't match `key=value` mean `path=something`.
+* many arguments that can't match `key=value` will pick the last one.
+* example: `:Spectre % is_insert_mode=true cwd=~/.config/nvim`.
 
 **WARNING**
 * Commit your file before you replace text. It does not support undo
