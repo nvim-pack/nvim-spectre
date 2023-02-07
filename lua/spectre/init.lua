@@ -175,7 +175,7 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
 
     for _, map in pairs(state.user_config.mapping) do
-        api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, map_opt)
+        api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, vim.tbl_deep_extend("force", map_opt, { desc = map.desc }))
     end
 
     vim.api.nvim_create_autocmd("BufWritePre", {
