@@ -17,10 +17,14 @@ local open_file = function(filename, lnum, col, winid)
 end
 
 local get_file_path = function(filename)
-    if state.cwd ~= nil and state.cwd ~= "" then
-        return vim.fn.expand(state.cwd) .. Path.path.sep .. filename
+
+    -- use default current working directory if state.cwd is nil or empty string
+    --
+    if state.cwd == nil or state.cwd == "" then 
+        state.cwd = vim.fn.getcwd()
     end
-    return filename
+
+    return vim.fn.expand(state.cwd) .. Path.path.sep .. filename
 end
 
 M.select_entry = function()
