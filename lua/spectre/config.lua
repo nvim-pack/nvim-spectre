@@ -22,6 +22,7 @@ local config = {
     open_cmd           = 'vnew',
     live_update        = false,
     highlight          = {
+        headers = "Comment",
         ui = "String",
         filename = "Keyword",
         filedirectory = "Comment",

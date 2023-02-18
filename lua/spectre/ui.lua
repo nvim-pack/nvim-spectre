@@ -143,7 +143,7 @@ function M.render_header(opts)
         opts.live_update and '(Auto update)' or '',
         state.user_config.default.replace.cmd
     )
-    utils.write_virtual_text(state.bufnr, config.namespace_header, 0, { { help_text, 'Comment' } })
+    utils.write_virtual_text(state.bufnr, config.namespace_header, 0, { { help_text, state.user_config.highlight.headers } })
 end
 
 M.show_menu_options = function(title, content)
