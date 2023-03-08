@@ -49,14 +49,21 @@ M.open_visual = function(opts)
     M.open(opts)
 end
 
-M.open_file_search = function()
-    local path = vim.fn.fnameescape(vim.fn.expand('%:p:.'))
+M.open_file_search = function(opts)
+	opts = opts or {}
+	if opts.select_word then
+		opts.search_text = vim.fn.expand("<cword>")
+	else
+		opts.search_text = utils.get_visual_selection()
+	end
 
-    if vim.loop.os_uname().sysname == 'Windows_NT' then
-        path = vim.fn.substitute(path, '\\', '/', 'g')
-    end
+	opts.path = vim.fn.fnameescape(vim.fn.expand("%:p:."))
 
-    M.open({ path = path })
+	if vim.loop.os_uname().sysname == "Windows_NT" then
+		opts.path = vim.fn.substitute(opts.path, "\\", "/", "g")
+	end
+
+	M.open(opts)
 end
 
 M.close = function()
