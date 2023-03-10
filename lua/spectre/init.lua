@@ -158,7 +158,7 @@ function M.mapping_buffer(bufnr)
                 au!
                 au InsertEnter <buffer> lua require"spectre".on_insert_enter()
                 au InsertLeave <buffer> lua require"spectre".on_search_change()
-                autocmd BufUnload <buffer> lua require("spectre").on_close()
+                autocmd BufLeave <buffer> lua require("spectre").on_close()
             augroup END ]]
     vim.opt_local.wrap = false
     vim.opt_local.foldexpr = "spectre#foldexpr()"
