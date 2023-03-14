@@ -165,7 +165,7 @@ function M.mapping_buffer(bufnr)
                 au!
                 au InsertEnter <buffer> lua require"spectre".on_insert_enter()
                 au InsertLeave <buffer> lua require"spectre".on_search_change()
-                autocmd BufUnload <buffer> lua require("spectre").on_close()
+                autocmd BufLeave <buffer> lua require("spectre").on_close()
             augroup END ]]
     vim.opt_local.wrap = false
     vim.opt_local.foldexpr = "spectre#foldexpr()"
@@ -279,7 +279,10 @@ M.on_close = function()
 end
 
 M.resume_last_search = function()
-    if not state.query_backup then return end
+    if not state.query_backup then 
+      print('No previous search!')
+      return 
+    end
     ui.render_text_query({
         replace_text = state.query_backup.replace_query,
         search_text = state.query_backup.search_query,
