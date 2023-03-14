@@ -31,21 +31,21 @@ You need install rg and sed
 
 ## Usage
 
-``` vim
-nnoremap <leader>S <cmd>lua require('spectre').open()<CR>
-
-"search current word
-nnoremap <leader>sw <cmd>lua require('spectre').open_visual({select_word=true})<CR>
-vnoremap <leader>s <esc>:lua require('spectre').open_visual()<CR>
-"  search in current file
-nnoremap <leader>sp viw:lua require('spectre').open_file_search()<cr>
+```lua
+vim.keymap.set('n', '<leader>S', '<cmd>lua require("spectre").open()<CR>', {
+    desc = "Open Spectre"
+})
+vim.keymap.set('n', '<leader>sw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', {
+    desc = "Search current word"
+})
+vim.keymap.set('v', '<leader>sw', '<esc><cmd>lua require("spectre").open_visual()<CR>', {
+    desc = "Search current word"
+})
+vim.keymap.set('n', '<leader>sp', '<cmd>lua require("spectre").open_file_search({select_word=true})<CR>', {
+    desc = "Search on current file"
+})
 ```
-
-Or use command: `Spectre`:
-* `%` will expand to current file.
-* arguments that can't match `key=value` mean `path=something`.
-* many arguments that can't match `key=value` will pick the last one.
-* example: `:Spectre % is_insert_mode=true cwd=~/.config/nvim`.
+use command: `Spectre`
 
 **WARNING**
 * Commit your file before you replace text. It does not support undo
@@ -270,6 +270,9 @@ require('spectre').open({
   path="lua/**/*.lua",
   is_close = false, --  close an exists instance of spectre and open new
 })
+-- you can use all variable above on command line
+-- Sample: Spectre % is_insert_mode=true cwd=~/.config/nvim
+-- `%` will expand to current file.
 
 ```
 ## Replace Method
