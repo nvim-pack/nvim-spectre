@@ -281,7 +281,7 @@ There are 2 replace method sed and oxi.
 
 | Sed                        | oxi                                 |
 |----------------------------|-------------------------------------|
-| group number by '\0'       | group number by '$0'                |
+| group number by '\0'       | group number by '${0}'              |
 | use vim to highlight on UI | use rust to highlight on UI         |
 | use sed to replace         | use rust to replace                 |
 | run sed command            | call rust code directly by nvim-oxi |
