@@ -50,20 +50,20 @@ M.open_visual = function(opts)
 end
 
 M.open_file_search = function(opts)
-	opts = opts or {}
-	if opts.select_word then
-		opts.search_text = vim.fn.expand("<cword>")
-	else
-		opts.search_text = utils.get_visual_selection()
-	end
+    opts = opts or {}
+    if opts.select_word then
+        opts.search_text = vim.fn.expand("<cword>")
+    else
+        opts.search_text = utils.get_visual_selection()
+    end
 
-	opts.path = vim.fn.fnameescape(vim.fn.expand("%:p:."))
+    opts.path = vim.fn.fnameescape(vim.fn.expand("%:p:."))
 
-	if vim.loop.os_uname().sysname == "Windows_NT" then
-		opts.path = vim.fn.substitute(opts.path, "\\", "/", "g")
-	end
+    if vim.loop.os_uname().sysname == "Windows_NT" then
+        opts.path = vim.fn.substitute(opts.path, "\\", "/", "g")
+    end
 
-	M.open(opts)
+    M.open(opts)
 end
 
 M.close = function()
@@ -178,7 +178,7 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'o', 'ji', map_opt) -- don't append line on can make the UI wrong
-    api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)  
+    api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
 
     for _, map in pairs(state.user_config.mapping) do
@@ -279,9 +279,9 @@ M.on_close = function()
 end
 
 M.resume_last_search = function()
-    if not state.query_backup then 
-      print('No previous search!')
-      return 
+    if not state.query_backup then
+        print('No previous search!')
+        return
     end
     ui.render_text_query({
         replace_text = state.query_backup.replace_query,
