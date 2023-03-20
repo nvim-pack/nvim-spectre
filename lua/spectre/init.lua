@@ -185,8 +185,8 @@ function M.mapping_buffer(bufnr)
         api.nvim_buf_set_keymap(bufnr, 'n', map.map, map.cmd, vim.tbl_deep_extend("force", map_opt, { desc = map.desc }))
     end
 
-    vim.api.nvim_create_autocmd("BufWritePre", {
-        group = vim.api.nvim_create_augroup("spectre_panel_write", { clear = true }),
+    vim.api.nvim_create_autocmd("BufWritePost", {
+        group = vim.api.nvim_create_augroup("SpectrePanelWrite", { clear = true }),
         pattern = "*",
         callback = require('spectre').on_write,
         desc = "spectre write autocmd"
@@ -274,7 +274,7 @@ end
 
 M.on_close = function()
     M.stop()
-    vim.api.nvim_create_augroup("spectre_panel_write", { clear = true })
+    vim.api.nvim_create_augroup("SpectrePanelWrite", { clear = true })
     state.query_backup = vim.tbl_extend("force", state.query, {})
 end
 
