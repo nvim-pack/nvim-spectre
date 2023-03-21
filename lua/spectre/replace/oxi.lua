@@ -7,9 +7,12 @@ end
 
 oxi.replace = function(self, value)
     local cwd = value.cwd or vim.loop.cwd()
+    if not value.filename:match("^%/") then
+        value.filename = Path:new(cwd):joinpath(value.filename)
+    end
+
     regex.change_options(self.state.options_value)
-    local file_path = Path:new(cwd):joinpath(value.filename)
-    local result = regex.replace_file(file_path.filename, value.lnum, value.search_text, value.replace_text)
+    local result = regex.replace_file(value.filename, value.lnum, value.search_text, value.replace_text)
     if not result then
         self:on_error(result, value)
         return

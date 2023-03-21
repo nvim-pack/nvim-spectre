@@ -293,6 +293,8 @@ M.resume_last_search = function()
 end
 
 M.async_replace = function(query)
+    -- clear old search result
+    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
     state.async_id = vim.loop.hrtime()
     async.void(function()
         M.do_replace_text(query, state.async_id)

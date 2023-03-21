@@ -2,7 +2,6 @@ local log = require('spectre._log')
 local rust_oxi = require('spectre_oxi')
 
 --- WARNING: it can't work on not utf8 string file
----@type RegexEngine
 local rust = {}
 
 local get_query = function(query)
