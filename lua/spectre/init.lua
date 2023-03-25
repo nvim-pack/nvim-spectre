@@ -165,7 +165,8 @@ function M.mapping_buffer(bufnr)
                 au!
                 au InsertEnter <buffer> lua require"spectre".on_insert_enter()
                 au InsertLeave <buffer> lua require"spectre".on_search_change()
-                autocmd BufLeave <buffer> lua require("spectre").on_close()
+                au BufLeave <buffer> lua require("spectre").on_leave()
+                au BufUnload <buffer> lua require("spectre").on_close()
             augroup END ]]
     vim.opt_local.wrap = false
     vim.opt_local.foldexpr = "spectre#foldexpr()"
@@ -275,6 +276,10 @@ end
 M.on_close = function()
     M.stop()
     vim.api.nvim_create_augroup("SpectrePanelWrite", { clear = true })
+    state.query_backup = vim.tbl_extend("force", state.query, {})
+end
+
+M.on_leave = function()
     state.query_backup = vim.tbl_extend("force", state.query, {})
 end
 
