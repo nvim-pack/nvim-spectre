@@ -18,7 +18,7 @@ A search panel for neovim.
 
 ```lua
 Plug 'nvim-lua/plenary.nvim'
-Plug 'windwp/nvim-spectre'
+Plug 'nvim-pack/nvim-spectre'
 ```
 
 You may also need to install the following:
