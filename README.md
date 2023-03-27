@@ -1,33 +1,35 @@
 # nvim-spectre
+
 A search panel for neovim.
 
-**Spectre** __find the enemy and replace them with dark power.__
+**Spectre** **find the enemy and replace them with dark power.**
 
 ![demo](https://github.com/windwp/nvim-spectre/wiki/assets/demospectre.gif)
 
-## Why Spectre?
-* Use regex in search
-* It can filter search by path glob (filetype)
-* It only search when you leave **Insert Mode**. You don't need a typeahead function .
-It always search when you type and it is very useless on search with regex
-* Use 1 buffer and you can edit or move
-* A tool to replace text on project
+## Why Use Spectre?
+
+- Use regex in search
+- It can filter search by path glob (filetype)
+- It only searches when you leave **Insert Mode**, `incsearch` can be annoying when writing regex
+- Use one buffer and you can edit or move
+- A tool to replace text on project
 
 ## Installation
 
-``` lua
+```lua
 Plug 'nvim-lua/plenary.nvim'
 Plug 'windwp/nvim-spectre'
-
 ```
-You need install rg and sed
+
+You may also need to install the following:
 
 - [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) (finder)
 - [devicons](https://github.com/kyazdani42/nvim-web-devicons) (icons)
 - [sed](https://www.gnu.org/software/sed/) (replace tool)
 
 ### MacOs
-  you need run `brew install gnu-sed`
+
+You may need run `brew install gnu-sed`.
 
 ## Usage
 
@@ -45,43 +47,49 @@ vim.keymap.set('n', '<leader>sp', '<cmd>lua require("spectre").open_file_search(
     desc = "Search on current file"
 })
 ```
-use command: `Spectre`
 
-**WARNING**
-* Commit your file before you replace text. It does not support undo
-* Don't use your crazy vim skill to edit result text or UI.
-* You can use `dd` to toggle result item
-* You need to use `<esc>` not `<c-c>` to leave insert mode.
+Use command: `:Spectre`
 
+## Warnings
 
-## Regex Issue
-* default regex use vim regex **magic mode** `\v` and **no-ignore-case** .
-* It has different regex of search command `rg` and replace command
-`sed` so careful if you want to replace text.
-* It has a different of highlight result because I use vim regex to
-highlight text so careful but you can try to replace.
+- Always commit your files before you replace text. `nvim-spectre`
+  does not support undo directly (Although `nvim` might if you have
+  enabled it).
+- Don't use your crazy vim skills to edit result text or UI or you may
+  encounter strange behaviour.
+- You can use `dd` to toggle result items.
+- You need to use `<Esc>` not `<C-c>` to leave insert mode.
+
+## Regex Issues
+
+- The default regex uses vim's **magic mode** `\v` and **no-ignore-case**.
+- It has different regex sytax compared to the `rg` command and
+  replace command `sed` so be careful when replacing text.
+- It has a different highlighting result because I use vim regex to
+  highlight text so be careful but you can try to replace.
 
 ## Replace
 
-you can replace with group by `\0-9` like vim and sed
-if you run command replace and don't see the change. you need to reload
-file with `:e` because `sed` is replace outside vim.
+You can replace groups with `\0-9` similar to vim and sed, if you run
+a replace command and don't see the change you may need to reload file
+with `:e` because `sed` is replace outside vim.
 
-## Customize
-``` lua
+## Customization
+
+```lua
 require('spectre').setup()
-
 ```
 
-Change any setting if you don't like it. **Don't copy all** .
-It can be change when plugin update so better use a default setting.
+Change any settings if you don't like them. **Don't just copy all** as
+settings may change as the plugin is updated so it may be better use
+the default settings.
 
-``` lua
+```lua
 require('spectre').setup({
 
   color_devicons = true,
   open_cmd = 'vnew',
-  live_update = false, -- auto execute search again when you write any file in vim
+  live_update = false, -- auto execute search again when you write to any file in vim
   line_sep_start = '┌-----------------------------------------',
   result_padding = '¦  ',
   line_sep       = '└-----------------------------------------',
@@ -252,11 +260,12 @@ require('spectre').setup({
 })
 
 ```
-### Custom function
 
-``` lua
--- if you want to get item from spectre panel.
--- you can use some following function to get data from spectre.
+### Custom Functions
+
+```lua
+-- if you want to get items from spectre panel you can use some of the
+-- following functions to get data from spectre.
 require('spectre.actions').get_current_entry()
 require('spectre.actions').get_all_entries()
 require('spectre.actions').get_state()
@@ -268,30 +277,33 @@ require('spectre').open({
   search_text="test",
   replace_text="test",
   path="lua/**/*.lua",
-  is_close = false, --  close an exists instance of spectre and open new
+  is_close = false, -- close an exists instance of spectre and open new
 })
--- you can use all variable above on command line
--- Sample: Spectre % is_insert_mode=true cwd=~/.config/nvim
--- `%` will expand to current file.
+-- you can use all variables above on command line
+-- for example: Spectre % is_insert_mode=true cwd=~/.config/nvim
+-- in this example `%` will expand to current file.
 
 ```
+
 ## Replace Method
 
-There are 2 replace method sed and oxi.
+There are two replace methods `sed` and `oxi`.
 
 | Sed                        | oxi                                 |
-|----------------------------|-------------------------------------|
+| -------------------------- | ----------------------------------- |
 | group number by '\0'       | group number by '${0}'              |
 | use vim to highlight on UI | use rust to highlight on UI         |
 | use sed to replace         | use rust to replace                 |
 | run sed command            | call rust code directly by nvim-oxi |
 
-Install oxi: 
-- you need install cargo and run command:
-[build.sh](./build.sh)
-[nvim-oxi](https://github.com/noib3/nvim-oxi)
+Install `oxi`:
 
-- set default replace command to "oxi" on setup()
+- you will need to install `cargo` and run the command:
+  [build.sh](./build.sh)
+  [nvim-oxi](https://github.com/noib3/nvim-oxi)
+
+- set default replace command to `"oxi"` on `setup()`
+
 ```lua
 require('spectre').setup({
     default = {
@@ -304,21 +316,24 @@ require('spectre').setup({
 
 ## Sponsors
 
-Thanks to everyone who sponsors my projects and makes continued development maintenance possible!
+Thanks to everyone who sponsors my projects and makes continued development and maintenance possible!
+
 <!-- patreon --><a href="https://github.com/t4t5"><img src="https://github.com/t4t5.png" width="60px" alt="" /></a><!-- patreon-->
 
 ## FAQ
 
-* add custom statusline [windline](https://github.com/windwp/windline.nvim)
+- How can I add a custom status line? [windline](https://github.com/windwp/windline.nvim)
 
-``` lua
+```lua
     require('windline').add_status(
         require('spectre.state_utils').status_line()
     )
 ```
 
-* what is Spectre?
+- Why is it called Spectre?
 
-> I want create a `Search Panel` but this name is not cool.
-> I get the name of a hero on a game.
+> I wanted to call it `Search Panel` but this name is not cool.
+
+> I got the name of a hero on a game.
+
 > Spectre has a skill to find enemy on global map so I use it:)
