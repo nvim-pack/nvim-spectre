@@ -53,8 +53,7 @@ Use command: `:Spectre`
 ## Warnings
 
 - Always commit your files before you replace text. `nvim-spectre`
-  does not support undo directly (Although `nvim` might if you have
-  enabled it).
+  does not support undo directly.
 - Don't use your crazy vim skills to edit result text or UI or you may
   encounter strange behaviour.
 - You can use `dd` to toggle result items.
