@@ -29,7 +29,8 @@ end
 -- help non-greedy
 -- escape >=< to \> \= \< but if it dont have \>
 M.escape_vim_magic = function(query)
-    local regex = string.gsub([[ (\\)@<![><=](\\)@! ]], " ", "")
+    query = string.gsub(query, '@', '\\@')
+    local regex = [=[(\\)@<![><=](\\)@!]=]
     return vim.fn.substitute(
         query,
         "\\v" .. regex,
@@ -39,7 +40,7 @@ M.escape_vim_magic = function(query)
 end
 -- escape_chars but don't escape it if have slash before or after !
 M.escape_chars = function(query)
-    local regex = string.gsub([[ (\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\\{\}])@! ]], " ", "")
+    local regex = [=[(\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\\{\}])@!]=]
     return vim.fn.substitute(
         query,
         "\\v" .. regex,

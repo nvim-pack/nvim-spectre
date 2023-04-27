@@ -12,9 +12,8 @@ local api = vim.api
 local M = {}
 
 
----@params regex RegexEngine
-M.render_line = function(
-    bufnr, namespace, text_opts, view_opts, regex)
+---@param regex RegexEngine
+M.render_line = function( bufnr, namespace, text_opts, view_opts, regex)
     local cfg = state.user_config
     local diff = utils.get_hl_line_text({
         search_query = text_opts.search_query,
