@@ -26,6 +26,7 @@ local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
 local ui = require('spectre.ui')
 local log = require('spectre._log')
+local highlight = require('spectre.highlight')
 local async = require('plenary.async')
 
 local scheduler = async.util.scheduler
