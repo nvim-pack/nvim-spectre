@@ -232,6 +232,13 @@ M.on_search_change = function()
     }
 
     for index, line in pairs(lines) do
+        if index == 1 or -- UI auto heal
+            index == 2 or
+            index == 4 or
+            index == 6 and
+            #line > 0 then
+            vim.cmd("Spectre")
+        end
         if index <= 3 and #line > 0 then
             query.search_query = query.search_query .. line
         end
