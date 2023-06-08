@@ -247,6 +247,7 @@ M.on_search_change = function()
         path          = "",
     }
 
+    -- Detect if fields have been filled
     for index, line in pairs(lines) do
         if index <= 3 and #line > 0 then
             query.search_query = query.search_query .. line
