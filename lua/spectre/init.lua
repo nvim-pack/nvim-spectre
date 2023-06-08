@@ -225,6 +225,22 @@ M.on_search_change = function()
     if not can_edit_line() then return end
     local lines = api.nvim_buf_get_lines(state.bufnr, 0, config.lnum_UI, false)
 
+    -- Auto-heal the UI if damaged
+    for index, line in pairs(lines) do
+        if index == 1 and #line > 0 then
+            vim.cmd("Spectre")
+        end
+        if index == 2 and #line > 0 then
+            vim.cmd("Spectre")
+        end
+        if index == 4 and #line > 0 then
+            vim.cmd("Spectre")
+        end
+        if index == 6 and #line > 0 then
+            vim.cmd("Spectre")
+        end
+    end
+    
     local query = {
         replace_query = "",
         search_query  = "",
@@ -232,13 +248,6 @@ M.on_search_change = function()
     }
 
     for index, line in pairs(lines) do
-        if index == 1 or -- UI auto heal
-            index == 2 or
-            index == 4 or
-            index == 6 and
-            #line > 0 then
-            vim.cmd("Spectre")
-        end
         if index <= 3 and #line > 0 then
             query.search_query = query.search_query .. line
         end
