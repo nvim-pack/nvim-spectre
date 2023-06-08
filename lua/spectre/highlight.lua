@@ -4,12 +4,14 @@ local create_highlight_group = function (name, link)
     if not ok then
         return
     end
-    if hl.foreground ~= null then
-        vim.cmd.highlight({name, 'guifg='.. string.format("#%06x", hl.foreground)})
+    if hl.foreground ~= nil then
+        -- vim.cmd.highlight({name, 'guifg='.. string.format("#%06x", hl.foreground)})
+        vim.cmd("highlight " .. name .. " guifg=" .. string.format("#%06x", hl.foreground) )
     end
 
-    if hl.background ~= null then
-        vim.cmd.highlight({name, 'guibg='.. string.format("#%06x", hl.background)})
+    if hl.background ~= nil then
+        -- vim.cmd.highlight({name, 'guibg='.. string.format("#%06x", hl.background)})
+        vim.cmd("highlight " .. name .. " guibg=" .. string.format("#%06x", hl.background) )
     end
 end
 
