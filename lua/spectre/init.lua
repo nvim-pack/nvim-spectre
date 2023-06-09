@@ -192,6 +192,32 @@ function M.mapping_buffer(bufnr)
         callback = require('spectre').on_write,
         desc = "spectre write autocmd"
     })
+    
+    -- avoid UI breakage by preventing backspace from jumping lines.
+    local backspace = vim.api.nvim_get_option('backspace')
+    local anti_insert_breakage_group = vim.api.nvim_create_augroup("SpectreAntiInsertBreakage", { clear = true })
+    vim.api.nvim_create_autocmd("InsertEnter", {
+        group = anti_insert_breakage_group,
+        pattern = "*",
+        callback = function()
+          local current_filetype = vim.bo.filetype
+          if current_filetype == "spectre_panel" then
+            vim.cmd("set backspace=indent,start")
+          end
+        end,
+        desc = "spectre anti-insert-breakage → protect the user from breaking the UI while on insert mode."
+    })
+    vim.api.nvim_create_autocmd({"WinLeave"}, {
+        group = anti_insert_breakage_group,
+        pattern = "*",
+        callback = function()
+          local current_filetype = vim.bo.filetype
+          if current_filetype == "spectre_panel" then
+            vim.cmd("set backspace=" .. backspace)
+          end
+        end,
+        desc = "spectre anti-insert-breakage → when leaving spectre restore the 'backspace' option."
+    })
 end
 
 local function hl_match(opts)
