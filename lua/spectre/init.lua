@@ -227,16 +227,12 @@ M.on_search_change = function()
 
     -- Auto-heal the UI if damaged
     for index, line in pairs(lines) do
-        if index == 1 and #line > 0 then
-            vim.cmd("Spectre")
-        end
-        if index == 2 and #line > 0 then
-            vim.cmd("Spectre")
-        end
-        if index == 4 and #line > 0 then
-            vim.cmd("Spectre")
-        end
-        if index == 6 and #line > 0 then
+        if (index == 1 and #line > 0) or
+           (index == 2 and #line > 0) or
+           (index == 4 and #line > 0) or
+           (index == 6 and #line > 0) or
+           (index == 8 and #line > 0)
+        then
             vim.cmd("Spectre")
         end
     end
@@ -247,18 +243,29 @@ M.on_search_change = function()
         path          = "",
     }
 
-    -- Detect if fields have been filled
     for index, line in pairs(lines) do
-        if index <= 3 and #line > 0 then
+        if index == 3 and #line > 0 then
             query.search_query = query.search_query .. line
         end
-        if index >= 5 and index < 7 and #line > 0 then
+        if index == 5 and #line > 0 then
             query.replace_query = query.replace_query .. line
         end
-        if index >= 7 and index <= 9 and #line > 0 then
+        if index == 7 and #line > 0 then
             query.path = query.path .. line
         end
+        -- PR #134 - If any of this lines change, trigger search.
+        -- This fixes aberrations caused by re-drawing.
+        if (index == 1 and #line > 0) or
+           (index == 2 and #line > 0) or
+           (index == 4 and #line > 0) or
+           (index == 6 and #line > 0) or
+           (index == 8 and #line > 0)
+        -- Below line 8, we don't detect changes.
+       then
+            query.search_query = query.search_query .. line
+        end
     end
+    
     local line = vim.fn.getpos('.')
     -- check path to verify search in current file
     if state.target_winid ~= nil then
