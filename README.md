@@ -329,6 +329,8 @@ Thanks to everyone who sponsors my projects and makes continued development and 
     )
 ```
 
+- What if I have remapped keys in my neovim config? [Spectre hardcodes some mappings in order to work correctly](https://github.com/nvim-pack/nvim-spectre/blob/1abe23ec9b7bc3082164f4cb842d521ef70e080e/lua/spectre/init.lua#L175). You can remap them as described above. You are allowed to create as many mappings as you want. For name and description choose any value. 'map' and 'cmd' are the only important fields.
+
 - Why is it called Spectre?
 
 > I wanted to call it `Search Panel` but this name is not cool.
