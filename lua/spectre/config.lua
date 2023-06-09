@@ -11,14 +11,16 @@ local config = {
     lnum_UI = 8, -- total line for ui you can edit it
     line_result = 10, -- line begin result
 
-    -- result_padding = '│  ',
+   -- result_padding = '│  ',
     -- color_devicons = true,
-    -- line_sep = '├──────────────────────────────────────',
     -- line_sep_start = '┌-----------------------------------------',
-    result_padding     = '¦  ',
+    -- result_padding     = '¦  ',
+    -- line_sep = '├──────────────────────────────────────',
+
+    line_sep_start = '┌──────────────────────────────────────────────────────',
+    result_padding = '│  ',
+    line_sep       = '└──────────────────────────────────────────────────────',
     color_devicons     = true,
-    line_sep_start     = '------------------------------------------',
-    line_sep           = '------------------------------------------',
     open_cmd           = 'vnew',
     live_update        = false,
     highlight          = {
