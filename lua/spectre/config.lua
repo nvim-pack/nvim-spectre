@@ -34,76 +34,64 @@ local config = {
     },
     mapping            = {
         ['toggle_line'] = {
-            map = "dd",
+            map = "d",
             cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
-            desc = "delete current item"
+            desc = "toggle item."
         },
         ['enter_file'] = {
             map = "<cr>",
             cmd = "<cmd>lua require('spectre.actions').select_entry()<CR>",
-            desc = "goto current file"
+            desc = "open file."
         },
         ['send_to_qf'] = {
-            map = "<leader>q",
+            map = "sqf",
             cmd = "<cmd>lua require('spectre.actions').send_to_qf()<CR>",
-            desc = "send all item to quickfix"
+            desc = "send all items to quickfix."
         },
         ['replace_cmd'] = {
-            map = "<leader>c",
+            map = "src",
             cmd = "<cmd>lua require('spectre.actions').replace_cmd()<CR>",
-            desc = "input replace vim command"
+            desc = "replace command."
         },
         ['show_option_menu'] = {
-            map = "<leader>o",
+            map = "so",
             cmd = "<cmd>lua require('spectre').show_options()<CR>",
-            desc = "show option"
+            desc = "show options."
         },
         ['run_current_replace'] = {
-            map = "<leader>rc",
-            cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
-            desc = "replace current item"
+          map = "c",
+          cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
+          desc = "replace line."
         },
         ['run_replace'] = {
-            map = "<leader>R",
+            map = "R",
             cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>",
-            desc = "replace all"
+            desc = "replace all."
         },
-        -- only show replace text in result UI
         ['change_view_mode'] = {
-            map = "<leader>v",
+            map = "sv",
             cmd = "<cmd>lua require('spectre').change_view()<CR>",
-            desc = "change result view mode"
+            desc = "results view mode."
         },
         ['change_replace_sed'] = {
-            map = "trs",
-            cmd = "<cmd>lua require('spectre').change_engine_replace('sed')<CR>",
-            desc = "use sed to replace"
+          map = "srs",
+          cmd = "<cmd>lua require('spectre').change_engine_replace('sed')<CR>",
+          desc = "use sed to replace."
         },
         ['change_replace_oxi'] = {
-            map = "tro",
-            cmd = "<cmd>lua require('spectre').change_engine_replace('oxi')<CR>",
-            desc = "use oxi to replace"
+          map = "sro",
+          cmd = "<cmd>lua require('spectre').change_engine_replace('oxi')<CR>",
+          desc = "use oxi to replace."
         },
-        ['toggle_live_update'] = {
-            map = "tu",
-            cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
-            desc = "update change when vim write file."
-        },
-        -- only work if the find_engine following have that option
-        ['toggle_ignore_case'] = {
-            map = "ti",
-            cmd = "<cmd>lua require('spectre').change_options('ignore-case')<CR>",
-            desc = "toggle ignore case"
-        },
-        ['toggle_ignore_hidden'] = {
-            map = "th",
-            cmd = "<cmd>lua require('spectre').change_options('hidden')<CR>",
-            desc = "toggle search hidden"
+        ['toggle_live_update']={
+          map = "sar",
+          cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
+          desc = "auto refresh changes when nvim writes a file."
         },
         ['resume_last_search'] = {
-            map = "<leader>l",
-            cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
-            desc = "resume last search before close"
+          map = "sl",
+          cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
+          desc = "repeat last search."
         },
     },
     find_engine        = {
