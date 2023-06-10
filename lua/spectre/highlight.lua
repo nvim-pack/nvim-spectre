@@ -15,7 +15,7 @@ local create_highlight_group = function (name, link)
     end
 end
 
-create_highlight_group('SpectreHeader', "DiffDelete")
+create_highlight_group('SpectreHeader', "Comment")
 create_highlight_group('SpectreBody', "String")
 create_highlight_group('SpectreFile', "Keyword")
 create_highlight_group('SpectreDir', "Comment")
