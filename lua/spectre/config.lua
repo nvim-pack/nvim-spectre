@@ -61,7 +61,7 @@ local config = {
         ['run_current_replace'] = {
           map = "c",
           cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
-          desc = "replace line."
+          desc = "confirm item."
         },
         ['run_replace'] = {
             map = "R",
