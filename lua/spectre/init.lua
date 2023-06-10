@@ -181,6 +181,7 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'n', 'o', 'ji', map_opt) -- don't append line on can make the UI wrong
     api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)    
     api.nvim_buf_set_keymap(bufnr, 'n', '<Tab>', "<cmd>lua require('spectre').tab()<cr>", map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '<S-Tab>', "<cmd>lua require('spectre').tab_shift()<cr>", map_opt)    
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
 
     for _, map in pairs(state.user_config.mapping) do
@@ -657,6 +658,13 @@ M.tab = function()
     local line = vim.api.nvim_win_get_cursor(0)[1]
     if line == 3 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1}) end
     if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {7, 1})
+    end
+end
+
+M.tab_shift = function()
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {3, 1}) end
+    if line == 7 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1})
     end
 end
 
