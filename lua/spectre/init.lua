@@ -194,13 +194,13 @@ function M.mapping_buffer(bufnr)
         callback = require('spectre').on_write,
         desc = "spectre write autocmd"
     })
-    -- Anti UI breakage - 
+    -- Anti UI breakage
     -- * If the user enters a forbidden line on insert mode: leave insert mode. 
     -- * If the user passes over a forbidden line on insert mode: leave insert mode.
     -- * Disable backspace jumping lines.
     local backspace = vim.api.nvim_get_option('backspace')
     local anti_insert_breakage_group = vim.api.nvim_create_augroup("SpectreAntiInsertBreakage", { clear = true })
-    vim.api.nvim_create_autocmd("InsertEnter", "CursorMovedI" {
+    vim.api.nvim_create_autocmd({"InsertEnter", "CursorMovedI"}, {
         group = anti_insert_breakage_group,
         pattern = "*",
         callback = function()
