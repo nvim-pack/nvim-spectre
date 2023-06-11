@@ -159,6 +159,10 @@ M.open = function(opts)
     end
 end
 
+M.toggle = function(opts)
+    if state.bufnr ~= nil then M.close()
+    else M.open() end
+end
 
 function M.mapping_buffer(bufnr)
     _G.__spectre_fold = M.get_fold
