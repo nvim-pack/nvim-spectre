@@ -159,9 +159,13 @@ M.open = function(opts)
     end
 end
 
-M.toggle = function(opts)
-    if state.bufnr ~= nil then M.close()
-    else M.open() end
+M.toggle = function()
+    if state.bufnr ~= nil then
+        M.close()
+        state.bufnr = nil
+    else
+        M.open()
+    end
 end
 
 function M.mapping_buffer(bufnr)
