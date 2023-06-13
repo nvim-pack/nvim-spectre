@@ -159,12 +159,12 @@ M.open = function(opts)
     end
 end
 
-M.toggle = function()
+M.toggle = function(opts)
     if state.bufnr ~= nil then
         M.close()
         state.bufnr = nil
     else
-        M.open()
+        M.open(opts)
     end
 end
 
