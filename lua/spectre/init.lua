@@ -232,8 +232,6 @@ function M.mapping_buffer(bufnr)
     })    
 end    
     
-end
-
 local function hl_match(opts)
     if #opts.search_query > 0 then
         api.nvim_buf_add_highlight(state.bufnr, config.namespace,
