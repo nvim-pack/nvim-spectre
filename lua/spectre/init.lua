@@ -26,6 +26,7 @@ local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
 local ui = require('spectre.ui')
 local log = require('spectre._log')
+local highlight = require('spectre.highlight')
 local async = require('plenary.async')
 
 local scheduler = async.util.scheduler
@@ -158,6 +159,14 @@ M.open = function(opts)
     end
 end
 
+M.toggle = function(opts)
+    if state.bufnr ~= nil then
+        M.close()
+        state.bufnr = nil
+    else
+        M.open(opts)
+    end
+end
 
 function M.mapping_buffer(bufnr)
     _G.__spectre_fold = M.get_fold
@@ -182,6 +191,8 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'u', "", map_opt) -- disable undo, It breaks the UI.
     api.nvim_buf_set_keymap(bufnr, 'i', '<CR>', "", map_opt) -- disable ENTER on insert mode, it breaks the UI.
+    api.nvim_buf_set_keymap(bufnr, 'n', '<Tab>', "<cmd>lua require('spectre').tab()<cr>", map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '<S-Tab>', "<cmd>lua require('spectre').tab_shift()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
 
     for _, map in pairs(state.user_config.mapping) do
@@ -688,6 +699,20 @@ M.get_fold = function(lnum)
     end
     return '0'
 
+end
+
+M.tab = function()
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+    if line == 3 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1}) end
+    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {7, 1})
+    end
+end
+
+M.tab_shift = function()
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {3, 1}) end
+    if line == 7 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1})
+    end
 end
 
 return M
