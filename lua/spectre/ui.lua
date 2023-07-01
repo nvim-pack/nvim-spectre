@@ -147,7 +147,7 @@ end
 
 M.show_menu_options = function(title, content)
     local win_width, win_height = vim.lsp.util._make_floating_popup_size(content, {})
-    local help_win = popup.create(content, {
+    local help_win, help_win_obj = popup.create(content, {
         title   = title,
         padding = { 1, 1, 1, 1 },
         enter   = false,
@@ -155,14 +155,25 @@ M.show_menu_options = function(title, content)
         height  = win_height + 2,
         col     = "cursor+2",
         line    = "cursor+2",
+        border = true,
+        borderchars ={ "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
     })
 
     vim.api.nvim_win_set_option(help_win, 'winblend', 0)
-    vim.api.nvim_command(
-        "autocmd CursorMoved,CursorMovedI,BufHidden,BufLeave <buffer> ++once lua pcall(vim.api.nvim_win_close, "
-        .. help_win
-        .. ", true)"
-    )
+    api.nvim_create_autocmd({
+        'CursorMoved',
+        'CursorMovedI',
+        'BufHidden',
+        'BufLeave',
+        'InsertEnter',
+        'WinScrolled',
+        'BufDelete',
+    }, {
+        once = true,
+        callback = function()
+            require("plenary.window").close_related_win(help_win_obj.win_id, help_win_obj.border.win_id)
+        end,
+    })
 end
 
 M.show_help = function()
