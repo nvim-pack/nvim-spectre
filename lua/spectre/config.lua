@@ -36,7 +36,7 @@ local config = {
         ['toggle_line'] = {
             map = "dd",
             cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
-            desc = "delete current item"
+            desc = "toggle current item"
         },
         ['enter_file'] = {
             map = "<cr>",
@@ -46,7 +46,7 @@ local config = {
         ['send_to_qf'] = {
             map = "<leader>q",
             cmd = "<cmd>lua require('spectre.actions').send_to_qf()<CR>",
-            desc = "send all item to quickfix"
+            desc = "send all items to quickfix"
         },
         ['replace_cmd'] = {
             map = "<leader>c",
@@ -87,7 +87,7 @@ local config = {
         ['toggle_live_update'] = {
             map = "tu",
             cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
-            desc = "update change when vim write file."
+            desc = "update when vim writes to file"
         },
         -- only work if the find_engine following have that option
         ['toggle_ignore_case'] = {
