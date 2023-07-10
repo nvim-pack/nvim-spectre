@@ -205,6 +205,19 @@ function M.mapping_buffer(bufnr)
         callback = require('spectre').on_write,
         desc = "spectre write autocmd"
     })
+
+    vim.api.nvim_create_autocmd("BufWinLeave", {
+        group = vim.api.nvim_create_augroup("SpectrePanelClose", { clear = true }),
+        pattern = "*",
+        callback = function()
+            local current_filetype = vim.bo.filetype
+            if current_filetype == "spectre_panel" then
+                state.bufnr = nil
+            end
+        end,
+        desc = "spectre window close autocmd"
+    })
+
     -- Anti UI breakage
     -- * If the user enters insert mode on a forbidden line: leave insert mode. 
     -- * If the user passes over a forbidden line on insert mode: leave insert mode.
