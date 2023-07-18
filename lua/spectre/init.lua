@@ -73,6 +73,7 @@ M.close = function()
         for _, win_id in pairs(wins) do
             vim.api.nvim_win_close(win_id, true);
         end
+        state.bufnr = nil
     end
 end
 
@@ -160,12 +161,8 @@ M.open = function(opts)
 end
 
 M.toggle = function(opts)
-    if state.bufnr ~= nil then
-        M.close()
-        state.bufnr = nil
-    else
-        M.open(opts)
-    end
+    if state.bufnr ~= nil then M.close()
+    else M.open(opts) end
 end
 
 function M.mapping_buffer(bufnr)
@@ -206,7 +203,7 @@ function M.mapping_buffer(bufnr)
         desc = "spectre write autocmd"
     })
     -- Anti UI breakage
-    -- * If the user enters insert mode on a forbidden line: leave insert mode. 
+    -- * If the user enters insert mode on a forbidden line: leave insert mode.
     -- * If the user passes over a forbidden line on insert mode: leave insert mode.
     -- * Disable backspace jumping lines.
     local backspace = vim.api.nvim_get_option('backspace')
@@ -240,9 +237,9 @@ function M.mapping_buffer(bufnr)
             end
         end,
         desc = "spectre anti-insert-breakage → restore the 'backspace' option."
-    })    
-end    
-    
+    })
+end
+
 local function hl_match(opts)
     if #opts.search_query > 0 then
         api.nvim_buf_add_highlight(state.bufnr, config.namespace,
