@@ -73,7 +73,7 @@ M.close = function()
         for _, win_id in pairs(wins) do
             vim.api.nvim_win_close(win_id, true);
         end
-        state.bufnr = nil
+        state.opened = false
     end
 end
 
@@ -93,6 +93,7 @@ M.open = function(opts)
         is_file = false
     }, opts or {}) or {}
 
+    state.opened = true
     state.status_line = ''
     opts.search_text = utils.trim(opts.search_text)
     state.target_winid = api.nvim_get_current_win()
@@ -161,7 +162,7 @@ M.open = function(opts)
 end
 
 M.toggle = function(opts)
-    if state.bufnr ~= nil then M.close()
+    if state.opened then M.close()
     else M.open(opts) end
 end
 
@@ -202,6 +203,7 @@ function M.mapping_buffer(bufnr)
         callback = require('spectre').on_write,
         desc = "spectre write autocmd"
     })
+
     -- Anti UI breakage
     -- * If the user enters insert mode on a forbidden line: leave insert mode.
     -- * If the user passes over a forbidden line on insert mode: leave insert mode.
