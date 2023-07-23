@@ -26,7 +26,8 @@ local state = {
     bufnr = nil,
     cwd = nil,
     target_winid = nil,
-    total_item = {}
+    total_item = {},
+    opened = false
 }
 
 if _G.__is_dev then

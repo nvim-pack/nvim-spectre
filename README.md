@@ -34,8 +34,8 @@ You may need run `brew install gnu-sed`.
 ## Usage
 
 ```lua
-vim.keymap.set('n', '<leader>S', '<cmd>lua require("spectre").open()<CR>', {
-    desc = "Open Spectre"
+vim.keymap.set('n', '<leader>S', '<cmd>lua require("spectre").toggle()<CR>', {
+    desc = "Toggle Spectre"
 })
 vim.keymap.set('n', '<leader>sw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', {
     desc = "Search current word"

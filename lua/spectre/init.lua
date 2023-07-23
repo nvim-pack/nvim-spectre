@@ -73,7 +73,7 @@ M.close = function()
         for _, win_id in pairs(wins) do
             vim.api.nvim_win_close(win_id, true);
         end
-        state.bufnr = nil
+        state.opened = false
     end
 end
 
@@ -93,6 +93,7 @@ M.open = function(opts)
         is_file = false
     }, opts or {}) or {}
 
+    state.opened = true
     state.status_line = ''
     opts.search_text = utils.trim(opts.search_text)
     state.target_winid = api.nvim_get_current_win()
@@ -161,7 +162,7 @@ M.open = function(opts)
 end
 
 M.toggle = function(opts)
-    if state.bufnr ~= nil then M.close()
+    if state.opened then M.close()
     else M.open(opts) end
 end
 
@@ -201,6 +202,16 @@ function M.mapping_buffer(bufnr)
         pattern = "*",
         callback = require('spectre').on_write,
         desc = "spectre write autocmd"
+    })
+    vim.api.nvim_create_autocmd("WinClosed", {
+        group = vim.api.nvim_create_augroup("SpectreStateOpened", { clear = true }),
+        pattern = "*",
+        callback = function()
+            if vim.api.nvim_buf_get_option(vim.api.nvim_get_current_buf(), 'filetype') == "spectre_panel" then
+                state.opened = false
+            end
+        end,
+        desc = "Ensure spectre state when its window is closed by any mean"
     })
     -- Anti UI breakage
     -- * If the user enters insert mode on a forbidden line: leave insert mode.
