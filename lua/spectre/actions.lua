@@ -7,20 +7,22 @@ local utils = require('spectre.utils')
 
 local M = {}
 
-local open_file = function(filename, lnum, col, winid)
+local open_file = function(filename, lnum, col, winid, focus)
+    -- print(state.target_winid)
+    -- print(winid)
     if winid ~= nil then
         vim.fn.win_gotoid(winid)
     end
     vim.api.nvim_command [[execute "normal! m` "]]
     vim.cmd("e " .. filename)
     api.nvim_win_set_cursor(0, { lnum, col })
+    vim.fn.win_gotoid(state.winid)
 end
 
 local get_file_path = function(filename)
-
     -- use default current working directory if state.cwd is nil or empty string
     --
-    if state.cwd == nil or state.cwd == "" then 
+    if state.cwd == nil or state.cwd == "" then
         state.cwd = vim.fn.getcwd()
     end
 
@@ -34,6 +36,16 @@ M.select_entry = function()
         open_file(t.filename, t.lnum, t.col, state.target_winid)
     else
         open_file(t.filename, t.lnum, t.col)
+    end
+end
+
+M.open_entry = function()
+    local t = M.get_current_entry()
+    if t == nil then return nil end
+    if config.is_open_target_win and state.target_winid ~= nil then
+        open_file(t.filename, t.lnum, t.col, state.target_winid, true)
+    else
+        open_file(t.filename, t.lnum, t.col, nil, true)
     end
 end
 
@@ -144,31 +156,30 @@ M.run_replace = function(entries)
     state.status_line = 'Run Replace.'
     local replacer = replacer_creator:new(
         state_utils.get_replace_engine_config(), {
-        on_done = function(result)
-            if (result.ref) then
-                done_item = done_item + 1
-                state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
-                M.set_entry_finish(result.ref.display_lnum)
-                local value = result.ref
-                value.text = " DONE"
-                vim.fn.setqflist(entries, 'r')
-                api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
-                    { virt_text = { { "󰄲 DONE", "String" } }, virt_text_pos = 'eol' })
+            on_done = function(result)
+                if (result.ref) then
+                    done_item = done_item + 1
+                    state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
+                    M.set_entry_finish(result.ref.display_lnum)
+                    local value = result.ref
+                    value.text = " DONE"
+                    vim.fn.setqflist(entries, 'r')
+                    api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
+                        { virt_text = { { "󰄲 DONE", "String" } }, virt_text_pos = 'eol' })
+                end
+            end,
+            on_error = function(result)
+                if (result.ref) then
+                    error_item = error_item + 1
+                    local value = result.ref
+                    value.text = "ERROR"
+                    vim.fn.setqflist(entries, 'r')
+                    state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
+                    api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
+                        { virt_text = { { "󰄱 ERROR", "Error" } }, virt_text_pos = 'eol' })
+                end
             end
-        end,
-        on_error = function(result)
-            if (result.ref) then
-                error_item = error_item + 1
-                local value = result.ref
-                value.text = "ERROR"
-                vim.fn.setqflist(entries, 'r')
-                state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
-                api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
-                    { virt_text = { { "󰄱 ERROR", "Error" } }, virt_text_pos = 'eol' })
-
-            end
-        end
-    })
+        })
     for _, value in pairs(entries) do
         if not value.is_replace_finish then
             replacer:replace({

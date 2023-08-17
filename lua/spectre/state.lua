@@ -26,6 +26,7 @@ local state = {
     bufnr = nil,
     cwd = nil,
     target_winid = nil,
+    winid = nil,
     total_item = {},
     opened = false
 }

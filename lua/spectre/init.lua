@@ -129,6 +129,7 @@ M.open = function(opts)
     vim.bo.buftype = 'nofile'
     vim.bo.buflisted = false
     state.bufnr = api.nvim_get_current_buf();
+    state.winid = api.nvim_get_current_win()
     vim.cmd(string.format("file %s/spectre", state.bufnr))
     vim.bo.filetype = config.filetype
     api.nvim_buf_clear_namespace(state.bufnr, config.namespace_status, 0, -1)
