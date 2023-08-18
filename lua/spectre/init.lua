@@ -101,6 +101,7 @@ M.open = function(opts)
     if opts.is_close then
         M.close()
     end
+    M.init_regex()
 
     local is_new = true
     --check reopen panel by reuse bufnr
@@ -636,7 +637,6 @@ M.search = function(opts)
         search_text = state.query.search_query,
         path = state.query.path
     })
-    M.init_regex()
 end
 
 M.init_regex = function()
