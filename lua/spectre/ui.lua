@@ -148,27 +148,34 @@ end
 M.show_menu_options = function(title, content)
     local win_width, win_height = vim.lsp.util._make_floating_popup_size(content, {})
 
-    local check = false
     local bufnr = vim.api.nvim_create_buf(false, true)
     api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
     api.nvim_buf_set_lines(bufnr, 0, -1, true, content)
 
-    local help_win = vim.api.nvim_open_win(bufnr, true, {
-        title = title,
+    local help_win = vim.api.nvim_open_win(bufnr, false, {
+        style = "minimal",
+        title = " " .. title .. " ",
         title_pos = 'center',
         relative = 'cursor',
-        width = win_width + 3,
-        height = win_height + 2,
-        col = 4,
-        row = 4,
-        border = { "╭", "─", "╮", "│", "╯", "─", "╰", "│" }
+        width = win_width,
+        height = win_height,
+        col = 0,
+        row = 1,
+        border = "rounded"
     })
     api.nvim_win_set_option(help_win, 'winblend', 0)
-    api.nvim_win_set_option(help_win, 'number', false)
-    api.nvim_buf_set_keymap(bufnr, 'n', '<Esc>','<CMD>lua vim.api.nvim_win_close(' .. help_win  .. ', true)<CR>', {noremap = true})
+    api.nvim_buf_set_keymap(bufnr, 'n', '<Esc>', '<CMD>lua vim.api.nvim_win_close(' .. help_win .. ', true)<CR>',
+        { noremap = true })
 
     api.nvim_create_autocmd({
         'CursorMovedI',
+        'CursorMoved',
+        'CursorMovedI',
+        'BufHidden',
+        'BufLeave',
+        'InsertEnter',
+        'WinScrolled',
+        'BufDelete',
     }, {
         callback = function()
             pcall(vim.api.nvim_win_close, help_win, true)
@@ -191,8 +198,7 @@ M.show_help = function()
         table.insert(help_msg, string.format("%9s : %s", map.map, map.desc))
     end
 
-    M.show_menu_options("Mapping", help_msg)
-
+    M.show_menu_options("Mappings", help_msg)
 end
 
 M.show_options = function()
