@@ -13,7 +13,7 @@ local M = {}
 
 
 ---@param regex RegexEngine
-M.render_line = function( bufnr, namespace, text_opts, view_opts, regex)
+M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
     local cfg = state.user_config
     local diff = utils.get_hl_line_text({
         search_query = text_opts.search_query,
@@ -43,7 +43,6 @@ M.render_line = function( bufnr, namespace, text_opts, view_opts, regex)
         api.nvim_buf_add_highlight(state.bufnr, config.namespace,
             cfg.highlight.border, text_opts.lnum, 0, -1)
     end
-
 end
 
 local get_devicons = (function()
@@ -87,9 +86,9 @@ M.render_filename = function(bufnr, namespace, line, entry)
 
     local width = vim.api.nvim_strwidth(filename)
     local hl = {
-        { { 0, icon_length }, icon_highlight },
+        { { 0, icon_length },                      icon_highlight },
         { { 0, vim.api.nvim_strwidth(directory) }, u_config.highlight.filedirectory },
-        { { 0, width + 1 }, u_config.highlight.filename },
+        { { 0, width + 1 },                        u_config.highlight.filename },
     }
     if icon == "" then
         table.remove(hl, 1)
@@ -142,25 +141,34 @@ function M.render_header(opts)
         opts.live_update and '(Auto update)' or '',
         state.user_config.default.replace.cmd
     )
-    utils.write_virtual_text(state.bufnr, config.namespace_header, 0, { { help_text, state.user_config.highlight.headers } })
+    utils.write_virtual_text(state.bufnr, config.namespace_header, 0,
+        { { help_text, state.user_config.highlight.headers } })
 end
 
 M.show_menu_options = function(title, content)
     local win_width, win_height = vim.lsp.util._make_floating_popup_size(content, {})
-    local help_win, help_win_obj = popup.create(content, {
-        title   = title,
-        padding = { 1, 1, 1, 1 },
-        enter   = false,
-        width   = win_width + 2,
-        height  = win_height + 2,
-        col     = "cursor+2",
-        line    = "cursor+2",
-        border = true,
-        borderchars ={ "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
-    })
 
-    vim.api.nvim_win_set_option(help_win, 'winblend', 0)
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+    api.nvim_buf_set_lines(bufnr, 0, -1, true, content)
+
+    local help_win = vim.api.nvim_open_win(bufnr, false, {
+        style = "minimal",
+        title = " " .. title .. " ",
+        title_pos = 'center',
+        relative = 'cursor',
+        width = win_width,
+        height = win_height,
+        col = 0,
+        row = 1,
+        border = "rounded"
+    })
+    api.nvim_win_set_option(help_win, 'winblend', 0)
+    api.nvim_buf_set_keymap(bufnr, 'n', '<Esc>', '<CMD>lua vim.api.nvim_win_close(' .. help_win .. ', true)<CR>',
+        { noremap = true })
+
     api.nvim_create_autocmd({
+        'CursorMovedI',
         'CursorMoved',
         'CursorMovedI',
         'BufHidden',
@@ -169,9 +177,8 @@ M.show_menu_options = function(title, content)
         'WinScrolled',
         'BufDelete',
     }, {
-        once = true,
         callback = function()
-            require("plenary.window").close_related_win(help_win_obj.win_id, help_win_obj.border.win_id)
+            pcall(vim.api.nvim_win_close, help_win, true)
         end,
     })
 end
@@ -191,8 +198,7 @@ M.show_help = function()
         table.insert(help_msg, string.format("%9s : %s", map.map, map.desc))
     end
 
-    M.show_menu_options("Mapping", help_msg)
-
+    M.show_menu_options("Mappings", help_msg)
 end
 
 M.show_options = function()
@@ -225,7 +231,7 @@ M.show_find_engine = function()
     end
 end
 
-M.render_text_query = function (opts)
+M.render_text_query = function(opts)
     -- set empty line for virtual text
     local lines = {}
     local length = config.lnum_UI
