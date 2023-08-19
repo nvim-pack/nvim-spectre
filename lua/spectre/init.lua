@@ -672,6 +672,7 @@ M.change_options = function(key)
         state.options[key] = false
     end
     state.options[key] = not state.options[key]
+    if state.regex == nil then return ;end
     state.regex.change_options(state_utils.get_replace_engine_config().options_value)
     if state.query.search_query ~= nil then
         ui.render_search_ui()
