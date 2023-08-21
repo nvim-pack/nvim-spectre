@@ -90,7 +90,8 @@ M.open = function(opts)
         replace_text = '',
         path = '',
         is_close = false, -- close an exists instance of spectre then open new
-        is_file = false
+        is_file = false,
+        begin_line_num = 3
     }, opts or {}) or {}
 
     state.opened = true
