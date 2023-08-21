@@ -200,6 +200,21 @@ default settings.
           cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
           desc = "repeat last search"
         },
+        ['jump_to_search'] = {
+            map = "<F1>",
+            cmd = "<cmd>lua require('spectre').search({type:'search'})<CR>",
+            desc = "jump to search line and exec callback"
+        },
+        ['jump_to_replace'] = {
+            map = "<F2>",
+            cmd = "<cmd>lua require('spectre').search({type:'replace'})<CR>",
+            desc = "jump to replace line and exec callback"
+        },
+        ['jump_to_path'] = {
+            map = "<F3>",
+            cmd = "<cmd>lua require('spectre').search({type:'path'})<CR>",
+            desc = "jump to path line and exec callback"
+        },
         -- you can put your mapping here it only use normal mode
       },
       find_engine = {

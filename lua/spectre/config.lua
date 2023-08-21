@@ -105,6 +105,21 @@ local config = {
             cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
             desc = "repeat last search"
         },
+        ['jump_to_search'] = {
+            map = "<F1>",
+            cmd = "<cmd>lua require('spectre').search({type:'search'})<CR>",
+            desc = "jump to search line and exec callback"
+        },
+        ['jump_to_replace'] = {
+            map = "<F2>",
+            cmd = "<cmd>lua require('spectre').search({type:'replace'})<CR>",
+            desc = "jump to replace line and exec callback"
+        },
+        ['jump_to_path'] = {
+            map = "<F3>",
+            cmd = "<cmd>lua require('spectre').search({type:'path'})<CR>",
+            desc = "jump to path line and exec callback"
+        },
     },
     find_engine        = {
         ['rg'] = {
@@ -193,6 +208,17 @@ local config = {
     replace_vim_cmd    = "cdo",
     is_open_target_win = true,
     is_insert_mode     = false,
+    jump_callback = {
+        search = function()
+            vim.api.nvim_feedkeys('cc', 'n', true)
+        end,
+        replace = function()
+            vim.api.nvim_feedkeys('cc', 'n', true)
+        end,
+        path = function()
+            vim.api.nvim_feedkeys('cc', 'n', true)
+        end
+    }
 }
 
 if vim.loop.os_uname().sysname == 'Darwin' then

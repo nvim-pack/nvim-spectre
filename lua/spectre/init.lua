@@ -191,6 +191,9 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'i', '<CR>', "", map_opt) -- disable ENTER on insert mode, it breaks the UI.
     api.nvim_buf_set_keymap(bufnr, 'n', '<Tab>', "<cmd>lua require('spectre').tab()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '<S-Tab>', "<cmd>lua require('spectre').tab_shift()<cr>", map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '<F1>', "<cmd>lua require('spectre').jump({type='search'})<cr>", map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '<F2>', "<cmd>lua require('spectre').jump({type='replace'})<cr>", map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'n', '<F3>', "<cmd>lua require('spectre').jump({type='path'})<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
 
     for _, map in pairs(state.user_config.mapping) do
@@ -721,6 +724,20 @@ M.tab_shift = function()
     if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {3, 1}) end
     if line == 7 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1})
     end
+end
+
+M.jump = function(opts)
+    local type = opts.type
+    if type == 'search' then
+        vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {3, 1})
+    elseif type == 'replace' then
+        vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1})
+    elseif type == 'path' then
+        vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {7, 1})
+    end
+    print(state.user_config.jump_callback)
+    local callback = state.user_config.jump_callback[type]
+    if callback ~= nil then callback() end
 end
 
 return M
