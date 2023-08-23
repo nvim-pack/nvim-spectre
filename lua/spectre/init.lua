@@ -26,7 +26,7 @@ local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
 local ui = require('spectre.ui')
 local log = require('spectre._log')
-local highlight = require('spectre.highlight')
+require('spectre.highlight')
 local async = require('plenary.async')
 
 local scheduler = async.util.scheduler
@@ -188,7 +188,6 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'n', 'o', 'ji', map_opt) -- don't append line on can make the UI wrong
     api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'u', "", map_opt) -- disable undo, It breaks the UI.
-    api.nvim_buf_set_keymap(bufnr, 'i', '<CR>', "", map_opt) -- disable ENTER on insert mode, it breaks the UI.
     api.nvim_buf_set_keymap(bufnr, 'n', '<Tab>', "<cmd>lua require('spectre').tab()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '<S-Tab>', "<cmd>lua require('spectre').tab_shift()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
@@ -213,42 +212,46 @@ function M.mapping_buffer(bufnr)
         end,
         desc = "Ensure spectre state when its window is closed by any mean"
     })
-    -- Anti UI breakage
-    -- * If the user enters insert mode on a forbidden line: leave insert mode.
-    -- * If the user passes over a forbidden line on insert mode: leave insert mode.
-    -- * Disable backspace jumping lines.
-    local backspace = vim.api.nvim_get_option('backspace')
-    local anti_insert_breakage_group = vim.api.nvim_create_augroup("SpectreAntiInsertBreakage", { clear = true })
-    vim.api.nvim_create_autocmd({"InsertEnter", "CursorMovedI"}, {
-        group = anti_insert_breakage_group,
-        pattern = "*",
-        callback = function()
-            local current_filetype = vim.bo.filetype
-            if current_filetype == "spectre_panel" then
-                vim.cmd("set backspace=indent,start")
-                local line = vim.api.nvim_win_get_cursor(0)[1]
-                if line == 1 or line == 2 or line == 4 or line == 6 or line >= 8
-                then
-                    vim.api.nvim_feedkeys(
-                        vim.api.nvim_replace_termcodes('<Esc>', true, false, true),
-                        'n', true
-                    )
+
+    if state.user_config.is_block_ui_break then
+        -- Anti UI breakage
+        -- * If the user enters insert mode on a forbidden line: leave insert mode.
+        -- * If the user passes over a forbidden line on insert mode: leave insert mode.
+        -- * Disable backspace jumping lines.
+        local backspace = vim.api.nvim_get_option('backspace')
+        local anti_insert_breakage_group = vim.api.nvim_create_augroup("SpectreAntiInsertBreakage", { clear = true })
+        vim.api.nvim_create_autocmd({ "InsertEnter", "CursorMovedI" }, {
+            group = anti_insert_breakage_group,
+            pattern = "*",
+            callback = function()
+                local current_filetype = vim.bo.filetype
+                if current_filetype == "spectre_panel" then
+                    vim.cmd("set backspace=indent,start")
+                    local line = vim.api.nvim_win_get_cursor(0)[1]
+                    if line == 1 or line == 2 or line == 4 or line == 6 or line >= 8
+                    then
+                        vim.api.nvim_feedkeys(
+                            vim.api.nvim_replace_termcodes('<Esc>', true, false, true),
+                            'n', true
+                        )
+                    end
                 end
-            end
-        end,
-        desc = "spectre anti-insert-breakage → protect the user from breaking the UI while on insert mode."
-    })
-    vim.api.nvim_create_autocmd({"WinLeave"}, {
-        group = anti_insert_breakage_group,
-        pattern = "*",
-        callback = function()
-            local current_filetype = vim.bo.filetype
-            if current_filetype == "spectre_panel" then
-                vim.cmd("set backspace=" .. backspace)
-            end
-        end,
-        desc = "spectre anti-insert-breakage → restore the 'backspace' option."
-    })
+            end,
+            desc = "spectre anti-insert-breakage → protect the user from breaking the UI while on insert mode."
+        })
+        vim.api.nvim_create_autocmd({ "WinLeave" }, {
+            group = anti_insert_breakage_group,
+            pattern = "*",
+            callback = function()
+                local current_filetype = vim.bo.filetype
+                if current_filetype == "spectre_panel" then
+                    vim.cmd("set backspace=" .. backspace)
+                end
+            end,
+            desc = "spectre anti-insert-breakage → restore the 'backspace' option."
+        })
+        api.nvim_buf_set_keymap(bufnr, 'i', '<CR>', "", map_opt) -- disable ENTER on insert mode, it breaks the UI.
+    end
 end
 
 local function hl_match(opts)
@@ -712,15 +715,13 @@ end
 M.tab = function()
     local line = vim.api.nvim_win_get_cursor(0)[1]
     if line == 3 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1}) end
-    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {7, 1})
-    end
+    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {7, 1}) end
 end
 
 M.tab_shift = function()
     local line = vim.api.nvim_win_get_cursor(0)[1]
     if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {3, 1}) end
-    if line == 7 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1})
-    end
+    if line == 7 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1}) end
 end
 
 return M
