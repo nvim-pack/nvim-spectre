@@ -242,7 +242,7 @@ M.render_text_query = function(opts)
     api.nvim_buf_set_lines(state.bufnr, 2, 2, false, { opts.search_text })
     api.nvim_buf_set_lines(state.bufnr, 4, 4, false, { opts.replace_text })
     api.nvim_buf_set_lines(state.bufnr, 6, 6, false, { opts.path })
-    api.nvim_win_set_cursor(0, { 3, 0 })
+    api.nvim_win_set_cursor(0, { opts.begin_line_num or 3, 0 })
 end
 
 return M
