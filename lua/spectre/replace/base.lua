@@ -6,6 +6,7 @@ base.on_error = function(self, value, ref)
     if value ~= 0 then
         pcall(vim.schedule_wrap(function()
             self.handler.on_error({
+                value = value,
                 ref = ref
             })
         end))
