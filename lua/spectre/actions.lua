@@ -157,6 +157,11 @@ M.run_replace = function(entries)
             end
         end,
         on_error = function(result)
+            if type(result.value) == "string" then
+                for line in result.value:gmatch("[^\r\n]+") do
+                    print(line)
+                end
+            end
             if (result.ref) then
                 error_item = error_item + 1
                 local value = result.ref

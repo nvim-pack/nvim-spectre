@@ -49,7 +49,10 @@ sed.replace = function(self, value)
         cwd = value.cwd,
         args = args,
         on_stdout = function(_, v) end,
-        on_stderr = function(_, v) self:on_error(v, value) end,
+        on_stderr = function(_, v)
+            v = self.state.cmd .. ' "' .. table.concat(args, '" "') .. '"\n' .. v
+            self:on_error(v, value)
+        end,
         on_exit = function(_, v) self:on_done(v, value) end
     })
     job:sync()
