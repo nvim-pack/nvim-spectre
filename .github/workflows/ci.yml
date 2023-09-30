@@ -43,7 +43,7 @@ jobs:
 
       - name: build rust
         run: |
-          ./build.sh
+          ./build.lua
           
       - name: Run tests
         run: |
