@@ -43,6 +43,8 @@ jobs:
 
       - name: build rust
         run: |
+          export PATH="${PWD}/_neovim/bin:${PATH}"
+          export VIM="${PWD}/_neovim/share/nvim/runtime"
           ./build.lua
           
       - name: Run tests
