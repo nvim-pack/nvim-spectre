@@ -193,7 +193,6 @@ local config = {
     replace_vim_cmd    = "cdo",
     is_open_target_win = true,
     is_insert_mode     = false,
-    is_block_ui_break = false
 }
 
 if vim.loop.os_uname().sysname == 'Darwin' then
