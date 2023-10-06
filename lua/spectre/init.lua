@@ -214,7 +214,7 @@ function M.mapping_buffer(bufnr)
         desc = "Ensure spectre state when its window is closed by any mean"
     })
 
-    if state.user_config.is_block_ui_break then
+    if state.user_config.ui_breakage_protection then
         -- Anti UI breakage
         -- * If the user enters insert mode on a forbidden line: leave insert mode.
         -- * If the user passes over a forbidden line on insert mode: leave insert mode.

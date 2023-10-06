@@ -326,6 +326,8 @@ Thanks to everyone who sponsors my projects and makes continued development and 
 
 ## FAQ
 
+> [Spectre hardcodes some mappings in order to work correctly](https://github.com/nvim-pack/nvim-spectre/blob/1abe23ec9b7bc3082164f4cb842d521ef70e080e/lua/spectre/init.lua#L175). You can remap them as described above. You are allowed to create as many mappings as you want. For name and description choose any value. 'map' and 'cmd' are the only important fields.
+
 - How can I add a custom status line? [windline](https://github.com/windwp/windline.nvim)
 
 ```lua
@@ -334,11 +336,13 @@ Thanks to everyone who sponsors my projects and makes continued development and 
     )
 ```
 
-- How to avoid ui break?
+- How can I paste multi line text in the search box?
+
 ```lua
-require(spectre).setup({ is_block_ui_break = true })
+require(spectre).setup({ ui_breakage_protection = false })
 ```
-> [Spectre hardcodes some mappings in order to work correctly](https://github.com/nvim-pack/nvim-spectre/blob/1abe23ec9b7bc3082164f4cb842d521ef70e080e/lua/spectre/init.lua#L175). You can remap them as described above. You are allowed to create as many mappings as you want. For name and description choose any value. 'map' and 'cmd' are the only important fields.
+
+> Warning: This will allow you to break the UI. A maximum of 2 lines are allowed when pasting text in the search field. Pasting more than that will break the UX to the point of making it non functional.
 
 - Is spectre compatible with the plugin mini.animate?
 
