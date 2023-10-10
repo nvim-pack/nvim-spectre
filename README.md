@@ -257,7 +257,7 @@ require('spectre').setup({
   },
   replace_vim_cmd = "cdo",
   is_open_target_win = true, --open file on opener window
-  is_insert_mode = false  -- start open panel on is_insert_mode
+  is_insert_mode = false,  -- start open panel on is_insert_mode
   is_block_ui_break = false -- mapping backspace and enter key to avoid ui break
 })
 
