@@ -6,11 +6,11 @@ function script_path()
    return str:match("(.*[/\\])")
 end
 
-vim.uv.chdir( script_path() .. '/spectre_oxi')
+vim.loop.chdir( script_path() .. '/spectre_oxi')
 
 os.execute'cargo build --release'
 
-local sysname = vim.uv.os_uname().sysname
+local sysname = vim.loop.os_uname().sysname
 
 if sysname == 'Darwin' then
     os.execute'cp target/release/libspectre_oxi.dylib ../lua/spectre_oxi.so'
