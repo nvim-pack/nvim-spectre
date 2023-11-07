@@ -298,7 +298,7 @@ There are two replace methods `sed` and `oxi`.
 Install `oxi`:
 
 - you will need to install `cargo` and run the command:
-  [build.sh](./build.sh)
+  [build.lua](./build.lua)
   [nvim-oxi](https://github.com/noib3/nvim-oxi)
 
 - set default replace command to `"oxi"` on `setup()`
@@ -328,7 +328,6 @@ Thanks to everyone who sponsors my projects and makes continued development and 
         require('spectre.state_utils').status_line()
     )
 ```
-
 - What if I have remapped keys in my neovim config?
 
 > [Spectre hardcodes some mappings in order to work correctly](https://github.com/nvim-pack/nvim-spectre/blob/1abe23ec9b7bc3082164f4cb842d521ef70e080e/lua/spectre/init.lua#L175). You can remap them as described above. You are allowed to create as many mappings as you want. For name and description choose any value. 'map' and 'cmd' are the only important fields.
