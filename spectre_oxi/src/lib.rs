@@ -23,7 +23,7 @@ fn spectre_oxi() -> oxi::Result<Dictionary> {
             "replace_file",
             Object::from(Function::from_fn(
                 |(file_path, lnum, search_query, replace_query): (String, i32, String, String)| {
-                    Ok(replace_file(file_path, lnum, search_query, replace_query))
+                    Ok::<bool, nvim_oxi::Error>(replace_file(file_path, lnum, search_query, replace_query))
                 },
             )),
         ),
@@ -31,7 +31,7 @@ fn spectre_oxi() -> oxi::Result<Dictionary> {
             "replace_all",
             Object::from(Function::from_fn(
                 |(search_query, replace_query, text): (String, String, String)| {
-                    Ok(replace_all(search_query, replace_query, text))
+                    Ok::<String, nvim_oxi::Error>(replace_all(search_query, replace_query, text))
                 },
             )),
         ),
@@ -39,7 +39,7 @@ fn spectre_oxi() -> oxi::Result<Dictionary> {
             "matchstr",
             Object::from(Function::from_fn(
                 |(search_text, search_query): (String, String)| {
-                    Ok(matchstr(search_text, search_query))
+                    Ok::<String, nvim_oxi::Error>(matchstr(search_text, search_query))
                 },
             )),
         ),
