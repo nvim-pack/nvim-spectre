@@ -95,6 +95,7 @@ M.render_filename = function(bufnr, namespace, line, entry)
     end
     local pos = 0
     for _, value in pairs(hl) do
+        pcall(function()
         api.nvim_buf_add_highlight(bufnr,
             namespace,
             value[2],
@@ -103,6 +104,7 @@ M.render_filename = function(bufnr, namespace, line, entry)
             pos + value[1][2]
         )
         pos = value[1][2] + pos
+      end)
     end
 end
 
