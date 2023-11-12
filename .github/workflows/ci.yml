@@ -11,7 +11,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-20.04
-            url: https://github.com/neovim/neovim/releases/download/v0.9.2/nvim-linux64.tar.gz
+            url: https://github.com/neovim/neovim/releases/download/v0.7.0/nvim-linux64.tar.gz
             manager: sudo apt-get
             packages: -y fd-find ripgrep
     steps:
@@ -43,9 +43,7 @@ jobs:
 
       - name: build rust
         run: |
-          export PATH="${PWD}/_neovim/bin:${PATH}"
-          export VIM="${PWD}/_neovim/share/nvim/runtime"
-          ./build.lua
+          ./build.sh
           
       - name: Run tests
         run: |
