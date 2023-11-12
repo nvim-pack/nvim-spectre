@@ -303,7 +303,7 @@ There are two replace methods `sed` and `oxi`.
 Install `oxi`:
 
 - you will need to install `cargo` and run the command:
-  [build.lua](./build.lua)
+  [build.sh](./build.sh)
   [nvim-oxi](https://github.com/noib3/nvim-oxi)
 
 - set default replace command to `"oxi"` on `setup()`
