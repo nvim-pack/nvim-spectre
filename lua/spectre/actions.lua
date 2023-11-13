@@ -188,12 +188,12 @@ M.run_replace = function(entries)
     -- state.status_line = "Replace done."
     -- is that correct i am not sure :)
     is_running = false
-    api.nvim_exec("checktime", false)
+    vim.cmd.checktime()
 end
 
 M.select_template = function()
     if not state.user_config.open_template or #state.user_config.open_template == 0 then
-        vim.notify('You need to add template.')
+        vim.notify('You need to set opne_template on setup.')
         return
     end
     vim.ui.select(state.user_config.open_template, {

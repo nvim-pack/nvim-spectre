@@ -1,5 +1,6 @@
 local api = vim.api
 
+---@class SpectreConfig
 local config = {
     filetype         = "spectre_panel",
     namespace        = api.nvim_create_namespace("SEARCH_PANEL"),

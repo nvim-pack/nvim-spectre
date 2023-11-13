@@ -70,10 +70,11 @@ end
 M.close = function()
     if state.bufnr ~= nil then
         local wins = vim.fn.win_findbuf(state.bufnr)
+        if not wins then return end
         for _, win_id in pairs(wins) do
             vim.api.nvim_win_close(win_id, true);
         end
-        state.opened = false
+        state.is_open = false
     end
 end
 
@@ -94,7 +95,7 @@ M.open = function(opts)
         begin_line_num = 3
     }, opts or {}) or {}
 
-    state.opened = true
+    state.is_open = true
     state.status_line = ''
     opts.search_text = utils.trim(opts.search_text)
     state.target_winid = api.nvim_get_current_win()
@@ -163,7 +164,7 @@ M.open = function(opts)
 end
 
 M.toggle = function(opts)
-    if state.opened then M.close()
+    if state.is_open then M.close()
     else M.open(opts) end
 end
 
@@ -208,7 +209,7 @@ function M.mapping_buffer(bufnr)
         pattern = "*",
         callback = function()
             if vim.api.nvim_buf_get_option(vim.api.nvim_get_current_buf(), 'filetype') == "spectre_panel" then
-                state.opened = false
+                state.is_open = false
             end
         end,
         desc = "Ensure spectre state when its window is closed by any mean"
