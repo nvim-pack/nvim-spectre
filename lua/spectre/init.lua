@@ -164,8 +164,11 @@ M.open = function(opts)
 end
 
 M.toggle = function(opts)
-    if state.is_open then M.close()
-    else M.open(opts) end
+    if state.is_open then
+        M.close()
+    else
+        M.open(opts)
+    end
 end
 
 function M.mapping_buffer(bufnr)
@@ -189,7 +192,7 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'o', 'ji', map_opt) -- don't append line on can make the UI wrong
     api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)
-    api.nvim_buf_set_keymap(bufnr, 'n', 'u', "", map_opt) -- disable undo, It breaks the UI.
+    api.nvim_buf_set_keymap(bufnr, 'n', 'u', "", map_opt)   -- disable undo, It breaks the UI.
     api.nvim_buf_set_keymap(bufnr, 'n', '<Tab>', "<cmd>lua require('spectre').tab()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '<S-Tab>', "<cmd>lua require('spectre').tab_shift()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', '?', "<cmd>lua require('spectre').show_help()<cr>", map_opt)
@@ -206,7 +209,7 @@ function M.mapping_buffer(bufnr)
     })
     vim.api.nvim_create_autocmd("WinClosed", {
         group = vim.api.nvim_create_augroup("SpectreStateOpened", { clear = true }),
-        pattern = "*",
+        buffer = 0,
         callback = function()
             if vim.api.nvim_buf_get_option(vim.api.nvim_get_current_buf(), 'filetype') == "spectre_panel" then
                 state.is_open = false
@@ -224,7 +227,7 @@ function M.mapping_buffer(bufnr)
         local anti_insert_breakage_group = vim.api.nvim_create_augroup("SpectreAntiInsertBreakage", { clear = true })
         vim.api.nvim_create_autocmd({ "InsertEnter", "CursorMovedI" }, {
             group = anti_insert_breakage_group,
-            pattern = "*",
+            buffer = 0,
             callback = function()
                 local current_filetype = vim.bo.filetype
                 if current_filetype == "spectre_panel" then
@@ -243,7 +246,7 @@ function M.mapping_buffer(bufnr)
         })
         vim.api.nvim_create_autocmd({ "WinLeave" }, {
             group = anti_insert_breakage_group,
-            pattern = "*",
+            buffer = 0,
             callback = function()
                 local current_filetype = vim.bo.filetype
                 if current_filetype == "spectre_panel" then
@@ -416,7 +419,6 @@ M.change_view = function(reset)
         state.view.mode = "replace"
         state.view.show_search = false
         state.view.show_replace = true
-
     else
         state.view.mode = "both"
         state.view.show_search = true
@@ -677,7 +679,7 @@ M.change_options = function(key)
         state.options[key] = false
     end
     state.options[key] = not state.options[key]
-    if state.regex == nil then return ;end
+    if state.regex == nil then return end
     state.regex.change_options(state_utils.get_replace_engine_config().options_value)
     if state.query.search_query ~= nil then
         ui.render_search_ui()
@@ -712,19 +714,18 @@ M.get_fold = function(lnum)
         return '1'
     end
     return '0'
-
 end
 
 M.tab = function()
     local line = vim.api.nvim_win_get_cursor(0)[1]
-    if line == 3 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1}) end
-    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {7, 1}) end
+    if line == 3 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 5, 1 }) end
+    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 7, 1 }) end
 end
 
 M.tab_shift = function()
     local line = vim.api.nvim_win_get_cursor(0)[1]
-    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {3, 1}) end
-    if line == 7 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), {5, 1}) end
+    if line == 5 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 3, 1 }) end
+    if line == 7 then vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 5, 1 }) end
 end
 
 return M
