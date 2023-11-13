@@ -1,4 +1,5 @@
 ---@class SpectreState
+---@field user_config table
 local state = {
     -- current config
     status_line = '',

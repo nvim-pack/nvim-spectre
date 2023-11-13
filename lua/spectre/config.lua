@@ -105,6 +105,11 @@ local config = {
             cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
             desc = "repeat last search"
         },
+        ['select_template'] = {
+            map = "<leader>rp",
+            cmd = "<cmd>lua require('spectre.actions').select_template()<CR>",
+            desc = "pick template"
+        },
     },
     find_engine        = {
         ['rg'] = {
@@ -193,7 +198,8 @@ local config = {
     replace_vim_cmd    = "cdo",
     is_open_target_win = true,
     is_insert_mode     = false,
-    is_block_ui_break = false
+    is_block_ui_break = false,
+    open_template      = {}
 }
 
 if vim.loop.os_uname().sysname == 'Darwin' then

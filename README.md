@@ -259,6 +259,11 @@ require('spectre').setup({
   is_open_target_win = true, --open file on opener window
   is_insert_mode = false,  -- start open panel on is_insert_mode
   is_block_ui_break = false -- mapping backspace and enter key to avoid ui break
+  open_template      = {
+    -- an template to use on open function
+    -- see the 'custom function' section bellow to learn how to configure the template
+    -- { search_text = 'text1', replace_text = '', path = "" }
+  }
 })
 
 ```
