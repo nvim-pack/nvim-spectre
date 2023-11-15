@@ -193,7 +193,7 @@ end
 
 M.select_template = function()
     if not state.user_config.open_template or #state.user_config.open_template == 0 then
-        vim.notify('You need to set opne_template on setup.')
+        vim.notify('You need to set open_template on setup function.')
         return
     end
     vim.ui.select(state.user_config.open_template, {
