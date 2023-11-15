@@ -1,4 +1,4 @@
----@class SpectreQuery 
+---@class SpectreQuery
 ---@field search_query string
 ---@field replace_query string
 ---@field path string
@@ -44,7 +44,7 @@ local state = {
         ['hidden'] = false
     },
     regex = nil,
-    user_config = {},
+    user_config = nil,
     bufnr = nil,
     cwd = nil,
     target_winid = nil,
