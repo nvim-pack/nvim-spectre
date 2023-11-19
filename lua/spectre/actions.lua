@@ -17,6 +17,11 @@ local open_file = function(filename, lnum, col, winid)
 end
 
 local get_file_path = function(filename)
+    -- if the path is absolute, return as is
+    -- TODO: need to handle Windows paths as well.
+    if string.sub(filename, 1, 1) == "/" then
+        return filename
+    end
     -- use default current working directory if state.cwd is nil or empty string
     --
     if state.cwd == nil or state.cwd == "" then

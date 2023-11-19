@@ -104,10 +104,16 @@ base.search = function(self, query)
         query.cwd = nil
     end
     table.insert(args, query.search_text)
+    if query.search_paths then
+        for _, dir in ipairs(query.search_paths) do
+            table.insert(args, dir)
+        end
+    else
+        -- https://github.com/nvim-telescope/telescope.nvim/issues/907
+        -- ripgrep issue
+        -- table.insert(args, '.')
+    end
 
-    -- https://github.com/nvim-telescope/telescope.nvim/issues/907
-    -- ripgrep issue
-    table.insert(args, '.')
 
     log.debug("search cwd " .. (query.cwd or ''))
     log.debug("search: " .. self.state.cmd .. ' ' .. table.concat(args, ' '))
