@@ -111,7 +111,7 @@ base.search = function(self, query)
     else
         -- https://github.com/nvim-telescope/telescope.nvim/issues/907
         -- ripgrep issue
-        -- table.insert(args, '.')
+        table.insert(args, '.')
     end
 
 

@@ -16,10 +16,16 @@ local open_file = function(filename, lnum, col, winid)
     api.nvim_win_set_cursor(0, { lnum, col })
 end
 
+local is_absolute = function(filename)
+    if vim.loop.os_uname().sysname == "Windows_NT" then
+        return string.find(filename, "%a:\\") == 1
+    end
+    return string.sub(filename, 1, 1) == "/"
+end
+
 local get_file_path = function(filename)
     -- if the path is absolute, return as is
-    -- TODO: need to handle Windows paths as well.
-    if string.sub(filename, 1, 1) == "/" then
+    if is_absolute(filename) then
         return filename
     end
     -- use default current working directory if state.cwd is nil or empty string
