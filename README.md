@@ -10,7 +10,7 @@ A search panel for neovim.
 
 - Use regex in search
 - It can filter search by path glob (filetype)
-- It only searches when you leave **Insert Mode**, `incsearch` can be annoying when writing regex
+- It only searches when you leave **Insert Mode**
 - Use one buffer and you can edit or move
 - A tool to replace text on project
 
@@ -62,10 +62,11 @@ Use command: `:Spectre`
 ## Regex Issues
 
 - The default regex uses vim's **magic mode** `\v` and **no-ignore-case**.
-- It has different regex sytax compared to the `rg` command and
+- It has different regex syntax compared to the `rg` command and
   replace command `sed` so be careful when replacing text.
 - It has a different highlighting result because I use vim regex to
   highlight text so be careful but you can try to replace.
+- If possible, we recommend building and using rust oxi engine to replace.
 
 ## Replace
 
@@ -261,7 +262,7 @@ require('spectre').setup({
   is_block_ui_break = false -- mapping backspace and enter key to avoid ui break
   open_template      = {
     -- an template to use on open function
-    -- see the 'custom function' section bellow to learn how to configure the template
+    -- see the 'custom function' section below to learn how to configure the template
     -- { search_text = 'text1', replace_text = '', path = "" }
   }
 })
