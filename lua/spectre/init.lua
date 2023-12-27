@@ -557,6 +557,7 @@ M.search_handler = function()
                     replace_query = state.query.replace_query,
                     search_text = item.search_text,
                     lnum = item.display_lnum,
+                    item_line = item.lnum,
                     is_replace = false
                 },
                 {

@@ -24,7 +24,7 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
     }, regex)
     local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
     api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
-        view_opts.padding_text .. diff.text,
+        view_opts.padding_text .. text_opts.item_line .. " " .. diff.text,
     })
     if not view_opts.is_disable then
         for _, value in pairs(diff.search) do
@@ -81,7 +81,7 @@ M.render_filename = function(bufnr, namespace, line, entry)
         state.user_config.color_devicons, '+')
 
     api.nvim_buf_set_lines(state.bufnr, line, line, false, {
-        string.format("%s %s%s:%s:%s:", icon, directory, filename, entry.lnum, entry.col),
+        string.format("%s %s%s:", icon, directory, filename),
     })
 
     local width = vim.api.nvim_strwidth(filename)
