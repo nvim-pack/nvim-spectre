@@ -295,6 +295,7 @@ require('spectre').open({
 -- you can use all variables above on command line
 -- for example: Spectre % is_insert_mode=true cwd=~/.config/nvim
 -- in this example `%` will expand to current file.
+```
 
 ### Search paths
 
@@ -309,7 +310,6 @@ directory.
 To limit the search paths further, you can also provide the `search_paths`
 option. This is the list of directories or files to search in, regardless of the
 `cwd`.
-```
 
 ## Replace Method
 
