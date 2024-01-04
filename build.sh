@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 cd spectre_oxi
 
 cargo build --release
