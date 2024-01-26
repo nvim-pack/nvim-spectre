@@ -195,12 +195,19 @@ M.select_template = function()
         vim.notify('You need to set open_template on setup function.')
         return
     end
+    local target_bufnr = state.target_bufnr
+    local target_winid = state.target_winid
+    local is_spectre = vim.api.nvim_buf_get_option(0, 'filetype') == "spectre_panel"
     vim.ui.select(state.user_config.open_template, {
         prompt = 'Select template',
         format_item = function(item) return item.search_text end
     }
     , function(item)
         require('spectre').open(vim.tbl_extend('force', state.query, item))
+        if is_spectre and target_bufnr and target_winid then
+            state.target_bufnr = target_bufnr
+            state.target_winid = target_winid
+        end
     end)
 end
 
