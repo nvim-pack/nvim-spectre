@@ -136,6 +136,7 @@ M.run_replace = function(entries)
         print("it is already running")
         return
     end
+    is_running = true
     entries = entries or M.get_all_entries()
     local replacer_creator = state_utils.get_replace_creator()
     local done_item = 0
@@ -185,8 +186,6 @@ M.run_replace = function(entries)
             })
         end
     end
-    -- state.status_line = "Replace done."
-    -- is that correct i am not sure :)
     is_running = false
     vim.cmd.checktime()
 end
