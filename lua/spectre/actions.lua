@@ -12,7 +12,8 @@ local open_file = function(filename, lnum, col, winid)
         vim.fn.win_gotoid(winid)
     end
     vim.api.nvim_command [[execute "normal! m` "]]
-    vim.cmd("e " .. filename)
+    local escaped_filename = vim.fn.fnameescape(filename)
+    vim.cmd("e " .. escaped_filename)
     api.nvim_win_set_cursor(0, { lnum, col })
 end
 
