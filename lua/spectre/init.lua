@@ -144,6 +144,7 @@ M.open = function(opts)
 
 
     state.cwd = opts.cwd
+    state.search_paths = opts.search_paths
     M.change_view("reset")
     ui.render_search_ui()
 
@@ -641,7 +642,8 @@ M.search = function(opts)
     state.finder_instance:search({
         cwd = state.cwd,
         search_text = state.query.search_query,
-        path = state.query.path
+        path = state.query.path,
+        search_paths = state.search_paths,
     })
     M.init_regex()
 end
