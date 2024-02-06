@@ -23,6 +23,7 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
         show_replace = view_opts.show_replace,
     }, regex)
     local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
+    local item_line_len = string.len(text_opts.item_line) + 1
     api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
         view_opts.padding_text .. text_opts.item_line .. " " .. diff.text,
     })
@@ -30,12 +31,12 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
         for _, value in pairs(diff.search) do
             api.nvim_buf_add_highlight(bufnr, namespace,
                 cfg.highlight.search,
-                text_opts.lnum, value[1] + view_opts.padding, value[2] + view_opts.padding)
+                text_opts.lnum, value[1] + view_opts.padding + item_line_len, value[2] + view_opts.padding + item_line_len)
         end
         for _, value in pairs(diff.replace) do
             api.nvim_buf_add_highlight(bufnr, namespace,
                 cfg.highlight.replace,
-                text_opts.lnum, value[1] + view_opts.padding, value[2] + view_opts.padding)
+                text_opts.lnum, value[1] + view_opts.padding + item_line_len, value[2] + view_opts.padding + item_line_len)
         end
         api.nvim_buf_add_highlight(state.bufnr, config.namespace,
             cfg.highlight.border, text_opts.lnum, 0, view_opts.padding)

@@ -388,6 +388,7 @@ M.do_replace_text = function(opts, async_id)
                 replace_query = state.query.replace_query,
                 search_text = item.search_text,
                 lnum = item.display_lnum,
+                item_line = item.lnum,
                 is_replace = true,
             },
             {
@@ -456,6 +457,7 @@ M.toggle_line = function(line_visual)
                 replace_query = state.query.replace_query,
                 search_text = item.search_text,
                 lnum = item.display_lnum,
+                item_line = item.lnum,
                 is_replace = true
             },
             {
@@ -489,6 +491,7 @@ M.toggle_line = function(line_visual)
                         replace_query = state.query.replace_query,
                         search_text = item.search_text,
                         lnum = item.display_lnum,
+                        item_line = item.lnum,
                         is_replace = true
                     },
                     {
