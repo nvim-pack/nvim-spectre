@@ -23,19 +23,29 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
         show_replace = view_opts.show_replace,
     }, regex)
     local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
-    api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
-        view_opts.padding_text .. diff.text,
-    })
+
+    local item_line_len = 0
+    if cfg.lnum_for_results == true then
+        item_line_len = string.len(text_opts.item_line) + 1
+        api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
+            view_opts.padding_text .. text_opts.item_line .. " " .. diff.text,
+        })
+    else
+        api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
+            view_opts.padding_text .. diff.text,
+        })
+    end
+
     if not view_opts.is_disable then
         for _, value in pairs(diff.search) do
             api.nvim_buf_add_highlight(bufnr, namespace,
                 cfg.highlight.search,
-                text_opts.lnum, value[1] + view_opts.padding, value[2] + view_opts.padding)
+                text_opts.lnum, value[1] + view_opts.padding + item_line_len, value[2] + view_opts.padding + item_line_len)
         end
         for _, value in pairs(diff.replace) do
             api.nvim_buf_add_highlight(bufnr, namespace,
                 cfg.highlight.replace,
-                text_opts.lnum, value[1] + view_opts.padding, value[2] + view_opts.padding)
+                text_opts.lnum, value[1] + view_opts.padding + item_line_len, value[2] + view_opts.padding + item_line_len)
         end
         api.nvim_buf_add_highlight(state.bufnr, config.namespace,
             cfg.highlight.border, text_opts.lnum, 0, view_opts.padding)
@@ -81,7 +91,7 @@ M.render_filename = function(bufnr, namespace, line, entry)
         state.user_config.color_devicons, '+')
 
     api.nvim_buf_set_lines(state.bufnr, line, line, false, {
-        string.format("%s %s%s:%s:%s:", icon, directory, filename, entry.lnum, entry.col),
+        string.format("%s %s%s:", icon, directory, filename),
     })
 
     local width = vim.api.nvim_strwidth(filename)
