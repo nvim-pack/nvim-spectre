@@ -23,10 +23,19 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
         show_replace = view_opts.show_replace,
     }, regex)
     local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
-    local item_line_len = string.len(text_opts.item_line) + 1
-    api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
-        view_opts.padding_text .. text_opts.item_line .. " " .. diff.text,
-    })
+
+    local item_line_len = 0
+    if cfg.lnum_for_results == true then
+        item_line_len = string.len(text_opts.item_line) + 1
+        api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
+            view_opts.padding_text .. text_opts.item_line .. " " .. diff.text,
+        })
+    else
+        api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
+            view_opts.padding_text .. diff.text,
+        })
+    end
+
     if not view_opts.is_disable then
         for _, value in pairs(diff.search) do
             api.nvim_buf_add_highlight(bufnr, namespace,
