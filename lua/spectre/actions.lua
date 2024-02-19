@@ -11,17 +11,17 @@ local open_file = function(filename, lnum, col, winid)
     if winid ~= nil then
         vim.fn.win_gotoid(winid)
     end
-    vim.api.nvim_command [[execute "normal! m` "]]
+    vim.api.nvim_command([[execute "normal! m` "]])
     local escaped_filename = vim.fn.fnameescape(filename)
-    vim.cmd("e " .. escaped_filename)
+    vim.cmd('e ' .. escaped_filename)
     api.nvim_win_set_cursor(0, { lnum, col })
 end
 
 local is_absolute = function(filename)
-    if vim.loop.os_uname().sysname == "Windows_NT" then
-        return string.find(filename, "%a:\\") == 1
+    if vim.loop.os_uname().sysname == 'Windows_NT' then
+        return string.find(filename, '%a:\\') == 1
     end
-    return string.sub(filename, 1, 1) == "/"
+    return string.sub(filename, 1, 1) == '/'
 end
 
 local get_file_path = function(filename)
@@ -31,7 +31,7 @@ local get_file_path = function(filename)
     end
     -- use default current working directory if state.cwd is nil or empty string
     --
-    if state.cwd == nil or state.cwd == "" then
+    if state.cwd == nil or state.cwd == '' then
         state.cwd = vim.fn.getcwd()
     end
 
@@ -40,7 +40,9 @@ end
 
 M.select_entry = function()
     local t = M.get_current_entry()
-    if t == nil then return nil end
+    if t == nil then
+        return nil
+    end
     if config.is_open_target_win and state.target_winid ~= nil then
         open_file(t.filename, t.lnum, t.col, state.target_winid)
     else
@@ -52,7 +54,7 @@ M.get_state = function()
     local result = {
         query = state.query,
         cwd = state.cwd,
-        options = state.options
+        options = state.options,
     }
     return vim.deepcopy(result)
 end
@@ -91,10 +93,10 @@ end
 
 M.send_to_qf = function()
     local entries = M.get_all_entries()
-    vim.cmd [[copen]]
-    vim.fn.setqflist(entries, "r")
+    vim.cmd([[copen]])
+    vim.fn.setqflist(entries, 'r')
     vim.fn.setqflist({}, 'r', {
-        title = string.format("Result Search: [%s]", state.query.search_query)
+        title = string.format('Result Search: [%s]', state.query.search_query),
     })
     return entries
 end
@@ -111,12 +113,7 @@ M.replace_cmd = function()
         end
         if state.query.is_file == true then
             vim.fn.win_gotoid(state.target_winid)
-            replace_cmd = string.format(
-                ':%%s/\\v%s/%s/g%s',
-                search_regex,
-                state.query.replace_query,
-                ignore_case
-            )
+            replace_cmd = string.format(':%%s/\\v%s/%s/g%s', search_regex, state.query.replace_query, ignore_case)
         else
             replace_cmd = string.format(
                 ':%s %%s/\\v%s/%s/g%s | update',
@@ -137,7 +134,7 @@ M.run_current_replace = function()
     if entry then
         M.run_replace({ entry })
     else
-        vim.notify("Not found any entry to replace.")
+        vim.notify('Not found any entry to replace.')
     end
 end
 
@@ -145,7 +142,7 @@ local is_running = false
 
 M.run_replace = function(entries)
     if is_running == true then
-        print("it is already running")
+        print('it is already running')
         return
     end
     is_running = true
@@ -154,37 +151,46 @@ M.run_replace = function(entries)
     local done_item = 0
     local error_item = 0
     state.status_line = 'Run Replace.'
-    local replacer = replacer_creator:new(
-        state_utils.get_replace_engine_config(), {
-            on_done = function(result)
-                if (result.ref) then
-                    done_item = done_item + 1
-                    state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
-                    M.set_entry_finish(result.ref.display_lnum)
-                    local value = result.ref
-                    value.text = " DONE"
-                    vim.fn.setqflist(entries, 'r')
-                    api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
-                        { virt_text = { { "󰄲 DONE", "String" } }, virt_text_pos = 'eol' })
-                end
-            end,
-            on_error = function(result)
-                if type(result.value) == "string" then
-                    for line in result.value:gmatch("[^\r\n]+") do
-                        print(line)
-                    end
-                end
-                if (result.ref) then
-                    error_item = error_item + 1
-                    local value = result.ref
-                    value.text = "ERROR"
-                    vim.fn.setqflist(entries, 'r')
-                    state.status_line = "Replace: " .. done_item .. " Error:" .. error_item
-                    api.nvim_buf_set_extmark(state.bufnr, config.namespace, value.display_lnum, 0,
-                        { virt_text = { { "󰄱 ERROR", "Error" } }, virt_text_pos = 'eol' })
+    local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), {
+        on_done = function(result)
+            if result.ref then
+                done_item = done_item + 1
+                state.status_line = 'Replace: ' .. done_item .. ' Error:' .. error_item
+                M.set_entry_finish(result.ref.display_lnum)
+                local value = result.ref
+                value.text = ' DONE'
+                vim.fn.setqflist(entries, 'r')
+                api.nvim_buf_set_extmark(
+                    state.bufnr,
+                    config.namespace,
+                    value.display_lnum,
+                    0,
+                    { virt_text = { { '󰄲 DONE', 'String' } }, virt_text_pos = 'eol' }
+                )
+            end
+        end,
+        on_error = function(result)
+            if type(result.value) == 'string' then
+                for line in result.value:gmatch('[^\r\n]+') do
+                    print(line)
                 end
             end
-        })
+            if result.ref then
+                error_item = error_item + 1
+                local value = result.ref
+                value.text = 'ERROR'
+                vim.fn.setqflist(entries, 'r')
+                state.status_line = 'Replace: ' .. done_item .. ' Error:' .. error_item
+                api.nvim_buf_set_extmark(
+                    state.bufnr,
+                    config.namespace,
+                    value.display_lnum,
+                    0,
+                    { virt_text = { { '󰄱 ERROR', 'Error' } }, virt_text_pos = 'eol' }
+                )
+            end
+        end,
+    })
     for _, value in pairs(entries) do
         if not value.is_replace_finish then
             replacer:replace({
@@ -209,12 +215,13 @@ M.select_template = function()
     end
     local target_bufnr = state.target_bufnr
     local target_winid = state.target_winid
-    local is_spectre = vim.api.nvim_buf_get_option(0, 'filetype') == "spectre_panel"
+    local is_spectre = vim.api.nvim_buf_get_option(0, 'filetype') == 'spectre_panel'
     vim.ui.select(state.user_config.open_template, {
         prompt = 'Select template',
-        format_item = function(item) return item.search_text end
-    }
-    , function(item)
+        format_item = function(item)
+            return item.search_text
+        end,
+    }, function(item)
         require('spectre').open(vim.tbl_extend('force', state.query, item))
         if is_spectre and target_bufnr and target_winid then
             state.target_bufnr = target_bufnr

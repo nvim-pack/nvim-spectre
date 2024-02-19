@@ -45,8 +45,8 @@ end
 
 M.status_line = function(opt)
     opt = opt or {}
-    local slant_right = opt.seprator or '';
-    local main_color = opt.main_color or 'black';
+    local slant_right = opt.seprator or ''
+    local main_color = opt.main_color or 'black'
     local spectre = {
         filetypes = { 'spectre_panel' },
         active = {
@@ -57,7 +57,6 @@ M.status_line = function(opt)
                     text = { 'black', 'white' },
                     sep_left = { main_color, 'white' },
                     sep_right = { 'white', 'NormalBg' },
-
                 },
                 text = function()
                     if state.status_line == '' or state.status_line == nil then
@@ -66,12 +65,12 @@ M.status_line = function(opt)
                         return {
                             { slant_right, 'sep_left' },
                             { state.status_line, 'text' },
-                            { slant_right, 'sep_right' }
+                            { slant_right, 'sep_right' },
                         }
                     end
-                end
+                end,
             },
-            { "%=", '' },
+            { '%=', '' },
             { slant_right, { 'NormalBg', main_color } },
             { ' Spectre ', { 'white', main_color, 'bold' } },
         },

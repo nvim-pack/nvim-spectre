@@ -14,7 +14,7 @@ rust.change_options = function(options_value)
             rust.flag = rust.flag .. v
         end
         if #rust.flag > 0 then
-            rust.flag = string.format("(?%s)", rust.flag)
+            rust.flag = string.format('(?%s)', rust.flag)
         end
     end
 end
@@ -24,7 +24,7 @@ rust.matchstr = function(search_text, search_query)
     if not ok then
         log.debug(search_text)
         log.debug(result)
-        return ""
+        return ''
     end
     return result
 end

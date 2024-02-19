@@ -1,7 +1,7 @@
 local api = vim.api
 local M = {}
 
-local Job = require("plenary.job")
+local Job = require('plenary.job')
 
 local config = require('spectre.config')
 local state = require('spectre.state')
@@ -11,12 +11,18 @@ M.parse_line_grep = function(query)
     local t = { text = query }
     local _, _, filename, lnum, col, text = string.find(t.text, _regex_file_line)
 
-    if filename == nil then return nil end
+    if filename == nil then
+        return nil
+    end
     local ok
     ok, lnum = pcall(tonumber, lnum)
-    if not ok then return nil end
+    if not ok then
+        return nil
+    end
     ok, col = pcall(tonumber, col)
-    if not ok then return nil end
+    if not ok then
+        return nil
+    end
 
     t.filename = filename
     t.lnum = lnum
@@ -31,30 +37,22 @@ end
 M.escape_vim_magic = function(query)
     query = string.gsub(query, '@', '\\@')
     local regex = [=[(\\)@<![><=](\\)@!]=]
-    return vim.fn.substitute(
-        query,
-        "\\v" .. regex,
-        [[\\\0]],
-        'g'
-    )
+    return vim.fn.substitute(query, '\\v' .. regex, [[\\\0]], 'g')
 end
 -- escape_chars but don't escape it if have slash before or after !
 M.escape_chars = function(query)
     local regex = [=[(\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\\{\}])@!]=]
-    return vim.fn.substitute(
-        query,
-        "\\v" .. regex,
-        [[\\\0]],
-        'g'
-    )
+    return vim.fn.substitute(query, '\\v' .. regex, [[\\\0]], 'g')
 end
 
 function M.trim(s)
-    return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
+    return (string.gsub(s, '^%s*(.-)%s*$', '%1'))
 end
 
 M.truncate = function(str, len)
-    if not str then return '' end
+    if not str then
+        return ''
+    end
     str = tostring(str) -- We need to make sure its an actually a string and not a number
     if vim.api.nvim_strwidth(str) <= len then
         return str
@@ -82,21 +80,26 @@ end
 
 -- escape slash with /
 M.escape_sed = function(query)
-    return query:gsub("[%/]", function(v)
+    return query:gsub('[%/]', function(v)
         return [[\]] .. v
     end)
 end
 
 M.run_os_cmd = function(cmd, cwd)
-    if type(cmd) ~= "table" then
+    if type(cmd) ~= 'table' then
         print('cmd has to be a table')
         return {}
     end
     local command = table.remove(cmd, 1)
     local stderr = {}
-    local stdout, ret = Job:new({ command = command, args = cmd, cwd = cwd, on_stderr = function(_, data)
-        table.insert(stderr, data)
-    end }):sync()
+    local stdout, ret = Job:new({
+        command = command,
+        args = cmd,
+        cwd = cwd,
+        on_stderr = function(_, data)
+            table.insert(stderr, data)
+        end,
+    }):sync()
     return stdout, ret, stderr
 end
 
@@ -105,8 +108,13 @@ function M.write_virtual_text(bufnr, ns, line, chunks, virt_text_pos)
     if ns == config.namespace_status and state.vt.status_id ~= 0 then
         vt_id = state.vt.status_id
     end
-    return api.nvim_buf_set_extmark(bufnr, ns, line, 0,
-        { id = vt_id, virt_text = chunks, virt_text_pos = virt_text_pos or 'overlay' })
+    return api.nvim_buf_set_extmark(
+        bufnr,
+        ns,
+        line,
+        0,
+        { id = vt_id, virt_text = chunks, virt_text_pos = virt_text_pos or 'overlay' }
+    )
 end
 
 function M.get_visual_selection()
@@ -131,20 +139,19 @@ end
 --- use vim function substitute with magic mode
 --- need to verify that query is work in vim when you run command
 function M.vim_replace_text(search_text, replace_text, search_line)
-    local text = vim.fn.substitute(
-        search_line,
-        "\\v" .. M.escape_vim_magic(search_text),
-        replace_text,
-        'g'
-    )
+    local text = vim.fn.substitute(search_line, '\\v' .. M.escape_vim_magic(search_text), replace_text, 'g')
     return text
 end
 
 --- get all position of text match in string
 ---@return table col{{start1, end1},{start2, end2}} math in line
 local function match_text_line(match, str, padding)
-    if match == nil or str == nil then return {} end
-    if match == "" or str == "" then return {} end
+    if match == nil or str == nil then
+        return {}
+    end
+    if match == '' or str == '' then
+        return {}
+    end
     padding = padding or 0
     local index = 0
     local len = string.len(str)
@@ -168,8 +175,8 @@ end
 --- @return table { text, search = {}, replace = {}}
 M.get_hl_line_text = function(opts, regex)
     local search_match = regex.matchstr(opts.search_text, opts.search_query)
-    local result = { search = {}, replace = {}, text = "" }
-    opts.replace_query = opts.replace_query or ""
+    local result = { search = {}, replace = {}, text = '' }
+    opts.replace_query = opts.replace_query or ''
     result.text = opts.search_text
     if search_match then
         result.search = match_text_line(search_match, opts.search_text, 0)
@@ -189,9 +196,7 @@ M.get_hl_line_text = function(opts, regex)
                     local pos = { v[2], v[2] + replace_length }
                     table.insert(result.replace, pos)
                     local text = result.text
-                    result.text = text:sub(0, v[2])
-                        .. replace_match
-                        .. text:sub(v[2] + 1)
+                    result.text = text:sub(0, v[2]) .. replace_match .. text:sub(v[2] + 1)
                     total_increase = total_increase + replace_length
                 end
             end
@@ -204,7 +209,7 @@ M.tbl_remove_dup = function(tbl)
     local hash = {}
     local res = {}
     for _, v in ipairs(tbl) do
-        if (not hash[v]) then
+        if not hash[v] then
             res[#res + 1] = v
             hash[v] = true
         end

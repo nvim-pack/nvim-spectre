@@ -2,7 +2,7 @@ local rg = {}
 
 rg.init = function(_, config)
     config = vim.tbl_extend('force', {
-        cmd = "rg",
+        cmd = 'rg',
         args = {
             '--color=never',
             '--no-heading',
@@ -21,11 +21,10 @@ rg.get_path_args = function(_, paths)
 
     local args = {}
     for _, path in ipairs(paths) do
-        table.insert(args, "-g")
+        table.insert(args, '-g')
         table.insert(args, path)
     end
     return args
 end
-
 
 return rg

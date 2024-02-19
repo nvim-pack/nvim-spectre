@@ -2,10 +2,10 @@ local ag = {}
 
 ag.init = function(_, config)
     config = vim.tbl_extend('force', {
-        cmd = "ag",
+        cmd = 'ag',
         args = {
             '--vimgrep',
-            '-s'
+            '-s',
         },
     }, config or {})
     return config
@@ -16,9 +16,9 @@ ag.get_path_args = function(_, paths)
         return {}
     end
 
-    local pattern = ""
+    local pattern = ''
     for _, path in ipairs(paths) do
-        pattern = pattern .. path .. "|"
+        pattern = pattern .. path .. '|'
     end
     return { '-G', pattern:sub(1, #pattern - 1) }
 end

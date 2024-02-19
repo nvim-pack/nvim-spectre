@@ -4,7 +4,6 @@
 ---@field path string
 ---@field is_file boolean
 
-
 ---@class SpectreState
 ---@field user_config SpectreConfig
 ---@field status_line string
@@ -27,21 +26,21 @@ local state = {
         search_query = '',
         replace_query = '',
         path = '',
-        is_file = false -- search in current file
+        is_file = false, -- search in current file
     },
     query_backup = nil,
     -- display text and highlight on result
     view = {
-        mode = "both",
+        mode = 'both',
         search = true,
-        replace = true
+        replace = true,
     },
     -- virtual text namespace
     vt = {},
     --for options
     options = {
         ['ignore-case'] = false,
-        ['hidden'] = false
+        ['hidden'] = false,
     },
     regex = nil,
     user_config = nil,
@@ -50,7 +49,7 @@ local state = {
     target_winid = nil,
     total_item = {},
     is_running = false,
-    is_open = false
+    is_open = false,
 }
 
 if _G.__is_dev then

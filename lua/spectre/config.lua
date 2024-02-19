@@ -2,12 +2,12 @@ local api = vim.api
 
 ---@class SpectreConfig
 local config = {
-    filetype         = "spectre_panel",
-    namespace        = api.nvim_create_namespace("SEARCH_PANEL"),
-    namespace_ui     = api.nvim_create_namespace("SEARCH_PANEL_UI"),
-    namespace_header = api.nvim_create_namespace("SEARCH_PANEL_HEADER"),
-    namespace_status = api.nvim_create_namespace("SEARCH_PANEL_STATUS"),
-    namespace_result = api.nvim_create_namespace("SEARCH_PANEL_RESULT"),
+    filetype = 'spectre_panel',
+    namespace = api.nvim_create_namespace('SEARCH_PANEL'),
+    namespace_ui = api.nvim_create_namespace('SEARCH_PANEL_UI'),
+    namespace_header = api.nvim_create_namespace('SEARCH_PANEL_HEADER'),
+    namespace_status = api.nvim_create_namespace('SEARCH_PANEL_STATUS'),
+    namespace_result = api.nvim_create_namespace('SEARCH_PANEL_RESULT'),
 
     lnum_UI = 8, -- total line for ui you can edit it
     line_result = 10, -- line begin result
@@ -20,102 +20,102 @@ local config = {
 
     line_sep_start = '┌──────────────────────────────────────────────────────',
     result_padding = '│  ',
-    line_sep       = '└──────────────────────────────────────────────────────',
-    color_devicons     = true,
-    open_cmd           = 'vnew',
-    live_update        = false,
-    lnum_for_results   = false, -- show line number for search/replace results
-    highlight          = {
-        headers = "SpectreHeader",
-        ui = "SpectreBody",
-        filename = "SpectreFile",
-        filedirectory = "SpectreDir",
-        search = "SpectreSearch",
-        border = "SpectreBorder",
-        replace = "SpectreReplace"
+    line_sep = '└──────────────────────────────────────────────────────',
+    color_devicons = true,
+    open_cmd = 'vnew',
+    live_update = false,
+    lnum_for_results = false, -- show line number for search/replace results
+    highlight = {
+        headers = 'SpectreHeader',
+        ui = 'SpectreBody',
+        filename = 'SpectreFile',
+        filedirectory = 'SpectreDir',
+        search = 'SpectreSearch',
+        border = 'SpectreBorder',
+        replace = 'SpectreReplace',
     },
-    mapping            = {
+    mapping = {
         ['toggle_line'] = {
-            map = "dd",
+            map = 'dd',
             cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
-            desc = "toggle item"
+            desc = 'toggle item',
         },
         ['enter_file'] = {
-            map = "<cr>",
+            map = '<cr>',
             cmd = "<cmd>lua require('spectre.actions').select_entry()<CR>",
-            desc = "open file"
+            desc = 'open file',
         },
         ['send_to_qf'] = {
-            map = "<leader>q",
+            map = '<leader>q',
             cmd = "<cmd>lua require('spectre.actions').send_to_qf()<CR>",
-            desc = "send all items to quickfix"
+            desc = 'send all items to quickfix',
         },
         ['replace_cmd'] = {
-            map = "<leader>c",
+            map = '<leader>c',
             cmd = "<cmd>lua require('spectre.actions').replace_cmd()<CR>",
-            desc = "input replace command"
+            desc = 'input replace command',
         },
         ['show_option_menu'] = {
-            map = "<leader>o",
+            map = '<leader>o',
             cmd = "<cmd>lua require('spectre').show_options()<CR>",
-            desc = "show options"
+            desc = 'show options',
         },
         ['run_current_replace'] = {
-            map = "<leader>rc",
+            map = '<leader>rc',
             cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
-            desc = "replace item"
+            desc = 'replace item',
         },
         ['run_replace'] = {
-            map = "<leader>R",
+            map = '<leader>R',
             cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>",
-            desc = "replace all"
+            desc = 'replace all',
         },
         -- only show replace text in result UI
         ['change_view_mode'] = {
-            map = "<leader>v",
+            map = '<leader>v',
             cmd = "<cmd>lua require('spectre').change_view()<CR>",
-            desc = "change result view mode"
+            desc = 'change result view mode',
         },
         ['change_replace_sed'] = {
-            map = "trs",
+            map = 'trs',
             cmd = "<cmd>lua require('spectre').change_engine_replace('sed')<CR>",
-            desc = "use sed to replace"
+            desc = 'use sed to replace',
         },
         ['change_replace_oxi'] = {
-            map = "tro",
+            map = 'tro',
             cmd = "<cmd>lua require('spectre').change_engine_replace('oxi')<CR>",
-            desc = "use oxi to replace"
+            desc = 'use oxi to replace',
         },
         ['toggle_live_update'] = {
-            map = "tu",
+            map = 'tu',
             cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
-            desc = "update when vim writes to file"
+            desc = 'update when vim writes to file',
         },
         -- only work if the find_engine following have that option
         ['toggle_ignore_case'] = {
-            map = "ti",
+            map = 'ti',
             cmd = "<cmd>lua require('spectre').change_options('ignore-case')<CR>",
-            desc = "toggle ignore case"
+            desc = 'toggle ignore case',
         },
         ['toggle_ignore_hidden'] = {
-            map = "th",
+            map = 'th',
             cmd = "<cmd>lua require('spectre').change_options('hidden')<CR>",
-            desc = "toggle search hidden"
+            desc = 'toggle search hidden',
         },
         ['resume_last_search'] = {
-            map = "<leader>l",
+            map = '<leader>l',
             cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
-            desc = "repeat last search"
+            desc = 'repeat last search',
         },
         ['select_template'] = {
-            map = "<leader>rp",
+            map = '<leader>rp',
             cmd = "<cmd>lua require('spectre.actions').select_template()<CR>",
-            desc = "pick template"
+            desc = 'pick template',
         },
     },
-    find_engine        = {
+    find_engine = {
         ['rg'] = {
-            cmd = "rg",
+            cmd = 'rg',
             -- default args
             args = {
                 '--color=never',
@@ -126,86 +126,85 @@ local config = {
             },
             options = {
                 ['ignore-case'] = {
-                    value = "--ignore-case",
-                    icon = "[I]",
-                    desc = "ignore case"
+                    value = '--ignore-case',
+                    icon = '[I]',
+                    desc = 'ignore case',
                 },
                 ['hidden'] = {
-                    value = "--hidden",
-                    desc = "hidden file",
-                    icon = "[H]"
-
+                    value = '--hidden',
+                    desc = 'hidden file',
+                    icon = '[H]',
                 },
                 -- you can put any option you want here it can toggle with
                 -- show_option function
-            }
+            },
         },
         ['ag'] = {
-            cmd = "ag",
+            cmd = 'ag',
             -- default args
             args = {
                 '--vimgrep',
-                '-s'
+                '-s',
             },
             options = {
                 ['ignore-case'] = {
-                    value = "-i",
-                    icon = "[I]",
-                    desc = "ignore case"
+                    value = '-i',
+                    icon = '[I]',
+                    desc = 'ignore case',
                 },
                 ['hidden'] = {
-                    value = "--hidden",
-                    desc = "hidden file",
-                    icon = "[H]"
+                    value = '--hidden',
+                    desc = 'hidden file',
+                    icon = '[H]',
                 },
             },
         },
     },
-    replace_engine     = {
+    replace_engine = {
         ['sed'] = {
-            cmd = "sed",
+            cmd = 'sed',
             args = {
                 '-i',
                 '-E',
             },
             options = {
                 ['ignore-case'] = {
-                    value = "--ignore-case",
-                    icon = "[I]",
-                    desc = "ignore case"
+                    value = '--ignore-case',
+                    icon = '[I]',
+                    desc = 'ignore case',
                 },
-            }
+            },
         },
         ['oxi'] = {
             cmd = 'oxi',
             args = {},
             options = {
                 ['ignore-case'] = {
-                    value = "i",
-                    icon = "[I]",
-                    desc = "ignore case"
+                    value = 'i',
+                    icon = '[I]',
+                    desc = 'ignore case',
                 },
-            }
-        }
+            },
+        },
     },
-    default            = {
+    default = {
         find = {
-            cmd = "rg",
-            options = { "ignore-case" }
+            cmd = 'rg',
+            options = { 'ignore-case' },
         },
         replace = {
-            cmd = "sed"
-        }
+            cmd = 'sed',
+        },
     },
-    replace_vim_cmd    = "cdo",
+    replace_vim_cmd = 'cdo',
     is_open_target_win = true,
-    is_insert_mode     = false,
+    is_insert_mode = false,
     is_block_ui_break = false,
-    open_template      = {}
+    open_template = {},
 }
 
 if vim.loop.os_uname().sysname == 'Darwin' then
-    config.replace_engine.sed.cmd = "gsed"
+    config.replace_engine.sed.cmd = 'gsed'
     if vim.fn.executable('gsed') == 0 then
         print("You need to install gnu sed 'brew install gnu-sed'")
     end
