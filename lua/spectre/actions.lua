@@ -223,4 +223,13 @@ M.select_template = function()
     end)
 end
 
+M.copy_current_line = function()
+    local line_text = vim.api.nvim_get_current_line()
+    local row = unpack(vim.api.nvim_win_get_cursor(0))
+    if row > state.user_config.lnum_UI then
+        line_text = line_text:sub(#state.user_config.result_padding, #line_text)
+    end
+    vim.fn.setreg(vim.v.register, line_text)
+end
+
 return M
