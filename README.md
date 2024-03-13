@@ -102,6 +102,16 @@ require('spectre').setup({
       replace = "DiffDelete"
   },
   mapping={
+    ['tab'] = {
+        map = '<Tab>',
+        cmd = "<cmd>lua require('spectre').tab()<cr>",
+        desc = 'next query'
+    },
+    ['shift-tab'] = {
+        map = '<S-Tab>',
+        cmd = "<cmd>lua require('spectre').tab_shift()<cr>",
+        desc = 'previous query'
+    },
     ['toggle_line'] = {
         map = "dd",
         cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
