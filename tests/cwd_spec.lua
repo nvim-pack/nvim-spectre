@@ -27,7 +27,7 @@ describe('check search on another directory', function()
             config.lnum_UI + 2,
             config.lnum_UI + 4
         )
-        eq(' test2.txt:1:1:', test1[1], 'should have correct text')
+        eq(' test2.txt:', test1[1], 'should have correct text')
         vim.api.nvim_win_set_cursor(0, { 12, 0 })
         vim.api.nvim_feedkeys(helper.t('<cr>'), 'x', true)
         local filename = vim.api.nvim_buf_get_name(0)
@@ -49,7 +49,7 @@ describe('check search on another directory', function()
             config.lnum_UI + 2,
             config.lnum_UI + 4
         )
-        eq(' test2.txt:1:1:', test1[1], 'should have correct text')
+        eq(' test2.txt:', test1[1], 'should have correct text')
         api.nvim_feedkeys(helper.t('<leader>R'), 'x', true)
         vim.wait(1000)
         local output_txt = utils.run_os_cmd({ 'cat', '../project_2/test2.txt' })
