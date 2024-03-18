@@ -188,6 +188,7 @@ function M.mapping_buffer(bufnr)
     api.nvim_buf_set_keymap(bufnr, 'v', 'p', "p<cmd>lua require('spectre').on_search_change()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'v', 'P', "P<cmd>lua require('spectre').on_search_change()<cr>", map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'd', '<nop>', map_opt)
+    api.nvim_buf_set_keymap(bufnr, 'i', '<c-c>', '<esc>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'v', 'd', '<esc><cmd>lua require("spectre").toggle_checked()<cr>', map_opt)
     api.nvim_buf_set_keymap(bufnr, 'n', 'o', 'ji', map_opt) -- don't append line on can make the UI wrong
     api.nvim_buf_set_keymap(bufnr, 'n', 'O', 'ki', map_opt)
