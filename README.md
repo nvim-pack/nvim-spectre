@@ -254,7 +254,11 @@ require('spectre').setup({
             desc = "ignore case"
           },
         }
-      }
+      },
+      ['sd'] = {
+        cmd = "sd",
+        options = { },
+      },
   },
   default = {
       find = {
@@ -325,7 +329,7 @@ option. This is the list of directories or files to search in, regardless of the
 
 ## Replace Method
 
-There are two replace methods `sed` and `oxi`.
+There are three replace methods `sed`, `oxi` and `sd`.
 
 | Sed                        | oxi                                 |
 | -------------------------- | ----------------------------------- |

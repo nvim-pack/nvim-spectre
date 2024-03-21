@@ -319,7 +319,7 @@ CUSTOM FUNCTIONS ~
 
 REPLACE METHOD                                        *spectre-replace-method*
 
-There are two replace methods `sed` and `oxi`.
+There are three replace methods `sed`, `oxi` and `sd`.
 
 │           Sed            │                oxi                │
 │group number by '\0'      │group number by '${0}'             │

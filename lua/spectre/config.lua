@@ -196,6 +196,10 @@ local config = {
                 },
             },
         },
+        ['sd'] = {
+            cmd = "sd",
+            options = { },
+        },
     },
     default = {
         find = {
