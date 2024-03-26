@@ -67,6 +67,15 @@ M.open_file_search = function(opts)
     M.open(opts)
 end
 
+M.toggle_file_search = function(opts)
+    opts = opts or {}
+    if state.is_open then
+        M.close()
+    else
+        M.open_file_search(opts)
+    end
+end
+
 M.close = function()
     if state.bufnr ~= nil then
         local wins = vim.fn.win_findbuf(state.bufnr)
