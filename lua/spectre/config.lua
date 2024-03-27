@@ -2,6 +2,7 @@ local api = vim.api
 
 ---@class SpectreConfig
 local config = {
+
     filetype = 'spectre_panel',
     namespace = api.nvim_create_namespace('SEARCH_PANEL'),
     namespace_ui = api.nvim_create_namespace('SEARCH_PANEL_UI'),
@@ -9,8 +10,8 @@ local config = {
     namespace_status = api.nvim_create_namespace('SEARCH_PANEL_STATUS'),
     namespace_result = api.nvim_create_namespace('SEARCH_PANEL_RESULT'),
 
-    lnum_UI = 8, -- total line for ui you can edit it
-    line_result = 10, -- line begin result
+    lnum_UI            = 8, -- total line for ui you can edit it
+    line_result        = 10, -- line begin result
 
     -- result_padding = '│  ',
     -- color_devicons = true,
@@ -100,6 +101,11 @@ local config = {
             map = 'tu',
             cmd = "<cmd>lua require('spectre').toggle_live_update()<CR>",
             desc = 'update when vim writes to file',
+        },
+        ['run_current_replace'] = {
+            map = "tp",
+            cmd = "<cmd>lua require('spectre.actions').show_file_preview()<CR>",
+            desc = "preview file"
         },
         -- only work if the find_engine following have that option
         ['toggle_ignore_case'] = {
