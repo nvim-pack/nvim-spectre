@@ -38,6 +38,30 @@ M.setup = function(cfg)
         state.options[opt] = true
     end
     require('spectre.highlight').set_hl()
+    M.check_replace_cmd_bins()
+end
+
+M.check_replace_cmd_bins = function()
+    if state.user_config.default.replace.cmd == 'sed' then
+        if vim.loop.os_uname().sysname == 'Darwin' then
+            config.replace_engine.sed.cmd = 'gsed'
+            if vim.fn.executable('gsed') == 0 then
+                print("You need to install gnu sed 'brew install gnu-sed'")
+            end
+        end
+
+        if vim.loop.os_uname().sysname == 'Windows_NT' then
+            if vim.fn.executable('sed') == 0 then
+                print("You need to install gnu sed with 'scoop install sed' or 'choco install sed'")
+            end
+        end
+    end
+
+    if state.user_config.default.replace.cmd == 'sd' then
+        if vim.fn.executable('sd') == 0 then
+            print("You need to install or build 'sd' from: https://github.com/chmln/sd")
+        end
+    end
 end
 
 M.open_visual = function(opts)
