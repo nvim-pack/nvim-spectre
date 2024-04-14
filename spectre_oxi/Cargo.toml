@@ -11,6 +11,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 nvim-oxi = { version = "0.3.0", features=["neovim-0-9"] }
-regex = "1.6.0"
+fancy-regex = "0.13.0"
 lazy_static = "1.4.0"
 
