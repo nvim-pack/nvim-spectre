@@ -706,13 +706,13 @@ M.get_fold = function(lnum)
         return '0'
     end
     local line = vim.fn.getline(lnum)
-    local check = string.find(line, '([^%s]*%:%d*:%d*:)$')
+    local check = string.find(line, '([^%s]*%:)$')
     if check then
         return '>1'
     end
 
     local nextline = vim.fn.getline(lnum + 1)
-    local nextcheck = string.find(nextline, '([^%s]*%:%d*:%d*:)$')
+    local nextcheck = string.find(nextline, '([^%s]*%:)$')
     if nextcheck then
         return '<1'
     end
