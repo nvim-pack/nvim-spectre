@@ -38,12 +38,12 @@ local config = {
         ['tab'] = {
             map = '<Tab>',
             cmd = "<cmd>lua require('spectre').tab()<cr>",
-            desc = 'next query'
+            desc = 'next query',
         },
         ['shift-tab'] = {
             map = '<S-Tab>',
             cmd = "<cmd>lua require('spectre').tab_shift()<cr>",
-            desc = 'previous query'
+            desc = 'previous query',
         },
         ['toggle_line'] = {
             map = 'dd',
@@ -197,8 +197,8 @@ local config = {
             },
         },
         ['sd'] = {
-            cmd = "sd",
-            options = { },
+            cmd = 'sd',
+            options = {},
         },
     },
     default = {
