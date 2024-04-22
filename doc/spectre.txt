@@ -32,7 +32,7 @@ WHY USE SPECTRE?                                    *spectre-why-use-spectre?*
 
 - Use regex in search
 - It can filter search by path glob (filetype)
-- It only searches when you leave **Insert Mode**, `incsearch` can be annoying when writing regex
+- It only searches when you leave **Insert Mode**
 - Use one buffer and you can edit or move
 - A tool to replace text on project
 
@@ -60,8 +60,8 @@ You may need run `brew install gnu-sed`.
 USAGE                                                          *spectre-usage*
 
 >
-    vim.keymap.set('n', '<leader>S', '<cmd>lua require("spectre").open()<CR>', {
-        desc = "Open Spectre"
+    vim.keymap.set('n', '<leader>S', '<cmd>lua require("spectre").toggle()<CR>', {
+        desc = "Toggle Spectre"
     })
     vim.keymap.set('n', '<leader>sw', '<cmd>lua require("spectre").open_visual({select_word=true})<CR>', {
         desc = "Search current word"
@@ -92,10 +92,11 @@ REGEX ISSUES                                            *spectre-regex-issues*
 
 
 - The default regex uses vim’s **magic mode** `\v` and **no-ignore-case**.
-- It has different regex sytax compared to the `rg` command and
+- It has different regex syntax compared to the `rg` command and
     replace command `sed` so be careful when replacing text.
 - It has a different highlighting result because I use vim regex to
     highlight text so be careful but you can try to replace.
+- If possible, we recommend building and using rust oxi engine to replace.
 
 
 REPLACE                                                      *spectre-replace*
@@ -110,6 +111,8 @@ CUSTOMIZATION                                          *spectre-customization*
     require('spectre').setup()
 <
 
+
+Config
 
 Change any settings if you don’t like them. **Don’t just copy all** as
 settings may change as the plugin is updated so it may be better use the
@@ -131,6 +134,16 @@ default settings.
           replace = "DiffDelete"
       },
       mapping={
+        ['tab'] = {
+            map = '<Tab>',
+            cmd = "<cmd>lua require('spectre').tab()<cr>",
+            desc = 'next query'
+        },
+        ['shift-tab'] = {
+            map = '<S-Tab>',
+            cmd = "<cmd>lua require('spectre').tab_shift()<cr>",
+            desc = 'previous query'
+        },
         ['toggle_line'] = {
             map = "dd",
             cmd = "<cmd>lua require('spectre').toggle_line()<CR>",
@@ -209,6 +222,7 @@ default settings.
           cmd = "rg",
           -- default args
           args = {
+            '--pcre2'
             '--color=never',
             '--no-heading',
             '--with-filename',
@@ -273,7 +287,11 @@ default settings.
                 desc = "ignore case"
               },
             }
-          }
+          },
+          ['sd'] = {
+            cmd = "sd",
+            options = { },
+          },
       },
       default = {
           find = {
@@ -288,7 +306,13 @@ default settings.
       },
       replace_vim_cmd = "cdo",
       is_open_target_win = true, --open file on opener window
-      is_insert_mode = false  -- start open panel on is_insert_mode
+      is_insert_mode = false,  -- start open panel on is_insert_mode
+      is_block_ui_break = false -- mapping backspace and enter key to avoid ui break
+      open_template      = {
+        -- an template to use on open function
+        -- see the 'custom function' section below to learn how to configure the template
+        -- { search_text = 'text1', replace_text = '', path = "" }
+      }
     })
 <
 
@@ -305,10 +329,14 @@ CUSTOM FUNCTIONS ~
     -- write your custom open function
     require('spectre').open({
       is_insert_mode = true,
+      -- the directory where the search tool will be started in
       cwd = "~/.config/nvim",
       search_text="test",
       replace_text="test",
+      -- the pattern of files to consider for searching
       path="lua/**/*.lua",
+      -- the directories or files to search in
+      search_paths = {"lua/", "plugin/"},
       is_close = false, -- close an exists instance of spectre and open new
     })
     -- you can use all variables above on command line
@@ -316,6 +344,20 @@ CUSTOM FUNCTIONS ~
     -- in this example `%` will expand to current file.
 <
 
+
+SEARCH PATHS ~
+
+By default, searching is performed in the current working directory, which can
+also be customized using the `cwd` option in the example above.
+
+The `path` option limits the search only to the files matching the provided
+pattern. Note, however, that even if you provide the `path`, all files in the
+`cwd` still need to be listed, and this could be quite slow if `cwd` is a large
+directory.
+
+To limit the search paths further, you can also provide the `search_paths`
+option. This is the list of directories or files to search in, regardless of
+the `cwd`.
 
 REPLACE METHOD                                        *spectre-replace-method*
 
@@ -369,7 +411,12 @@ FAQ                                                              *spectre-faq*
 
 
 
-- What if I have remapped keys in my neovim config?
+- How to avoid ui break?
+
+
+>
+    require('spectre').setup({ is_block_ui_break = true })
+<
 
 
 
@@ -381,20 +428,21 @@ FAQ                                                              *spectre-faq*
 
 
 
+- Is spectre compatible with the plugin mini.animate?
+
+
+
+  Yes, but only if you set `opts = { open = { enable = false } }` on
+  `mini.animate`, otherwise it will cause serious issues preventing spectre from
+  opening/closing.
+
+
+
 - Why is it called Spectre?
 
 
-
-  I wanted to call it `Search Panel` but this name is not cool.
-
-
-
-  I got the name of a hero on a game.
-
-
-
-  Spectre has a skill to find enemy on global map so I use it:)
-
+I wanted to call it `Search Panel` but this name is not cool. I got the name of
+a hero on a game. Spectre has a skill to find enemy on global map so I use it:)
 
 Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
 
