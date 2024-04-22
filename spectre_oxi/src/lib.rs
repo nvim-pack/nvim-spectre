@@ -1,5 +1,5 @@
 use nvim_oxi::{self as oxi, Dictionary, Function, Object};
-use regex::Regex;
+use fancy_regex::Regex;
 use std::{
     fs::File,
     io::{BufRead, BufReader, Write},
@@ -65,15 +65,14 @@ fn get_static_regex(pattern: String) -> Result<&'static Mutex<Regex>, String> {
 /// it return empty string when the text is not match
 fn matchstr(search_text: String, search_query: String) -> String {
     if let Ok(r) = get_static_regex(search_query) {
-        let regex = r.lock().unwrap();
-        if regex.is_match(&search_text) {
-            return regex
-                .captures(&search_text)
-                .unwrap()
-                .get(0)
-                .unwrap()
-                .as_str()
-                .to_string();
+        let regex = match r.lock() {
+            Ok(lock) => lock,
+            Err(_) => return String::new(),
+        };
+        if let Ok(Some(captures)) = regex.captures(&search_text) {
+            if let Some(mat) = captures.get(0) {
+                return mat.as_str().to_string();
+            }
         }
     }
     String::new()

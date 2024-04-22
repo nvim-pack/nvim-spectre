@@ -190,6 +190,7 @@ require('spectre').setup({
       cmd = "rg",
       -- default args
       args = {
+        '--pcre2'
         '--color=never',
         '--no-heading',
         '--with-filename',
@@ -373,9 +374,11 @@ Thanks to everyone who sponsors my projects and makes continued development and 
 ```
 
 - How to avoid ui break?
+
 ```lua
 require('spectre').setup({ is_block_ui_break = true })
 ```
+
 > [Spectre hardcodes some mappings in order to work correctly](https://github.com/nvim-pack/nvim-spectre/blob/1abe23ec9b7bc3082164f4cb842d521ef70e080e/lua/spectre/init.lua#L175). You can remap them as described above. You are allowed to create as many mappings as you want. For name and description choose any value. 'map' and 'cmd' are the only important fields.
 
 - Is spectre compatible with the plugin mini.animate?
@@ -384,6 +387,6 @@ require('spectre').setup({ is_block_ui_break = true })
 
 - Why is it called Spectre?
 
- I wanted to call it `Search Panel` but this name is not cool.
- I got the name of a hero on a game.
- Spectre has a skill to find enemy on global map so I use it:)
+I wanted to call it `Search Panel` but this name is not cool.
+I got the name of a hero on a game.
+Spectre has a skill to find enemy on global map so I use it:)
