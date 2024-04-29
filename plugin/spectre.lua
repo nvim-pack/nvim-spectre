@@ -34,4 +34,5 @@ vim.api.nvim_create_user_command("Spectre", function(ctx)
 end, {
 	nargs = "*",
 	complete = "file",
+    desc = "Global find and replace",
 })
