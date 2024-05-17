@@ -190,13 +190,12 @@ require('spectre').setup({
       cmd = "rg",
       -- default args
       args = {
-        '--pcre2'
         '--color=never',
         '--no-heading',
         '--with-filename',
         '--line-number',
         '--column',
-      } ,
+      },
       options = {
         ['ignore-case'] = {
           value= "--ignore-case",

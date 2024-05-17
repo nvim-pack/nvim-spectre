@@ -1,10 +1,13 @@
-spectre-customize	spectre.txt	/*spectre-customize*
+spectre-customization	spectre.txt	/*spectre-customization*
 spectre-faq	spectre.txt	/*spectre-faq*
 spectre-installation	spectre.txt	/*spectre-installation*
 spectre-nvim-spectre	spectre.txt	/*spectre-nvim-spectre*
-spectre-regex-issue	spectre.txt	/*spectre-regex-issue*
+spectre-regex-issues	spectre.txt	/*spectre-regex-issues*
 spectre-replace	spectre.txt	/*spectre-replace*
+spectre-replace-method	spectre.txt	/*spectre-replace-method*
+spectre-sponsors	spectre.txt	/*spectre-sponsors*
 spectre-table-of-contents	spectre.txt	/*spectre-table-of-contents*
 spectre-usage	spectre.txt	/*spectre-usage*
-spectre-why-spectre?	spectre.txt	/*spectre-why-spectre?*
+spectre-warnings	spectre.txt	/*spectre-warnings*
+spectre-why-use-spectre?	spectre.txt	/*spectre-why-use-spectre?*
 spectre.txt	spectre.txt	/*spectre.txt*
