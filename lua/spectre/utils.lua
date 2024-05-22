@@ -217,9 +217,8 @@ M.tbl_remove_dup = function(tbl)
     return res
 end
 
-M.tbl_flatten = function (t)
-    return vim.fn.has("nvim-0.11") == 1 and vim.iter(t):flatten(math.huge):totable()
-      or vim.tbl_flatten(t)
+M.tbl_flatten = function(t)
+    return vim.fn.has('nvim-0.11') == 1 and vim.iter(t):flatten(math.huge):totable() or vim.tbl_flatten(t)
 end
 
 return M
