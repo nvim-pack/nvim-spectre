@@ -33,7 +33,7 @@ sed.replace = function(self, value)
         utils.escape_sed(value.search_text),
         utils.escape_sed(value.replace_text)
     )
-    local args = vim.tbl_flatten({
+    local args = utils.tbl_flatten({
         self.state.args,
         t_sed,
         value.filename,
