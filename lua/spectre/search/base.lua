@@ -1,5 +1,4 @@
 ---@diagnostic disable: param-type-mismatch
-local flatten = vim.tbl_flatten
 local Job = require('plenary.job')
 local log = require('spectre._log')
 local MAX_LINE_CHARS = 255
@@ -84,7 +83,7 @@ base.on_exit = function(self, value)
 end
 
 base.search = function(self, query)
-    local args = flatten({
+    local args = utils.tbl_flatten({
         -- query.search_text,
         self.state.args,
     })
@@ -99,7 +98,7 @@ base.search = function(self, query)
 
     -- no more args
     table.insert(args, '--')
-    args = flatten(args)
+    args = utils.tbl_flatten(args)
 
     if query.cwd == '' then
         query.cwd = nil
