@@ -708,14 +708,14 @@ M.get_fold = function(lnum)
         return '0'
     end
     local line = vim.fn.getline(lnum)
-    local check = string.find(line, '([^%s]*%:)$')
-    if check then
+    local padding = line:sub(0, #config.result_padding)
+    if padding ~= config.result_padding then
         return '>1'
     end
 
     local nextline = vim.fn.getline(lnum + 1)
-    local nextcheck = string.find(nextline, '([^%s]*%:)$')
-    if nextcheck then
+    padding = nextline:sub(0, #config.result_padding)
+    if padding ~= config.result_padding then
         return '<1'
     end
     local item = state.total_item[lnum]
