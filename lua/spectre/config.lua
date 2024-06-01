@@ -9,7 +9,7 @@ local config = {
     namespace_status = api.nvim_create_namespace('SEARCH_PANEL_STATUS'),
     namespace_result = api.nvim_create_namespace('SEARCH_PANEL_RESULT'),
 
-    lnum_UI = 8, -- total line for ui you can edit it
+    lnum_UI = 8,      -- total line for ui you can edit it
     line_result = 10, -- line begin result
 
     -- result_padding = '│  ',
@@ -122,6 +122,11 @@ local config = {
             cmd = "<cmd>lua require('spectre.actions').select_template()<CR>",
             desc = 'pick template',
         },
+        ['delete_line'] = {
+            map = '<leader>rd',
+            cmd = "<cmd>lua require('spectre.actions').run_delete_line()<CR>",
+            desc = 'delete line',
+        }
     },
     find_engine = {
         ['rg'] = {

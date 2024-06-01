@@ -1,4 +1,5 @@
 ---@diagnostic disable: param-type-mismatch
+local Path = require('plenary.path')
 local base = {}
 base.__index = base
 
@@ -47,4 +48,44 @@ local function extend(child)
     return creator
 end
 
+base.delete_line = function(self, value)
+    local cwd = value.cwd or vim.loop.cwd()
+    if not value.filename:match('^%/') then
+        value.filename = Path:new(cwd):joinpath(value.filename):absolute()
+    end
+    -- Read the original file
+    local lines = {}
+    local file = io.open(value.filename, 'r')
+    if not file then
+        self.on_error(false, value)
+        return
+    end
+    local lnum = 0
+    local changed = false
+    for line in file:lines() do
+        lnum = lnum + 1
+        if lnum ~= value.lnum then
+            table.insert(lines, line)
+        else
+            changed = true
+        end
+    end
+    file:close()
+
+    if not changed then
+        self.on_error(false, value)
+        return
+    end
+    file = io.open(value.filename, 'w')
+    if not file then
+        self.on_error(false, value)
+        return
+    end
+    for _, line in ipairs(lines) do
+        file:write(line, '\n')
+    end
+    file:close()
+    self:on_done(true, value)
+    return
+end
 return { extend = extend }

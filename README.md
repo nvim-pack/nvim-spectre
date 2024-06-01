@@ -182,6 +182,16 @@ require('spectre').setup({
       cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
       desc = "repeat last search"
     },
+    ['select_template'] = {
+        map = '<leader>rp',
+        cmd = "<cmd>lua require('spectre.actions').select_template()<CR>",
+        desc = 'pick template',
+    },
+    ['delete_line'] = {
+        map = '<leader>rd',
+        cmd = "<cmd>lua require('spectre.actions').run_delete_line()<CR>",
+        desc = 'delete line',
+    }
     -- you can put your mapping here it only use normal mode
   },
   find_engine = {

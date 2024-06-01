@@ -14,7 +14,7 @@ local open_file = function(filename, lnum, col, winid)
     vim.api.nvim_command([[execute "normal! m` "]])
     local escaped_filename = vim.fn.fnameescape(filename)
     vim.cmd('e ' .. escaped_filename)
-    api.nvim_win_set_cursor(0, { lnum, col })
+    pcall(api.nvim_win_set_cursor, 0, { lnum, col })
 end
 
 local is_absolute = function(filename)
@@ -140,18 +140,10 @@ end
 
 local is_running = false
 
-M.run_replace = function(entries)
-    if is_running == true then
-        print('it is already running')
-        return
-    end
-    is_running = true
-    entries = entries or M.get_all_entries()
-    local replacer_creator = state_utils.get_replace_creator()
+local ui_handle = function(entries)
     local done_item = 0
     local error_item = 0
-    state.status_line = 'Run Replace.'
-    local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), {
+    return {
         on_done = function(result)
             if result.ref then
                 done_item = done_item + 1
@@ -190,7 +182,19 @@ M.run_replace = function(entries)
                 )
             end
         end,
-    })
+    }
+end
+
+M.run_replace = function(entries)
+    if is_running == true then
+        print('it is already running')
+        return
+    end
+    is_running = true
+    entries = entries or M.get_all_entries()
+    local replacer_creator = state_utils.get_replace_creator()
+    state.status_line = 'Run Replace.'
+    local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), ui_handle(entries))
     for _, value in pairs(entries) do
         if not value.is_replace_finish then
             replacer:replace({
@@ -206,6 +210,32 @@ M.run_replace = function(entries)
     end
     is_running = false
     vim.cmd.checktime()
+end
+
+M.delete_line_file_current = function()
+    local entry = M.get_current_entry()
+    if entry then
+        M.run_delete_line({ entry })
+    else
+        vim.notify('Not found any entry to delete.')
+    end
+end
+
+M.run_delete_line = function(entries)
+    entries = entries or M.get_all_entries()
+    local replacer_creator = state_utils.get_replace_creator()
+    local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), ui_handle(entries))
+    for _, value in pairs(entries) do
+        replacer:delete_line({
+            lnum = value.lnum,
+            col = value.col,
+            cwd = state.cwd,
+            display_lnum = value.display_lnum,
+            filename = value.filename,
+            search_text = state.query.search_query,
+            replace_text = state.query.replace_query,
+        })
+    end
 end
 
 M.select_template = function()
