@@ -1,5 +1,6 @@
 ---@diagnostic disable: param-type-mismatch
 local Path = require('plenary.path')
+local log = require('spectre._log')
 local base = {}
 base.__index = base
 
@@ -53,6 +54,7 @@ base.delete_line = function(self, value)
     if not value.filename:match('^%/') then
         value.filename = Path:new(cwd):joinpath(value.filename):absolute()
     end
+    log.debug('delete line on file: ' .. value.filename)
     -- Read the original file
     local lines = {}
     local file = io.open(value.filename, 'r')
@@ -64,10 +66,11 @@ base.delete_line = function(self, value)
     local changed = false
     for line in file:lines() do
         lnum = lnum + 1
-        if lnum ~= value.lnum then
-            table.insert(lines, line)
-        else
+        if vim.iter(value.lnums):find(lnum) then
+            log.debug('delete line: ' .. lnum)
             changed = true
+        else
+            table.insert(lines, line)
         end
     end
     file:close()
@@ -86,6 +89,5 @@ base.delete_line = function(self, value)
     end
     file:close()
     self:on_done(true, value)
-    return
 end
 return { extend = extend }
