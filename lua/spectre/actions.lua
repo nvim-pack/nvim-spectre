@@ -93,11 +93,17 @@ end
 
 M.send_to_qf = function()
     local entries = M.get_all_entries()
-    vim.cmd([[copen]])
     vim.fn.setqflist(entries, 'r')
     vim.fn.setqflist({}, 'r', {
         title = string.format('Result Search: [%s]', state.query.search_query),
     })
+    local trouble_avail, _ = pcall(require, "trouble")
+    local status = trouble_avail and state.user_config.use_trouble_qf
+    if status then
+        vim.cmd([[Trouble quickfix win.relative=win focus=true]])
+    else
+        vim.cmd([[copen]])
+    end
     return entries
 end
 

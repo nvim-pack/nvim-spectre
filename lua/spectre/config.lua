@@ -216,6 +216,7 @@ local config = {
         },
     },
     replace_vim_cmd = 'cdo',
+    use_trouble_qf = false,
     is_open_target_win = true,
     is_insert_mode = false,
     is_block_ui_break = false,
