@@ -93,11 +93,17 @@ end
 
 M.send_to_qf = function()
     local entries = M.get_all_entries()
-    vim.cmd([[copen]])
     vim.fn.setqflist(entries, 'r')
     vim.fn.setqflist({}, 'r', {
         title = string.format('Result Search: [%s]', state.query.search_query),
     })
+    local trouble_avail, _ = pcall(require, 'trouble')
+    local status = trouble_avail and state.user_config.use_trouble_qf
+    if status then
+        vim.cmd([[Trouble quickfix win.relative=win focus=true]])
+    else
+        vim.cmd([[copen]])
+    end
     return entries
 end
 
@@ -223,61 +229,53 @@ M.run_delete_line = function(entries)
     local error_item = 0
     state.status_line = 'Run Replace.'
     local replacer_creator = state_utils.get_replace_creator()
-    local replacer = replacer_creator:new(state_utils.get_replace_engine_config(),
-        {
-            on_done = function(result)
-                if result.ref then
-                    done_item = done_item + 1
-                    local value = result.ref
-                    state.status_line = 'Delete line: ' .. done_item .. ' Error:' .. error_item
-                    for _, display_lnum in ipairs(value.display_lnums) do
-                        M.set_entry_finish(display_lnum)
-                        api.nvim_buf_set_extmark(
-                            state.bufnr,
-                            config.namespace,
-                            display_lnum,
-                            0,
-                            { virt_text = { { '󰄲 DONE', 'String' } }, virt_text_pos = 'eol' }
-                        )
-                    end
+    local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), {
+        on_done = function(result)
+            if result.ref then
+                done_item = done_item + 1
+                local value = result.ref
+                state.status_line = 'Delete line: ' .. done_item .. ' Error:' .. error_item
+                for _, display_lnum in ipairs(value.display_lnums) do
+                    M.set_entry_finish(display_lnum)
+                    api.nvim_buf_set_extmark(
+                        state.bufnr,
+                        config.namespace,
+                        display_lnum,
+                        0,
+                        { virt_text = { { '󰄲 DONE', 'String' } }, virt_text_pos = 'eol' }
+                    )
                 end
-            end,
-            on_error = function(result)
-                if result.ref then
-                    error_item = error_item + 1
-                    local value = result.ref
-                    state.status_line = 'Delete line: ' .. done_item .. ' Error:' .. error_item
-                    for _, display_lnum in ipairs(value.display_lnums) do
-                        M.set_entry_finish(display_lnum)
-                        api.nvim_buf_set_extmark(
-                            state.bufnr,
-                            config.namespace,
-                            display_lnum,
-                            0,
-                            { virt_text = { { '󰄱 ERROR', 'Error' } }, virt_text_pos = 'eol' }
-                        )
-                    end
+            end
+        end,
+        on_error = function(result)
+            if result.ref then
+                error_item = error_item + 1
+                local value = result.ref
+                state.status_line = 'Delete line: ' .. done_item .. ' Error:' .. error_item
+                for _, display_lnum in ipairs(value.display_lnums) do
+                    M.set_entry_finish(display_lnum)
+                    api.nvim_buf_set_extmark(
+                        state.bufnr,
+                        config.namespace,
+                        display_lnum,
+                        0,
+                        { virt_text = { { '󰄱 ERROR', 'Error' } }, virt_text_pos = 'eol' }
+                    )
                 end
-            end,
-        }
-    )
+            end
+        end,
+    })
     local groupby_filename = {}
     for _, value in pairs(entries) do
         if not groupby_filename[value.filename] then
             groupby_filename[value.filename] = {
                 filename = value.filename,
                 lnums = { value.lnum },
-                display_lnums = { value.display_lnum }
+                display_lnums = { value.display_lnum },
             }
         else
-            table.insert(
-                groupby_filename[value.filename].lnums,
-                value.lnum
-            )
-            table.insert(
-                groupby_filename[value.filename].display_lnums,
-                value.display_lnum
-            )
+            table.insert(groupby_filename[value.filename].lnums, value.lnum)
+            table.insert(groupby_filename[value.filename].display_lnums, value.display_lnum)
         end
     end
 
@@ -290,7 +288,6 @@ M.run_delete_line = function(entries)
         })
     end
 end
-
 
 M.select_template = function()
     if not state.user_config.open_template or #state.user_config.open_template == 0 then
