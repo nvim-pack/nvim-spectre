@@ -26,6 +26,7 @@ You may also need to install the following:
 - [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) (finder)
 - [devicons](https://github.com/kyazdani42/nvim-web-devicons) (icons)
 - [sed](https://www.gnu.org/software/sed/) (replace tool)
+- [trouble.nvim](https://github.com/folke/trouble.nvim) (improved quickfix list)
 
 ### MacOs
 
@@ -282,6 +283,7 @@ require('spectre').setup({
       }
   },
   replace_vim_cmd = "cdo",
+  use_trouble_qf = false, -- use trouble.nvim as quickfix list
   is_open_target_win = true, --open file on opener window
   is_insert_mode = false,  -- start open panel on is_insert_mode
   is_block_ui_break = false -- mapping backspace and enter key to avoid ui break
