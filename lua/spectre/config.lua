@@ -189,6 +189,7 @@ local config = {
                     desc = 'ignore case',
                 },
             },
+            warn = true,
         },
         ['oxi'] = {
             cmd = 'oxi',
@@ -204,6 +205,7 @@ local config = {
         ['sd'] = {
             cmd = 'sd',
             options = {},
+            warn = true,
         },
     },
     default = {
