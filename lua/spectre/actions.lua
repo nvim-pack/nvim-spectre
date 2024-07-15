@@ -143,6 +143,93 @@ M.run_current_replace = function()
         vim.notify('Not found any entry to replace.')
     end
 end
+local function readFileSync(path)
+    local uv = require('luv')
+    local fd = assert(uv.fs_open(path, "r", 438))
+    local stat = assert(uv.fs_fstat(fd))
+    local data = assert(uv.fs_read(fd, stat.size, 0))
+    assert(uv.fs_close(fd))
+    return data
+end
+local function spliteFile(inputstr, sep)
+    if sep == nil then
+        sep = "\n"
+    end
+    local t = {}
+    for str in string.gmatch(inputstr, "(.-)\n") do
+        table.insert(t, str)
+    end
+    return t
+end
+local function getFileRange(file, entry)
+    local content = {}
+    local h_pos;
+    local cnt = 0;
+
+    for k, v in pairs(file) do
+        if k >= entry.lnum - 5 and k <= entry.lnum + 5 then
+            table.insert(content, v)
+            cnt = cnt + 1
+        end
+        if k == entry.lnum then
+            h_pos = cnt;
+        end
+    end
+    return content, h_pos
+end
+
+M.show_file_preview = function()
+    local entry = M.get_current_entry()
+    if entry then
+        local data = readFileSync(entry.filename)
+        local file = spliteFile(data)
+
+        local content, h_pos = getFileRange(file, entry)
+        local win_width, win_height = vim.lsp.util._make_floating_popup_size(content, {})
+        local query_length = string.len(state.query.search_query)
+
+        local bufnr = vim.api.nvim_create_buf(false, true)
+
+        api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+        api.nvim_buf_set_lines(bufnr, 0, -1, true, content)
+        api.nvim_buf_add_highlight(bufnr, -1,
+            state.user_config.highlight.search,
+            h_pos - 1, entry.col - 1, entry.col + query_length - 1)
+
+        local help_win = vim.api.nvim_open_win(bufnr, false, {
+            style = "minimal",
+            title = " " .. entry.filename .. " ",
+            title_pos = 'center',
+            relative = 'cursor',
+            width = win_width,
+            height = win_height,
+            col = 0,
+            row = 1,
+            border = "rounded"
+        })
+
+        api.nvim_win_set_option(help_win, 'winblend', 0)
+        api.nvim_buf_set_keymap(bufnr, 'n', '<Esc>', '<CMD>lua vim.api.nvim_win_close(' .. help_win .. ', true)<CR>',
+            { noremap = true })
+
+        api.nvim_create_autocmd({
+            'CursorMovedI',
+            'CursorMoved',
+            'CursorMovedI',
+            'BufHidden',
+            'BufLeave',
+            'InsertEnter',
+            'WinScrolled',
+            'BufDelete',
+        }, {
+            callback = function()
+                pcall(vim.api.nvim_win_close, help_win, true)
+            end,
+        })
+    else
+        vim.notify("Not found any entry.")
+    end
+end
 
 local is_running = false
 
