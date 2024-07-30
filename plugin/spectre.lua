@@ -1,5 +1,3 @@
-local spectre = require("spectre")
-
 local function get_arg(str)
 	local key, value = str:match([=[^([^%s]*)=([^%s]*)$]=])
 
@@ -11,6 +9,7 @@ local function get_arg(str)
 end
 
 vim.api.nvim_create_user_command("Spectre", function(ctx)
+    local spectre = require("spectre")
 	local args = {}
 	local user_args
 	if #ctx.fargs == 1 or vim.tbl_isempty(ctx.fargs) then
