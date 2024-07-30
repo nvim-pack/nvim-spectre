@@ -365,7 +365,7 @@ require('spectre').setup({
             cmd = "oxi"
        }
     }
-  )
+})
 ```
 
 ## Sponsors
