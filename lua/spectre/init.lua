@@ -43,7 +43,7 @@ end
 
 M.check_replace_cmd_bins = function()
     if state.user_config.default.replace.cmd == 'sed' then
-        if vim.loop.os_uname().sysname == 'Darwin' then
+        if vim.loop.os_uname().sysname == 'Darwin' and vim.fn.executable('sed') == 0 then
             config.replace_engine.sed.cmd = 'gsed'
             if vim.fn.executable('gsed') == 0 and state.user_config.replace_engine.sed.warn then
                 print("You need to install gnu sed 'brew install gnu-sed'")
