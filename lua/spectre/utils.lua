@@ -57,7 +57,7 @@ M.truncate = function(str, len)
     if vim.api.nvim_strwidth(str) <= len then
         return str
     end
-    return string.sub(str, 0, len) .. " ..."
+    return string.sub(str, 0, len) .. ' ...'
 end
 -- only escape slash
 M.escape_slash = function(query)
