@@ -57,21 +57,7 @@ M.truncate = function(str, len)
     if vim.api.nvim_strwidth(str) <= len then
         return str
     end
-    local charlen = 0
-    local cur_len = 0
-    local result = ''
-    local len_of_dots = vim.api.nvim_strwidth('…')
-    while true do
-        local part = M.strcharpart(str, charlen, 1)
-        cur_len = cur_len + vim.api.nvim_strwidth(part)
-        if (cur_len + len_of_dots) > len then
-            result = result .. '…'
-            break
-        end
-        result = result .. part
-        charlen = charlen + 1
-    end
-    return result
+    return string.sub(str, 0, len) .. " ..."
 end
 -- only escape slash
 M.escape_slash = function(query)
