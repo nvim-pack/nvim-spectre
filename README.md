@@ -91,7 +91,7 @@ the default settings.
 require('spectre').setup({
 
   color_devicons = true,
-  open_cmd = 'vnew',
+  open_cmd = 'vnew', -- can also be a lua function
   live_update = false, -- auto execute search again when you write to any file in vim
   lnum_for_results = true, -- show line number for search/replace results
   line_sep_start = '┌-----------------------------------------',

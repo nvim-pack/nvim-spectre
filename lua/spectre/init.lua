@@ -152,7 +152,11 @@ M.open = function(opts)
         end
     end
     if state.bufnr == nil or is_new then
-        vim.cmd(state.user_config.open_cmd)
+        if type(state.user_config.open_cmd) == 'function' then
+            state.user_config.open_cmd()
+        else
+            vim.cmd(state.user_config.open_cmd)
+        end
     else
         if state.query.path ~= nil and #state.query.path > 1 and opts.path == '' then
             opts.path = state.query.path
