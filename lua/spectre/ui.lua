@@ -29,6 +29,9 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
         api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
             view_opts.padding_text .. text_opts.item_line .. ' ' .. diff.text,
         })
+        api.nvim_buf_add_highlight(bufnr, namespace,
+            cfg.highlight.line,
+            text_opts.lnum, view_opts.padding , view_opts.padding + item_line_len)
     else
         api.nvim_buf_set_lines(bufnr, text_opts.lnum, end_lnum, false, {
             view_opts.padding_text .. diff.text,
