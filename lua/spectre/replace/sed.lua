@@ -5,13 +5,18 @@ local log = require('spectre._log')
 local sed = {}
 
 sed.init = function(_, config)
+    local uname = vim.loop.os_uname().sysname
+    local sed_args
+    if uname == 'Darwin' then
+        sed_args = { '-i', '', '-e' }
+    else
+        sed_args = { '-i', '-E' }
+    end
+
     config = vim.tbl_extend('force', {
         cmd = 'sed',
         pattern = '%s,%ss/%s/%s/g',
-        args = {
-            '-i',
-            '-E',
-        },
+        args = sed_args,
     }, config or {})
     return config
 end

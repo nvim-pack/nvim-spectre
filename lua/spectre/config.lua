@@ -178,10 +178,7 @@ local config = {
     replace_engine = {
         ['sed'] = {
             cmd = 'sed',
-            args = {
-                '-i',
-                '-E',
-            },
+            args = nil,
             options = {
                 ['ignore-case'] = {
                     value = '--ignore-case',
