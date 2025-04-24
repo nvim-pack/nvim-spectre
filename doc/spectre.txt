@@ -51,6 +51,7 @@ You may also need to install the following:
 - BurntSushi/ripgrep <https://github.com/BurntSushi/ripgrep> (finder)
 - devicons <https://github.com/kyazdani42/nvim-web-devicons> (icons)
 - sed <https://www.gnu.org/software/sed/> (replace tool)
+- trouble.nvim <https://github.com/folke/trouble.nvim> (improved quickfix list)
 
 
 MACOS ~
@@ -214,6 +215,16 @@ default settings.
           cmd = "<cmd>lua require('spectre').resume_last_search()<CR>",
           desc = "repeat last search"
         },
+        ['select_template'] = {
+            map = '<leader>rp',
+            cmd = "<cmd>lua require('spectre.actions').select_template()<CR>",
+            desc = 'pick template',
+        },
+        ['delete_line'] = {
+            map = '<leader>rd',
+            cmd = "<cmd>lua require('spectre.actions').run_delete_line()<CR>",
+            desc = 'delete line',
+        }
         -- you can put your mapping here it only use normal mode
       },
       find_engine = {
@@ -273,7 +284,6 @@ default settings.
                   icon="[I]",
                   desc="ignore case"
                 },
-                warn = true,
               }
           },
           -- call rust code by nvim-oxi to replace
@@ -291,7 +301,6 @@ default settings.
           ['sd'] = {
             cmd = "sd",
             options = { },
-            warn = true,
           },
       },
       default = {
@@ -306,6 +315,7 @@ default settings.
           }
       },
       replace_vim_cmd = "cdo",
+      use_trouble_qf = false, -- use trouble.nvim as quickfix list
       is_open_target_win = true, --open file on opener window
       is_insert_mode = false,  -- start open panel on is_insert_mode
       is_block_ui_break = false -- mapping backspace and enter key to avoid ui break
@@ -316,20 +326,6 @@ default settings.
       }
     })
 <
-Warnings are emitted based on your operating system and chosen executables. If
-you find one of these warnings to be in error, you may silence it by setting
-the respective `warn` key. For example, to silence GNU sed warnings:
-
->
-    require('spectre').setup({
-        replace_engine={
-            ['sed']={
-                  warn = false,
-                }
-            },
-        }
-    })
->
 
 
 CUSTOM FUNCTIONS ~
@@ -400,7 +396,7 @@ Install `oxi`:
                 cmd = "oxi"
            }
         }
-      )
+    })
 <
 
 
