@@ -1,4 +1,5 @@
 local has_devicons, devicons = pcall(require, 'nvim-web-devicons')
+local has_mini_icons, mini_icons = pcall(require, 'mini.icons')
 local config = require('spectre.config')
 local state = require('spectre.state')
 local state_utils = require('spectre.state_utils')
@@ -80,6 +81,18 @@ local get_devicons = (function()
                 return default or '|', ''
             end
             local icon, icon_highlight = devicons.get_icon(filename, string.match(filename, '%a+$'), { default = true })
+            return icon, icon_highlight
+        end
+    elseif has_mini_icons then
+        if not _G.MiniIcons then
+            mini_icons.setup()
+        end
+
+        return function(filename, enable_icon, default)
+            if not enable_icon or not filename then
+                return default or '|', ''
+            end
+            local icon, icon_highlight = mini_icons.get('file', filename)
             return icon, icon_highlight
         end
     else
