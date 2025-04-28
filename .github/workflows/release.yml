@@ -3,10 +3,17 @@ on:
   push:
     tags:
       - 'v*'
+    branches:
+      - master
   pull_request:
 jobs:
+  test:
+    name: Run tests
+    uses: ./.github/workflows/ci.yml
   luarocks-upload:
+    needs: test
     runs-on: ubuntu-22.04
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v3
       - name: LuaRocks Upload
