@@ -24,7 +24,7 @@ local config = require('spectre.config')
 local state = require('spectre.state')
 local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
-local ui = require('spectre.ui')
+local ui = require('spectre.ui.nui_components')
 local log = require('spectre._log')
 local async = require('plenary.async')
 
@@ -32,8 +32,9 @@ local scheduler = async.util.scheduler
 
 local M = {}
 
-M.setup = function(cfg)
-    state.user_config = vim.tbl_deep_extend('force', config, cfg or {})
+M.setup = function(opts)
+    opts = opts or {}
+    state.user_config = vim.tbl_deep_extend("force", state.user_config, opts)
     for _, opt in pairs(state.user_config.default.find.options) do
         state.options[opt] = true
     end
@@ -101,102 +102,19 @@ M.toggle_file_search = function(opts)
 end
 
 M.close = function()
-    if state.bufnr ~= nil then
-        local wins = vim.fn.win_findbuf(state.bufnr)
-        if not wins then
-            return
-        end
-        for _, win_id in pairs(wins) do
-            vim.api.nvim_win_close(win_id, true)
-        end
-        state.is_open = false
-    end
+    ui.close()
 end
 
-M.open = function(opts)
-    log.debug('Start')
-    if state.user_config == nil then
-        M.setup()
-    end
-
-    opts = vim.tbl_extend('force', {
-        cwd = nil,
-        is_insert_mode = state.user_config.is_insert_mode,
-        search_text = '',
-        replace_text = '',
-        path = '',
-        is_close = false, -- close an exists instance of spectre then open new
-        is_file = false,
-        begin_line_num = 3,
-    }, opts or {}) or {}
-
-    state.is_open = true
-    state.status_line = ''
-    opts.search_text = utils.trim(opts.search_text)
+function M.open(opts)
+    opts = opts or {}
+    state.cwd = opts.cwd or vim.fn.getcwd()
+    state.query = opts or {}
+    state.options = opts.options or {}
+    state.search_paths = opts.search_paths or {}
     state.target_winid = api.nvim_get_current_win()
     state.target_bufnr = api.nvim_get_current_buf()
-    if opts.is_close then
-        M.close()
-    end
 
-    local is_new = true
-    --check reopen panel by reuse bufnr
-    if state.bufnr ~= nil and not opts.is_close then
-        local wins = vim.fn.win_findbuf(state.bufnr)
-        if #wins >= 1 then
-            for _, win_id in pairs(wins) do
-                if vim.fn.win_gotoid(win_id) == 1 then
-                    is_new = false
-                end
-            end
-        end
-    end
-    if state.bufnr == nil or is_new then
-        if type(state.user_config.open_cmd) == 'function' then
-            state.user_config.open_cmd()
-        else
-            vim.cmd(state.user_config.open_cmd)
-        end
-    else
-        if state.query.path ~= nil and #state.query.path > 1 and opts.path == '' then
-            opts.path = state.query.path
-        end
-    end
-
-    vim.wo.foldenable = false
-    vim.bo.buftype = 'nofile'
-    vim.bo.buflisted = false
-    state.bufnr = api.nvim_get_current_buf()
-    vim.cmd(string.format('file %s/spectre', state.bufnr))
-    vim.bo.filetype = config.filetype
-    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_status, 0, -1)
-    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
-    api.nvim_buf_set_lines(state.bufnr, 0, -1, false, {})
-
-    vim.api.nvim_buf_attach(state.bufnr, false, {
-        on_detach = M.stop,
-    })
-    ui.render_text_query(opts)
-
-    state.cwd = opts.cwd
-    state.search_paths = opts.search_paths
-    M.change_view('reset')
-    ui.render_search_ui()
-
-    if opts.is_insert_mode == true then
-        vim.api.nvim_feedkeys('A', 'n', true)
-    end
-
-    M.mapping_buffer(state.bufnr)
-
-    if #opts.search_text > 0 then
-        M.search({
-            cwd = opts.cwd,
-            search_query = opts.search_text,
-            replace_query = opts.replace_text,
-            path = opts.path,
-        })
-    end
+    ui.open()
 end
 
 M.toggle = function(opts)
@@ -375,8 +293,7 @@ M.on_write = function()
 end
 
 M.toggle_live_update = function()
-    state.user_config.live_update = not state.user_config.live_update
-    ui.render_header(state.user_config)
+    ui.toggle_live_update()
 end
 
 M.on_close = function()
@@ -444,25 +361,8 @@ M.do_replace_text = function(opts, async_id)
 end
 
 M.change_view = function(reset)
-    if reset then
-        state.view.mode = ''
-    end
-    if state.view.mode == 'replace' then
-        state.view.mode = 'search'
-        state.view.show_search = true
-        state.view.show_replace = false
-    elseif state.view.mode == 'both' then
-        state.view.mode = 'replace'
-        state.view.show_search = false
-        state.view.show_replace = true
-    else
-        state.view.mode = 'both'
-        state.view.show_search = true
-        state.view.show_replace = true
-    end
-    if not reset then
-        M.async_replace()
-    end
+    if not ui then return end
+    ui.change_view(reset)
 end
 
 M.toggle_checked = function()
@@ -474,64 +374,8 @@ M.toggle_checked = function()
 end
 
 M.toggle_line = function(line_visual)
-    if can_edit_line() then
-        -- delete line content
-        vim.cmd([[:normal! ^d$]])
-        return false
-    end
-    local lnum = line_visual or unpack(vim.api.nvim_win_get_cursor(0))
-    local item = state.total_item[lnum]
-    if item ~= nil and item.display_lnum == lnum - 1 then
-        item.disable = not item.disable
-        ui.render_line(state.bufnr, config.namespace, {
-            search_query = state.query.search_query,
-            replace_query = state.query.replace_query,
-            search_text = item.search_text,
-            lnum = item.display_lnum,
-            item_line = item.lnum,
-            is_replace = true,
-        }, {
-            is_disable = item.disable,
-            padding_text = state.user_config.result_padding,
-            padding = #state.user_config.result_padding,
-            show_search = state.view.show_search,
-            show_replace = state.view.show_replace,
-        }, state.regex)
-
-        return
-    elseif not line_visual then
-        -- delete all item in 1 file
-        local line = vim.fn.getline(lnum)
-        local check = string.find(line, '([^%s]*%:%d*:%d*:)$')
-        if check then
-            check = state.total_item[lnum + 1]
-            if check == nil then
-                return
-            end
-            local disable = not check.disable
-            item = check
-            local index = lnum + 1
-            while item ~= nil and check.filename == item.filename do
-                item.disable = disable
-                ui.render_line(state.bufnr, config.namespace, {
-                    search_query = state.query.search_query,
-                    replace_query = state.query.replace_query,
-                    search_text = item.search_text,
-                    lnum = item.display_lnum,
-                    item_line = item.lnum,
-                    is_replace = true,
-                }, {
-                    is_disable = item.disable,
-                    padding_text = state.user_config.result_padding,
-                    padding = #state.user_config.result_padding,
-                    show_search = state.view.show_search,
-                    show_replace = state.view.show_replace,
-                }, state.regex)
-                index = index + 1
-                item = state.total_item[index]
-            end
-        end
-    end
+    if not ui then return end
+    ui.toggle_line()
 end
 
 M.search_handler = function()
@@ -697,14 +541,8 @@ M.change_options = function(key)
 end
 
 M.show_options = function()
-    local option_cmd = ui.show_options()
-    ---@diagnostic disable-next-line: param-type-mismatch
-    vim.defer_fn(function()
-        local char = vim.fn.getchar() - 48
-        if option_cmd[char] then
-            M.change_options(option_cmd[char])
-        end
-    end, 200)
+    if not ui then return end
+    ui.show_options()
 end
 
 M.get_fold = function(lnum)
@@ -730,23 +568,18 @@ M.get_fold = function(lnum)
 end
 
 M.tab = function()
-    local line = vim.api.nvim_win_get_cursor(0)[1]
-    if line == 3 then
-        vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 5, 1 })
-    end
-    if line == 5 then
-        vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 7, 1 })
-    end
+    if not ui then return end
+    ui.tab()
 end
 
 M.tab_shift = function()
-    local line = vim.api.nvim_win_get_cursor(0)[1]
-    if line == 5 then
-        vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 3, 1 })
-    end
-    if line == 7 then
-        vim.api.nvim_win_set_cursor(vim.api.nvim_get_current_win(), { 5, 1 })
-    end
+    if not ui then return end
+    ui.tab_shift()
+end
+
+M.toggle_preview = function()
+    if not ui then return end
+    ui.toggle_preview()
 end
 
 return M
