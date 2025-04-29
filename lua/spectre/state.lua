@@ -19,42 +19,87 @@
 ---@field async_id number
 ---@field target_winid number
 ---@field target_bufnr number
-local state = {
-    -- current config
-    status_line = '',
-    query = {
-        search_query = '',
-        replace_query = '',
-        path = '',
-        is_file = false, -- search in current file
+local M = {}
+
+M.user_config = {
+    default = {
+        find = {
+            cmd = "rg",
+        },
+        replace = {
+            cmd = "sed",
+        },
     },
-    query_backup = nil,
-    -- display text and highlight on result
-    view = {
-        mode = 'both',
-        search = true,
-        replace = true,
+    find_engine = {
+        rg = {
+            cmd = "rg",
+            args = {
+                "--color=never",
+                "--no-heading",
+                "--with-filename",
+                "--line-number",
+                "--column",
+            },
+            options = {
+                ["ignore-case"] = {
+                    value = "-i",
+                    icon = "[I]",
+                    desc = "ignore case",
+                },
+                ["hidden"] = {
+                    value = "--hidden",
+                    desc = "hidden file",
+                    icon = "[H]",
+                },
+            },
+        },
     },
-    -- virtual text namespace
-    vt = {},
-    --for options
-    options = {
-        ['ignore-case'] = false,
-        ['hidden'] = false,
+    replace_engine = {
+        oxi = {
+            cmd = "oxi",
+            args = {},
+            options = {
+                ["ignore-case"] = {
+                    value = "-i",
+                    icon = "[I]",
+                    desc = "ignore case",
+                },
+            },
+        },
     },
-    regex = nil,
-    user_config = nil,
-    bufnr = nil,
-    cwd = nil,
-    target_winid = nil,
-    total_item = {},
-    is_running = false,
-    is_open = false,
+    live_update = false,
+    line_sep = "└──────────────────────────────────────────────────────",
+    result_padding = "│  ",
+    line_sep_start = "┌──────────────────────────────────────────────────────",
+    highlight = {
+        ui = "SpectreBody",
+        search = "SpectreSearch",
+        replace = "SpectreReplace",
+        border = "SpectreBorder",
+    },
 }
 
+M.query = {}
+M.options = {}
+M.search_paths = {}
+M.cwd = nil
+M.target_winid = nil
+M.target_bufnr = nil
+M.finder_instance = nil
+M.total_item = {}
+M.is_running = false
+M.status_line = ""
+M.async_id = nil
+M.view = {
+    mode = "both",
+    show_search = true,
+    show_replace = true,
+}
+M.regex = nil
+
 if _G.__is_dev then
-    _G.__spectre_state = _G.__spectre_state or state
-    state = _G.__spectre_state
+    _G.__spectre_state = _G.__spectre_state or M
+    M = _G.__spectre_state
 end
 
-return state
+return M

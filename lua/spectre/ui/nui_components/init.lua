@@ -8,6 +8,7 @@ local config = require("spectre.config")
 local utils = require("spectre.utils")
 local api = vim.api
 local state_utils = require("spectre.state_utils")
+local has_devicons, devicons = pcall(require, 'nvim-web-devicons')
 
 local M = {}
 
@@ -33,6 +34,7 @@ local function create_search_ui()
         replace_text = "",
         path = "",
         is_file = false,
+        results = {},
     })
 
     local body = function()
@@ -88,7 +90,6 @@ local function create_search_ui()
                 n.button({
                     label = "Options",
                     on_press = function()
-                        print("Options")
                         vim.schedule(function()
                             M.show_options()
                         end)
@@ -122,12 +123,31 @@ local function create_search_ui()
                     end,
                 })
             ),
-            n.buffer({
-                id = "results-buffer",
+            n.tree({
+                id = "results-tree",
                 flex = 1,
                 border_label = "Results",
-                autoscroll = true,
-                buf = bufnr,
+                data = signal.results,
+                on_select = function(node, component)
+                    if node.is_done ~= nil then
+                        node.is_done = not node.is_done
+                        component:render()
+                    end
+                end,
+                prepare_node = function(node, line, component)
+                    if node.is_done then
+                        line:append("✔", "String")
+                    else
+                        line:append("◻", "Comment")
+                    end
+
+                    if node.icon then
+                        line:append(" " .. node.icon .. " ", node.icon_highlight)
+                    end
+
+                    line:append(" " .. node.text)
+                    return line
+                end,
             })
         )
     end
@@ -151,22 +171,17 @@ local function create_search_ui()
     end
 
     new_renderer:render(body)
-    return new_renderer
+    return new_renderer, signal
 end
 
 function M.open()
     if renderer then
-        print ("close")
         M.close()
     end
 
-    local new_renderer = create_search_ui()
-    -- if not new_renderer or type(new_renderer.mount) ~= "function" then
-    --     error("Failed to create search UI: renderer is invalid")
-    -- end
-
+    local new_renderer, signal = create_search_ui()
     renderer = new_renderer
-    -- renderer:render()
+    M.signal = signal
 end
 
 function M.on_search_change() 
@@ -183,35 +198,57 @@ end
 
 function M.search(query)
     if not renderer then return end
-    -- Clear results buffer
-    local results_component = renderer:get_component_by_id("results-buffer")
+    local results_component = renderer:get_component_by_id("results-tree")
     if not results_component then return end
-    local bufnr = results_component.bufnr
 
-    vim.schedule(function()
-        api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+    local results = {}
+    local last_filename = ""
+    local current_group = nil
 
-        -- Start search
-        local finder_creator = state_utils.get_finder_creator()
-        state.finder_instance = finder_creator:new(state_utils.get_search_engine_config(), {
-            on_result = function(result)
-                local line = string.format("%s:%d:%d: %s", result.filename, result.lnum, result.col, result.text)
-                api.nvim_buf_set_lines(bufnr, -1, -1, false, { line })
-            end,
-            on_finish = function()
-                state.finder_instance = nil
-                if preview_win and api.nvim_win_is_valid(preview_win) then
-                    M.toggle_preview() -- Refresh preview if it's open
+    -- Start search
+    local finder_creator = state_utils.get_finder_creator()
+    state.finder_instance = finder_creator:new(state_utils.get_search_engine_config(), {
+        on_result = function(result)
+            if last_filename ~= result.filename then
+                local icon, icon_highlight = "", ""
+                if has_devicons then
+                    icon, icon_highlight = devicons.get_icon(result.filename, "", { default = true })
                 end
-            end,
-        })
+                
+                current_group = n.node({
+                    text = result.filename,
+                    icon = icon,
+                    icon_highlight = icon_highlight,
+                    children = {}
+                })
+                table.insert(results, current_group)
+                last_filename = result.filename
+            end
 
-        state.finder_instance:search({
-            cwd = state.cwd,
-            search_text = query.search_query,
-            path = query.path,
-        })
-    end)
+            if current_group then
+                table.insert(results, n.node({
+                    text = string.format("%d:%d: %s", result.lnum, result.col, result.text),
+                    is_done = false
+                }))
+            end
+        end,
+        on_finish = function()
+            state.finder_instance = nil
+            if M.signal then
+                M.signal.results = results
+                renderer:redraw()
+            end
+            if preview_win and api.nvim_win_is_valid(preview_win) then
+                M.toggle_preview() -- Refresh preview if it's open
+            end
+        end,
+    })
+
+    state.finder_instance:search({
+        cwd = state.cwd,
+        search_text = query.search_query,
+        path = query.path,
+    })
 end
 
 function M.run_replace()
@@ -260,36 +297,29 @@ function M.show_options()
     local i = 1
 
     for key, option in pairs(cfg.options) do
-        table.insert(options, {
-            text = string.format("%d: %s", i, option.desc or ""),
-            value = key,
-        })
+        table.insert(options, string.format("%d: %s", i, option.desc or ""))
         i = i + 1
     end
 
-    vim.schedule(function()
-        local menu = n.menu({
-            position = "50%",
-            size = {
-                width = 30,
-                height = #options + 2,
-            },
-            border = {
-                style = "rounded",
-                text = {
-                    top = "[Options]",
-                    top_align = "center",
-                },
-            },
-        }, {
-            lines = options,
-            on_submit = function(item)
-                state.options[item.value] = not state.options[item.value]
+    vim.ui.select(options, {
+        prompt = "Select option to toggle:",
+        format_item = function(item)
+            return item
+        end,
+    }, function(choice)
+        if not choice then return end
+        local index = tonumber(choice:match("(%d+):"))
+        if not index then return end
+        
+        local i = 1
+        for key, _ in pairs(cfg.options) do
+            if i == index then
+                state.options[key] = not state.options[key]
                 M.on_search_change()
-            end,
-        })
-
-        menu:mount()
+                break
+            end
+            i = i + 1
+        end
     end)
 end
 
@@ -300,7 +330,7 @@ end
 
 function M.toggle_preview()
     if not renderer then return end
-    local results_component = renderer:get_component_by_id("results-buffer")
+    local results_component = renderer:get_component_by_id("results-tree")
     if not results_component then return end
 
     if preview_win and api.nvim_win_is_valid(preview_win) then
@@ -343,7 +373,6 @@ end
 
 function M.close()
     if renderer then
-        -- renderer:unmount()
         renderer = nil
     end
     if preview_win and api.nvim_win_is_valid(preview_win) then

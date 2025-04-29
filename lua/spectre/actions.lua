@@ -39,15 +39,14 @@ local get_file_path = function(filename)
 end
 
 M.select_entry = function()
-    local t = M.get_current_entry()
-    if t == nil then
-        return nil
-    end
-    if config.is_open_target_win and state.target_winid ~= nil then
-        open_file(t.filename, t.lnum, t.col, state.target_winid)
-    else
-        open_file(t.filename, t.lnum, t.col)
-    end
+    local entry = M.get_current_entry()
+    if not entry then return end
+
+    local full_path = vim.fn.fnamemodify(entry.filename, ":p")
+    if not vim.fn.filereadable(full_path) then return end
+
+    vim.cmd("edit " .. full_path)
+    api.nvim_win_set_cursor(0, { entry.lnum, entry.col - 1 })
 end
 
 M.get_state = function()
@@ -66,45 +65,63 @@ M.set_entry_finish = function(display_lnum)
     end
 end
 
-M.get_current_entry = function()
-    if not state.total_item then
-        return
-    end
-    local lnum = unpack(vim.api.nvim_win_get_cursor(0))
-    local item = state.total_item[lnum]
-    if item ~= nil and item.display_lnum == lnum - 1 then
-        local t = vim.deepcopy(item)
-        t.filename = get_file_path(item.filename)
-        return t
-    end
+function M.get_current_entry()
+    local bufnr = api.nvim_get_current_buf()
+    local cursor_pos = api.nvim_win_get_cursor(0)
+    local line = api.nvim_buf_get_lines(bufnr, cursor_pos[1] - 1, cursor_pos[1], false)[1]
+
+    if not line then return nil end
+
+    local filename, lnum, col = line:match("([^:]+):(%d+):(%d+):")
+    if not filename or not lnum or not col then return nil end
+
+    return {
+        filename = filename,
+        lnum = tonumber(lnum),
+        col = tonumber(col),
+        text = line:match(":[^:]+$"):sub(2),
+    }
 end
 
-M.get_all_entries = function()
+function M.get_all_entries()
     local entries = {}
-    for _, item in pairs(state.total_item) do
-        if not item.disable then
-            local t = vim.deepcopy(item)
-            t.filename = get_file_path(item.filename)
-            table.insert(entries, t)
+    local bufnr = api.nvim_get_current_buf()
+    local lines = api.nvim_buf_get_lines(bufnr, 0, -1, false)
+
+    for _, line in ipairs(lines) do
+        local filename, lnum, col = line:match("([^:]+):(%d+):(%d+):")
+        if filename and lnum and col then
+            table.insert(entries, {
+                filename = filename,
+                lnum = tonumber(lnum),
+                col = tonumber(col),
+                text = line:match(":[^:]+$"):sub(2),
+            })
         end
     end
+
     return entries
 end
 
 M.send_to_qf = function()
     local entries = M.get_all_entries()
-    vim.fn.setqflist(entries, 'r')
-    vim.fn.setqflist({}, 'r', {
-        title = string.format('Result Search: [%s]', state.query.search_query),
-    })
-    local trouble_avail, _ = pcall(require, 'trouble')
-    local status = trouble_avail and state.user_config.use_trouble_qf
-    if status then
-        vim.cmd([[Trouble quickfix win.relative=win focus=true]])
-    else
-        vim.cmd([[copen]])
+    if #entries == 0 then
+        vim.notify("No entries to send to quickfix")
+        return
     end
-    return entries
+
+    local qf_list = {}
+    for _, entry in ipairs(entries) do
+        table.insert(qf_list, {
+            filename = entry.filename,
+            lnum = entry.lnum,
+            col = entry.col,
+            text = entry.text,
+        })
+    end
+
+    vim.fn.setqflist(qf_list)
+    vim.cmd("copen")
 end
 
 -- input that comand to run on vim
@@ -135,83 +152,53 @@ M.replace_cmd = function()
     end
 end
 
-M.run_current_replace = function()
+function M.run_current_replace()
     local entry = M.get_current_entry()
     if entry then
         M.run_replace({ entry })
     else
-        vim.notify('Not found any entry to replace.')
+        vim.notify("Not found any entry to replace.")
     end
 end
 
 local is_running = false
 
-M.run_replace = function(entries)
-    if is_running == true then
-        print('it is already running')
+function M.run_replace(entries)
+    entries = entries or M.get_all_entries()
+    if #entries == 0 then
+        vim.notify("No entries to replace")
         return
     end
-    is_running = true
-    entries = entries or M.get_all_entries()
-    local replacer_creator = state_utils.get_replace_creator()
-    local done_item = 0
-    local error_item = 0
-    state.status_line = 'Run Replace.'
-    local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), {
-        on_done = function(result)
-            if result.ref then
-                done_item = done_item + 1
-                state.status_line = 'Replace: ' .. done_item .. ' Error:' .. error_item
-                M.set_entry_finish(result.ref.display_lnum)
-                local value = result.ref
-                value.text = ' DONE'
-                vim.fn.setqflist(entries, 'r')
-                api.nvim_buf_set_extmark(
-                    state.bufnr,
-                    config.namespace,
-                    value.display_lnum,
-                    0,
-                    { virt_text = { { '󰄲 DONE', 'String' } }, virt_text_pos = 'eol' }
-                )
-            end
-        end,
-        on_error = function(result)
-            if type(result.value) == 'string' then
-                for line in result.value:gmatch('[^\r\n]+') do
-                    print(line)
+
+    vim.schedule(function()
+        local replacer_creator = state_utils.get_replace_creator()
+        local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), {
+            on_done = function(result)
+                if result.ref then
+                    M.set_entry_finish(result.ref.display_lnum)
                 end
+            end,
+            on_error = function(result)
+                if result.ref then
+                    vim.notify("Error replacing: " .. result.value, vim.log.levels.ERROR)
+                end
+            end,
+        })
+
+        for _, entry in ipairs(entries) do
+            if not entry.is_replace_finish then
+                replacer:replace({
+                    lnum = entry.lnum,
+                    col = entry.col,
+                    cwd = state.cwd,
+                    display_lnum = entry.display_lnum,
+                    filename = entry.filename,
+                    search_text = state.query.search_query,
+                    replace_text = state.query.replace_query,
+                })
             end
-            if result.ref then
-                error_item = error_item + 1
-                local value = result.ref
-                value.text = 'ERROR'
-                vim.fn.setqflist(entries, 'r')
-                state.status_line = 'Replace: ' .. done_item .. ' Error:' .. error_item
-                api.nvim_buf_set_extmark(
-                    state.bufnr,
-                    config.namespace,
-                    value.display_lnum,
-                    0,
-                    { virt_text = { { '󰄱 ERROR', 'Error' } }, virt_text_pos = 'eol' }
-                )
-            end
-        end,
-    })
-    for _, value in pairs(entries) do
-        if not value.is_replace_finish then
-            replacer:replace({
-                lnum = value.lnum,
-                col = value.col,
-                cwd = state.cwd,
-                display_lnum = value.display_lnum,
-                filename = value.filename,
-                search_text = state.query.search_query,
-                replace_text = state.query.replace_query,
-            })
         end
-    end
-    is_running = false
-    vim.cmd.checktime()
+    end)
 end
 
 M.delete_line_file_current = function()
