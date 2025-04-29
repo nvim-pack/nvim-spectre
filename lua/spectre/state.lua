@@ -19,6 +19,7 @@
 ---@field async_id number
 ---@field target_winid number
 ---@field target_bufnr number
+---@field renderer any|nil
 local M = {}
 
 M.user_config = {
@@ -96,6 +97,7 @@ M.view = {
     show_replace = true,
 }
 M.regex = nil
+M.renderer = nil
 
 if _G.__is_dev then
     _G.__spectre_state = _G.__spectre_state or M

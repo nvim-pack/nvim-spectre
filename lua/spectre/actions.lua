@@ -85,21 +85,18 @@ end
 
 function M.get_all_entries()
     local entries = {}
-    local bufnr = api.nvim_get_current_buf()
-    local lines = api.nvim_buf_get_lines(bufnr, 0, -1, false)
-
-    for _, line in ipairs(lines) do
-        local filename, lnum, col = line:match("([^:]+):(%d+):(%d+):")
-        if filename and lnum and col then
+    for display_lnum, item in ipairs(state.total_item) do
+        if item and item.filename then
             table.insert(entries, {
-                filename = filename,
-                lnum = tonumber(lnum),
-                col = tonumber(col),
-                text = line:match(":[^:]+$"):sub(2),
+                filename = item.filename,
+                lnum = item.lnum,
+                col = item.col,
+                text = item.text,
+                display_lnum = display_lnum - 1,
+                is_replace_finish = item.is_replace_finish or false
             })
         end
     end
-
     return entries
 end
 
@@ -176,11 +173,41 @@ function M.run_replace(entries)
             on_done = function(result)
                 if result.ref then
                     M.set_entry_finish(result.ref.display_lnum)
+                    -- Update UI by adding a checkmark to the line
+                    local bufnr = api.nvim_get_current_buf()
+                    local line = result.ref.display_lnum
+                    api.nvim_buf_set_extmark(
+                        bufnr,
+                        config.namespace,
+                        line,
+                        0,
+                        { virt_text = { { '✓', 'String' } }, virt_text_pos = 'eol' }
+                    )
+                    -- Trigger renderer redraw
+                    if state.renderer then
+                        print("redrawing")
+                        state.renderer:redraw()
+                    end
                 end
             end,
             on_error = function(result)
                 if result.ref then
                     vim.notify("Error replacing: " .. result.value, vim.log.levels.ERROR)
+                    -- Add error mark to the line
+                    local bufnr = api.nvim_get_current_buf()
+                    local line = result.ref.display_lnum
+                    api.nvim_buf_set_extmark(
+                        bufnr,
+                        config.namespace,
+                        line,
+                        0,
+                        { virt_text = { { '✗', 'Error' } }, virt_text_pos = 'eol' }
+                    )
+                    -- Trigger renderer redraw
+                    if state.renderer then
+                        print("redrawing")
+                        state.renderer:redraw()
+                    end
                 end
             end,
         })
@@ -232,6 +259,10 @@ M.run_delete_line = function(entries)
                         { virt_text = { { '󰄲 DONE', 'String' } }, virt_text_pos = 'eol' }
                     )
                 end
+                -- Trigger renderer redraw
+                if state.renderer then
+                    state.renderer:redraw()
+                end
             end
         end,
         on_error = function(result)
@@ -248,6 +279,10 @@ M.run_delete_line = function(entries)
                         0,
                         { virt_text = { { '󰄱 ERROR', 'Error' } }, virt_text_pos = 'eol' }
                     )
+                end
+                -- Trigger renderer redraw
+                if state.renderer then
+                    state.renderer:redraw()
                 end
             end
         end,

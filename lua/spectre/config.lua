@@ -73,12 +73,12 @@ local config = {
         ['run_current_replace'] = {
             map = '<leader>rc',
             cmd = "<cmd>lua require('spectre.actions').run_current_replace()<CR>",
-            desc = 'replace item',
+            desc = 'replace current item',
         },
         ['run_replace'] = {
             map = '<leader>R',
             cmd = "<cmd>lua require('spectre.actions').run_replace()<CR>",
-            desc = 'replace all',
+            desc = 'replace all items',
         },
         -- only show replace text in result UI
         ['change_view_mode'] = {
