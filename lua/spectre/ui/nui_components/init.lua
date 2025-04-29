@@ -1,33 +1,37 @@
+local M = {}
+
 local n = require("nui-components")
 if not n then
     error("Failed to load nui-components")
 end
-
 local state = require("spectre.state")
-local config = require("spectre.config")
-local utils = require("spectre.utils")
 local api = vim.api
 local state_utils = require("spectre.state_utils")
 local has_devicons, devicons = pcall(require, 'nvim-web-devicons')
-
-local M = {}
+local utils = require("spectre.utils")
 
 local renderer = nil
-local search_input = nil
-local replace_input = nil
-local path_input = nil
-local results_buffer = nil
 local preview_win = nil
 local preview_buf = nil
+local preview_namespace = api.nvim_create_namespace('SPECTRE_PREVIEW')
 
 local function create_search_ui()
     -- Create a new buffer for the results
     local bufnr = api.nvim_create_buf(false, true)
-    api.nvim_buf_set_name(bufnr, "spectre")
     api.nvim_buf_set_option(bufnr, "filetype", "spectre_panel")
     api.nvim_buf_set_option(bufnr, "buftype", "nofile")
     api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
     api.nvim_buf_set_option(bufnr, "buflisted", false)
+
+    -- Create a separate buffer for preview
+    local preview_bufnr = api.nvim_create_buf(false, true)
+    api.nvim_buf_set_option(preview_bufnr, "filetype", "markdown")
+    api.nvim_buf_set_option(preview_bufnr, "buftype", "nofile")
+    api.nvim_buf_set_option(preview_bufnr, "bufhidden", "wipe")
+    api.nvim_buf_set_option(preview_bufnr, "buflisted", false)
+    api.nvim_buf_set_option(preview_bufnr, "wrap", true)
+    api.nvim_buf_set_option(preview_bufnr, "number", true)
+    api.nvim_buf_set_option(preview_bufnr, "relativenumber", true)
 
     local signal = n.create_signal({
         search_text = "",
@@ -35,6 +39,8 @@ local function create_search_ui()
         path = "",
         is_file = false,
         results = {},
+        has_search = false,
+        preview_visible = false,
     })
 
     local body = function()
@@ -49,6 +55,7 @@ local function create_search_ui()
                     max_lines = 1,
                     on_change = function(value)
                         signal.search_text = value
+                        signal.has_search = #value > 0
                         vim.schedule(function()
                             M.on_search_change()
                         end)
@@ -70,6 +77,123 @@ local function create_search_ui()
                     end,
                 })
             ),
+            
+                n.tree({
+                    id = "results-tree",
+                    flex = 1,
+                    border_label = "Results",
+                    data = signal.results,
+                    hidden = signal.has_search:negate(),
+                    on_select = function(node, component)
+                        if node.is_done ~= nil then
+                            node.is_done = not node.is_done
+                            component:render()
+                        end
+                    end,
+                    on_focus = function(component)
+                        signal.preview_visible = true
+                    end,
+                    on_blur = function(node, component)
+                        signal.preview_visible = false
+                        component:render()
+                    end,
+                    on_change = function(focused_node, component)
+                        if focused_node.filename then
+                            local full_path = vim.fn.fnamemodify(focused_node.filename, ":p")
+                            if vim.fn.filereadable(full_path) then
+                                local lines = vim.fn.readfile(full_path)
+                                api.nvim_buf_set_lines(preview_bufnr, 0, -1, false, lines)
+                                
+                                -- Clear previous highlights
+                                api.nvim_buf_clear_namespace(preview_bufnr, preview_namespace, 0, -1)
+                                
+                                -- Add search highlighting if there's a search query
+                                if state.query and state.query.search_query and #state.query.search_query > 0 then
+                                    for i, line in ipairs(lines) do
+                                        local matches = utils.match_text_line(state.query.search_query, line, 0)
+                                        for _, match in ipairs(matches) do
+                                            api.nvim_buf_add_highlight(
+                                                preview_bufnr,
+                                                preview_namespace,
+                                                state.user_config.highlight.search,
+                                                i - 1,
+                                                match[1],
+                                                match[2]
+                                            )
+                                        end
+                                    end
+                                end
+                                
+                                -- Highlight the current line in the preview buffer
+                                if focused_node.lnum then
+                                    local line_num = tonumber(focused_node.lnum)
+                                    if line_num then
+                                        -- Set cursor to the line number in the preview buffer
+                                        api.nvim_buf_call(preview_bufnr, function()
+                                            vim.cmd("normal! " .. line_num .. "G")
+                                        end)
+                                    end
+                                end
+                            end
+                        else
+                            api.nvim_buf_set_lines(preview_bufnr, 0, -1, false, {})
+                        end
+                    end,
+                    prepare_node = function(node, line, component)
+                        if node.is_done ~= nil then
+                            if node.is_done then
+                                local icon = "✔"
+                                local hl = "String"
+                                if has_devicons then
+                                    icon = '󰱒' 
+                                end
+                                line:append('  ' .. icon .. ' ', hl)
+                            else
+                                local icon = "◻"
+                                local hl = "Comment"
+                                if has_devicons then
+                                    icon = '' 
+                                end
+                                line:append('  ' .. icon .. ' ', hl)
+                            end
+                        end
+
+                        if node.icon then
+                            line:append(" " .. node.icon .. " ", node.icon_highlight)
+                        end
+
+                        -- Add search highlighting if there's a search query
+                        if state.query and state.query.search_query and #state.query.search_query > 0 and node.text then
+                            local matches = utils.match_text_line(state.query.search_query, node.text, 0)
+                            local last_pos = 0
+                            for _, match in ipairs(matches) do
+                                -- Add text before the match
+                                if match[1] > last_pos then
+                                    line:append(" " .. node.text:sub(last_pos + 1, match[1]))
+                                end
+                                -- Add highlighted match
+                                line:append(node.text:sub(match[1] + 1, match[2]), state.user_config.highlight.search)
+                                last_pos = match[2]
+                            end
+                            -- Add remaining text after last match
+                            if last_pos < #node.text then
+                                line:append(" " .. node.text:sub(last_pos + 1))
+                            end
+                        else
+                            line:append(" " .. node.text)
+                        end
+                        return line
+                    end,
+                }),
+                n.buffer({
+                    id = "preview-buffer",
+                    flex = 1,
+                    border_label = "Preview",
+                    hidden = signal.preview_visible:negate(),
+                    buf = preview_bufnr,
+                    autoscroll = true,
+                }),
+
             n.columns(
                 { flex = 0 },
                 n.text_input({
@@ -112,49 +236,14 @@ local function create_search_ui()
                             M.toggle_live_update()
                         end)
                     end,
-                }),
-                n.gap(3),
-                n.button({
-                    label = "Preview",
-                    on_press = function()
-                        vim.schedule(function()
-                            M.toggle_preview()
-                        end)
-                    end,
                 })
-            ),
-            n.tree({
-                id = "results-tree",
-                flex = 1,
-                border_label = "Results",
-                data = signal.results,
-                on_select = function(node, component)
-                    if node.is_done ~= nil then
-                        node.is_done = not node.is_done
-                        component:render()
-                    end
-                end,
-                prepare_node = function(node, line, component)
-                    if node.is_done then
-                        line:append("✔", "String")
-                    else
-                        line:append("◻", "Comment")
-                    end
-
-                    if node.icon then
-                        line:append(" " .. node.icon .. " ", node.icon_highlight)
-                    end
-
-                    line:append(" " .. node.text)
-                    return line
-                end,
-            })
+            )
         )
     end
 
     local new_renderer = n.create_renderer({
         width = 80,
-        height = 20,
+        height = 40,
         buf = bufnr,
         parent = vim.api.nvim_get_current_win(),
         border = {
@@ -184,9 +273,8 @@ function M.open()
     M.signal = signal
 end
 
-function M.on_search_change() 
+function M.on_search_change()
     if not renderer then return end
-    print("on_search_change")
     local query = {
         search_query = renderer:get_component_by_id("search-input"):get_current_value(),
         replace_query = renderer:get_component_by_id("replace-input"):get_current_value(),
@@ -214,7 +302,7 @@ function M.search(query)
                 if has_devicons then
                     icon, icon_highlight = devicons.get_icon(result.filename, "", { default = true })
                 end
-                
+
                 current_group = n.node({
                     text = result.filename,
                     icon = icon,
@@ -227,6 +315,9 @@ function M.search(query)
 
             if current_group then
                 table.insert(results, n.node({
+                    filename = result.filename,
+                    col = result.col,
+                    lnum = result.lnum,
                     text = string.format("%d:%d: %s", result.lnum, result.col, result.text),
                     is_done = false
                 }))
@@ -297,30 +388,29 @@ function M.show_options()
     local i = 1
 
     for key, option in pairs(cfg.options) do
-        table.insert(options, string.format("%d: %s", i, option.desc or ""))
+        table.insert(options, n.option(string.format("%d: %s", i, option.desc or ""), { id = key }))
         i = i + 1
     end
 
-    vim.ui.select(options, {
-        prompt = "Select option to toggle:",
-        format_item = function(item)
-            return item
-        end,
-    }, function(choice)
-        if not choice then return end
-        local index = tonumber(choice:match("(%d+):"))
-        if not index then return end
-        
-        local i = 1
-        for key, _ in pairs(cfg.options) do
-            if i == index then
-                state.options[key] = not state.options[key]
-                M.on_search_change()
-                break
+    local signal = n.create_signal({
+        selected = {},
+    })
+
+    local select_component = n.select({
+        border_label = "Options",
+        data = options,
+        selected = signal.selected,
+        multiselect = true,
+        on_select = function(nodes)
+            signal.selected = nodes
+            for _, node in ipairs(nodes) do
+                state.options[node.id] = not state.options[node.id]
             end
-            i = i + 1
-        end
-    end)
+            M.on_search_change()
+        end,
+    })
+
+    select_component:mount()
 end
 
 function M.toggle_live_update()
@@ -354,7 +444,6 @@ function M.toggle_preview()
 
     preview_buf = api.nvim_create_buf(false, true)
     api.nvim_buf_set_lines(preview_buf, 0, -1, false, vim.fn.readfile(full_path))
-    api.nvim_buf_set_option(preview_buf, "filetype", vim.fn.fnamemodify(filename, ":e"))
 
     preview_win = api.nvim_open_win(preview_buf, false, {
         relative = "win",
@@ -382,4 +471,4 @@ function M.close()
     end
 end
 
-return M 
+return M

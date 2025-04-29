@@ -155,6 +155,8 @@ local function match_text_line(match, str, padding)
     return col_tbl
 end
 
+M.match_text_line = match_text_line
+
 --- get highlight text from search_text and replace_text
 --- @params opts {search_query, replace_query, search_text, padding}
 --- @param regex RegexEngine
