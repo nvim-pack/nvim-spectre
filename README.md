@@ -2,7 +2,7 @@
 
 A search panel for neovim.
 
-**Spectre** **find the enemy and replace them with dark power.**
+**Spectre** **finds the enemy and replaces them with dark power.**
 
 ![demo](https://github.com/windwp/nvim-spectre/wiki/assets/demospectre.gif)
 
