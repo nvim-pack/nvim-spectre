@@ -82,7 +82,6 @@ local function create_search_ui()
                 on_select = function(node, component)
                     if node.is_done ~= nil then
                         node.is_done = not node.is_done
-                        -- component:redraw()
                     end
                 end,
                 on_focus = function()
@@ -104,16 +103,28 @@ local function create_search_ui()
                             -- Add search highlighting if there's a search query
                             if state.query and state.query.search_query and #state.query.search_query > 0 then
                                 for i, line in ipairs(lines) do
-                                    local matches = utils.match_text_line(state.query.search_query, line, 0)
+                                    -- Safely get matches with error handling
+                                    local matches = {}
+                                    local success, result = pcall(function()
+                                        return utils.match_text_line(state.query.search_query, line, 0)
+                                    end)
+                                    
+                                    if success and type(result) == "table" then
+                                        matches = result
+                                    end
+                                    
                                     for _, match in ipairs(matches) do
-                                        api.nvim_buf_add_highlight(
-                                            preview_bufnr,
-                                            preview_namespace,
-                                            state.user_config.highlight.search,
-                                            i - 1,
-                                            match[1],
-                                            match[2]
-                                        )
+                                        -- Safely add highlight
+                                        pcall(function()
+                                            api.nvim_buf_add_highlight(
+                                                preview_bufnr,
+                                                preview_namespace,
+                                                state.user_config.highlight.search,
+                                                i - 1,
+                                                match[1],
+                                                match[2]
+                                            )
+                                        end)
                                     end
                                 end
                             end
@@ -141,14 +152,14 @@ local function create_search_ui()
                             if has_devicons then
                                 icon = '󰱒'
                             end
-                            line:append('  ' .. icon .. ' ', hl)
+                            line:append('  ' .. icon .. ' ', hl)
                         else
                             local icon = "◻"
                             local hl = "Comment"
                             if has_devicons then
-                                icon = ''
+                                icon = ''
                             end
-                            line:append('  ' .. icon .. ' ', hl)
+                            line:append('  ' .. icon .. ' ', hl)
                         end
                     end
 
@@ -158,19 +169,87 @@ local function create_search_ui()
 
                     -- Add search highlighting if there's a search query
                     if state.query and state.query.search_query and #state.query.search_query > 0 and node.text then
-                        local matches = utils.match_text_line(state.query.search_query, node.text, 0)
+                        -- Safely get matches with error handling
+                        local matches = {}
+                        local success, result = pcall(function()
+                            return utils.match_text_line(state.query.search_query, node.text, 0)
+                        end)
+                        
+                        if success and type(result) == "table" then
+                            matches = result
+                        end
+                        
                         local last_pos = 0
                         local max_width = vim.api.nvim_win_get_width(0) -
                         15                                                   -- Leave some space for icons and padding
                         local truncated_text = utils.truncate(node.text, max_width)
+
+                        -- Find if this node has been replaced
+                        local is_replaced = false
+                        if state.total_item and node.display_lnum ~= nil then
+                            for _, item in ipairs(state.total_item) do
+                                if item and item.display_lnum and item.display_lnum == node.display_lnum and item.is_replace then
+                                    is_replaced = true
+                                    break
+                                end
+                            end
+                        end
 
                         for _, match in ipairs(matches) do
                             -- Add text before the match
                             if match[1] > last_pos then
                                 line:append(truncated_text:sub(last_pos + 1, match[1]))
                             end
+                            
                             -- Add highlighted match
                             line:append(truncated_text:sub(match[1] + 1, match[2]), state.user_config.highlight.search)
+                            
+                            -- Add replacement preview if exists and not replaced yet
+                            if state.query.replace_query and #state.query.replace_query > 0 and not is_replaced then
+                                -- Get the regex engine with safety check
+                                local regex = nil
+                                local success, result = pcall(state_utils.get_regex)
+                                if success then
+                                    regex = result
+                                else
+                                    -- Fallback to vim regex
+                                    regex = require('spectre.regex.vim')
+                                end
+                                
+                                -- Calculate replace_match with error handling
+                                local replace_match = {}
+                                success, result = pcall(function()
+                                    return utils.get_hl_line_text({
+                                        search_query = state.query.search_query,
+                                        replace_query = state.query.replace_query,
+                                        search_text = truncated_text:sub(match[1] + 1, match[2]),
+                                        show_search = true,
+                                        show_replace = true
+                                    }, regex).replace
+                                end)
+                                
+                                if success then
+                                    replace_match = result
+                                end
+                                
+                                if type(replace_match) == "table" and #replace_match > 0 then
+                                    -- Calculate replace_text with error handling
+                                    local replace_text = ""
+                                    success, result = pcall(function()
+                                        return " → (" .. utils.get_hl_line_text({
+                                            search_query = state.query.search_query,
+                                            replace_query = state.query.replace_query,
+                                            search_text = truncated_text:sub(match[1] + 1, match[2]),
+                                        }, regex).text .. ")"
+                                    end)
+                                    
+                                    if success then
+                                        replace_text = result
+                                        line:append(replace_text, state.user_config.highlight.replace)
+                                    end
+                                end
+                            end
+                            
                             last_pos = match[2]
                         end
                         -- Add remaining text after last match
@@ -225,7 +304,6 @@ local function create_search_ui()
                     on_press = function()
                         vim.schedule(function()
                             require('spectre.actions').run_replace()
-                            M.on_search_change()
                         end)
                     end,
                 })
@@ -312,7 +390,8 @@ function M.search(query)
                     col = result.col,
                     lnum = result.lnum,
                     text = string.format("%d:%d: %s", result.lnum, result.col, result.text),
-                    is_done = false
+                    is_done = false,
+                    display_lnum = #state.total_item
                 })
                 table.insert(results, entry)
                 -- Store the entry in state.total_item with all required fields

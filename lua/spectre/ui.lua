@@ -21,6 +21,7 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
         search_text = text_opts.search_text,
         show_search = view_opts.show_search,
         show_replace = view_opts.show_replace,
+        is_replace = text_opts.is_replace,
     }, regex)
     local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
 

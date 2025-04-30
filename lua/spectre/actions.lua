@@ -59,7 +59,14 @@ M.get_state = function()
 end
 
 M.set_entry_finish = function(display_lnum)
-    local item = state.total_item[display_lnum + 1]
+    -- Safety check: ensure display_lnum is valid and state.total_item exists
+    if not display_lnum or not state.total_item then return end
+    
+    -- In Lua, arrays are 1-indexed but display_lnum might be 0-indexed
+    local index = display_lnum + 1
+    
+    -- Check if the item exists in total_item
+    local item = state.total_item[index]
     if item then
         item.is_replace_finish = true
     end
@@ -171,8 +178,15 @@ function M.run_replace(entries)
         local replacer_creator = state_utils.get_replace_creator()
         local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), {
             on_done = function(result)
-                if result.ref then
+                if result.ref and result.ref.display_lnum ~= nil then
+                    -- Set the entry as finished and mark it as replaced
                     M.set_entry_finish(result.ref.display_lnum)
+                    
+                    -- Add a safety check before accessing state.total_item
+                    if state.total_item and state.total_item[result.ref.display_lnum] then
+                        state.total_item[result.ref.display_lnum].is_replace = true
+                    end
+                    
                     -- Update UI by adding a checkmark to the line
                     local bufnr = api.nvim_get_current_buf()
                     local line = result.ref.display_lnum
@@ -183,16 +197,41 @@ function M.run_replace(entries)
                         0,
                         { virt_text = { { '✓', 'String' } }, virt_text_pos = 'eol' }
                     )
-                    -- Trigger renderer redraw
+                    
+                    -- If we have a renderer, trigger a full redraw
                     if state.renderer then
-                        print("redrawing")
-                        state.renderer:redraw()
+                        -- Update the node in the UI
+                        local tree = state.renderer:get_component_by_id("results-tree")
+                        -- Check if tree exists and has the get_nodes method
+                        if tree and type(tree) == "table" and type(tree.get_nodes) == "function" then
+                            local success, nodes = pcall(function() 
+                                return tree:get_nodes() 
+                            end)
+                            
+                            if success and nodes then
+                                for _, node in ipairs(nodes) do
+                                    -- Add safety check for node.display_lnum
+                                    if node.display_lnum and node.display_lnum == result.ref.display_lnum then
+                                        node.is_done = true
+                                        -- This triggers the prepare_node function
+                                        pcall(function() state.renderer:redraw() end)
+                                        break
+                                    end
+                                end
+                            else
+                                -- If we can't get nodes, just redraw
+                                pcall(function() state.renderer:redraw() end)
+                            end
+                        else
+                            -- If tree doesn't exist or doesn't have get_nodes, just redraw
+                            pcall(function() state.renderer:redraw() end)
+                        end
                     end
                 end
             end,
             on_error = function(result)
-                if result.ref then
-                    vim.notify("Error replacing: " .. result.value, vim.log.levels.ERROR)
+                if result.ref and result.ref.display_lnum ~= nil then
+                    vim.notify("Error replacing: " .. (result.value or "unknown error"), vim.log.levels.ERROR)
                     -- Add error mark to the line
                     local bufnr = api.nvim_get_current_buf()
                     local line = result.ref.display_lnum
@@ -205,8 +244,10 @@ function M.run_replace(entries)
                     )
                     -- Trigger renderer redraw
                     if state.renderer then
-                        print("redrawing")
-                        state.renderer:redraw()
+                        -- Make sure renderer has redraw method
+                        if type(state.renderer) == "table" and type(state.renderer.redraw) == "function" then
+                            pcall(function() state.renderer:redraw() end)
+                        end
                     end
                 end
             end,
@@ -245,44 +286,54 @@ M.run_delete_line = function(entries)
     local replacer_creator = state_utils.get_replace_creator()
     local replacer = replacer_creator:new(state_utils.get_replace_engine_config(), {
         on_done = function(result)
-            if result.ref then
+            if result.ref and result.ref.display_lnums then
                 done_item = done_item + 1
                 local value = result.ref
                 state.status_line = 'Delete line: ' .. done_item .. ' Error:' .. error_item
                 for _, display_lnum in ipairs(value.display_lnums) do
-                    M.set_entry_finish(display_lnum)
-                    api.nvim_buf_set_extmark(
-                        state.bufnr,
-                        config.namespace,
-                        display_lnum,
-                        0,
-                        { virt_text = { { '󰄲 DONE', 'String' } }, virt_text_pos = 'eol' }
-                    )
+                    if display_lnum ~= nil then
+                        M.set_entry_finish(display_lnum)
+                        api.nvim_buf_set_extmark(
+                            state.bufnr,
+                            config.namespace,
+                            display_lnum,
+                            0,
+                            { virt_text = { { '󰄲 DONE', 'String' } }, virt_text_pos = 'eol' }
+                        )
+                    end
                 end
                 -- Trigger renderer redraw
                 if state.renderer then
-                    state.renderer:redraw()
+                    -- Make sure renderer has redraw method
+                    if type(state.renderer) == "table" and type(state.renderer.redraw) == "function" then
+                        pcall(function() state.renderer:redraw() end)
+                    end
                 end
             end
         end,
         on_error = function(result)
-            if result.ref then
+            if result.ref and result.ref.display_lnums then
                 error_item = error_item + 1
                 local value = result.ref
                 state.status_line = 'Delete line: ' .. done_item .. ' Error:' .. error_item
                 for _, display_lnum in ipairs(value.display_lnums) do
-                    M.set_entry_finish(display_lnum)
-                    api.nvim_buf_set_extmark(
-                        state.bufnr,
-                        config.namespace,
-                        display_lnum,
-                        0,
-                        { virt_text = { { '󰄱 ERROR', 'Error' } }, virt_text_pos = 'eol' }
-                    )
+                    if display_lnum ~= nil then
+                        M.set_entry_finish(display_lnum)
+                        api.nvim_buf_set_extmark(
+                            state.bufnr,
+                            config.namespace,
+                            display_lnum,
+                            0,
+                            { virt_text = { { '󰄱 ERROR', 'Error' } }, virt_text_pos = 'eol' }
+                        )
+                    end
                 end
                 -- Trigger renderer redraw
                 if state.renderer then
-                    state.renderer:redraw()
+                    -- Make sure renderer has redraw method
+                    if type(state.renderer) == "table" and type(state.renderer.redraw) == "function" then
+                        pcall(function() state.renderer:redraw() end)
+                    end
                 end
             end
         end,
