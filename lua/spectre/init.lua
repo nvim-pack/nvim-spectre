@@ -24,7 +24,8 @@ local config = require('spectre.config')
 local state = require('spectre.state')
 local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
-local ui = require('spectre.ui.nui_components')
+-- Dynamically choose UI based on configuration
+local ui = nil
 local log = require('spectre._log')
 local async = require('plenary.async')
 
@@ -40,6 +41,18 @@ M.setup = function(opts)
     end
     require('spectre.highlight').set_hl()
     M.check_replace_cmd_bins()
+    
+    -- Initialize UI based on configuration
+    M.init_ui()
+end
+
+-- Initialize UI based on user config
+M.init_ui = function()
+    if state.user_config.use_legacy_ui then
+        ui = require('spectre.ui.legacy')
+    else
+        ui = require('spectre.ui.nui_components')
+    end
 end
 
 M.check_replace_cmd_bins = function()
@@ -80,11 +93,20 @@ M.open = function(opts)
     }
     state.regex = nil
 
+    -- Ensure UI is initialized
+    if ui == nil then
+        M.init_ui()
+    end
+    
     ui.open()
 end
 
 M.close = function()
     state.is_open = false
+    -- Ensure UI is initialized
+    if ui == nil then
+        M.init_ui()
+    end
     ui.close()
 end
 
@@ -182,14 +204,26 @@ M.change_options = function(key)
     end
     state.regex.change_options(state_utils.get_replace_engine_config().options_value)
     if state.query.search_query ~= nil then
-        ui.render_search_ui()
+        -- Ensure UI is initialized
+        if ui == nil then
+            M.init_ui()
+        end
+        
+        if ui and ui.render_search_ui then
+            ui.render_search_ui()
+        end
         M.search()
     end
 end
 
 M.show_options = function()
-    if not ui then return end
-    ui.show_options()
+    if not ui then 
+        M.init_ui()
+    end
+    
+    if ui and ui.show_options then
+        ui.show_options() 
+    end
 end
 
 M.get_fold = function(lnum)
@@ -215,18 +249,98 @@ M.get_fold = function(lnum)
 end
 
 M.tab = function()
-    if not ui then return end
-    ui.tab()
+    if not ui then 
+        M.init_ui()
+    end
+    
+    if ui and ui.tab then
+        ui.tab()
+    end
 end
 
 M.tab_shift = function()
-    if not ui then return end
-    ui.tab_shift()
+    if not ui then 
+        M.init_ui()
+    end
+    
+    if ui and ui.tab_shift then
+        ui.tab_shift()
+    end
 end
 
 M.toggle_preview = function()
-    if not ui then return end
-    ui.toggle_preview()
+    if not ui then 
+        M.init_ui()
+    end
+    
+    if ui and ui.toggle_preview then
+        ui.toggle_preview()
+    end
+end
+
+-- Function to toggle between different view modes
+M.change_view = function()
+    if not ui then 
+        M.init_ui()
+    end
+    
+    -- Toggle view mode
+    if state.view.mode == "both" then
+        state.view.mode = "replace"
+        state.view.show_search = false
+        state.view.show_replace = true
+    elseif state.view.mode == "replace" then
+        state.view.mode = "search"
+        state.view.show_search = true
+        state.view.show_replace = false
+    else
+        state.view.mode = "both"
+        state.view.show_search = true
+        state.view.show_replace = true
+    end
+    
+    -- Trigger UI update if available
+    if ui and ui.render_search_ui then
+        ui.render_search_ui()
+    end
+end
+
+-- Function to toggle between UI types
+M.toggle_ui = function()
+    state.user_config.use_legacy_ui = not state.user_config.use_legacy_ui
+    
+    -- Re-initialize the UI
+    M.init_ui()
+    
+    -- Notify the user
+    local ui_type = state.user_config.use_legacy_ui and "legacy" or "modern"
+    vim.notify("Switched to " .. ui_type .. " UI. Reopen spectre panel to apply changes.", vim.log.levels.INFO)
+    
+    -- If spectre is open, close and reopen it to apply changes
+    if state.is_open then
+        local query_backup = vim.deepcopy(state.query)
+        M.close()
+        M.open(query_backup)
+    end
+end
+
+-- Function to set the UI type
+M.set_ui_type = function(use_legacy)
+    state.user_config.use_legacy_ui = use_legacy
+    
+    -- Re-initialize the UI
+    M.init_ui()
+    
+    -- Notify the user
+    local ui_type = state.user_config.use_legacy_ui and "legacy" or "modern"
+    vim.notify("Set to " .. ui_type .. " UI. Reopen spectre panel to apply changes.", vim.log.levels.INFO)
+    
+    -- If spectre is open, close and reopen it to apply changes
+    if state.is_open then
+        local query_backup = vim.deepcopy(state.query)
+        M.close()
+        M.open(query_backup)
+    end
 end
 
 return M

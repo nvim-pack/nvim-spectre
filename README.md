@@ -49,6 +49,23 @@ vim.keymap.set('n', '<leader>sp', '<cmd>lua require("spectre").open_file_search(
 })
 ```
 
+You can also toggle between the legacy UI and the modern nui-based UI:
+
+```lua
+-- Toggle between legacy and modern UI
+vim.keymap.set('n', '<leader>sU', '<cmd>lua require("spectre").toggle_ui()<CR>', {
+    desc = "Toggle between legacy and modern UI"
+})
+
+-- Switch to a specific UI
+vim.keymap.set('n', '<leader>su', '<cmd>lua require("spectre").set_ui_type(false)<CR>', {
+    desc = "Use modern UI"
+})
+vim.keymap.set('n', '<leader>sL', '<cmd>lua require("spectre").set_ui_type(true)<CR>', {
+    desc = "Use legacy UI"
+})
+```
+
 Use command: `:Spectre`
 
 ## Warnings
@@ -286,12 +303,9 @@ require('spectre').setup({
   use_trouble_qf = false, -- use trouble.nvim as quickfix list
   is_open_target_win = true, --open file on opener window
   is_insert_mode = false,  -- start open panel on is_insert_mode
-  is_block_ui_break = false -- mapping backspace and enter key to avoid ui break
-  open_template      = {
-    -- an template to use on open function
-    -- see the 'custom function' section below to learn how to configure the template
-    -- { search_text = 'text1', replace_text = '', path = "" }
-  }
+  is_block_ui_break = false, -- mapping backspace and enter key to avoid ui break
+  open_template = {}, -- an template to use on open function
+  use_legacy_ui = false, -- set to true to use the legacy UI instead of nui-based modern UI
 })
 
 ```
@@ -398,6 +412,4 @@ require('spectre').setup({ is_block_ui_break = true })
 
 - Why is it called Spectre?
 
-I wanted to call it `Search Panel` but this name is not cool.
-I got the name of a hero on a game.
-Spectre has a skill to find enemy on global map so I use it:)
+I wanted to call it `
