@@ -35,21 +35,21 @@ local M = {}
 
 M.setup = function(opts)
     opts = opts or {}
-    state.user_config = vim.tbl_deep_extend("force", state.user_config, opts)
+    state.user_config = vim.tbl_deep_extend('force', state.user_config, opts)
     for _, opt in pairs(state.user_config.default.find.options) do
         state.options[opt] = true
     end
     require('spectre.highlight').set_hl()
     M.check_replace_cmd_bins()
-    
+
     -- Initialize UI based on configuration
     M.init_ui()
 end
 
 -- Initialize UI based on user config
 M.init_ui = function()
-    if state.user_config.use_legacy_ui then
-        ui = require('spectre.ui.legacy')
+    if state.user_config.ui == 'plenary' then
+        ui = require('spectre.ui.plenary')
     else
         ui = require('spectre.ui.nui_components')
     end
@@ -64,10 +64,7 @@ M.check_replace_cmd_bins = function()
             args = { 'oxi' },
             on_exit = function(j, return_val)
                 if return_val ~= 0 then
-                    vim.notify(
-                        'oxi not found. Please install it with: cargo install oxi',
-                        vim.log.levels.WARN
-                    )
+                    vim.notify('oxi not found. Please install it with: cargo install oxi', vim.log.levels.WARN)
                 end
             end,
         }):sync()
@@ -87,7 +84,7 @@ M.open = function(opts)
     state.status_line = ''
     state.async_id = nil
     state.view = {
-        mode = "both",
+        mode = 'both',
         show_search = true,
         show_replace = true,
     }
@@ -97,7 +94,7 @@ M.open = function(opts)
     if ui == nil then
         M.init_ui()
     end
-    
+
     ui.open()
 end
 
@@ -111,7 +108,9 @@ M.close = function()
 end
 
 M.on_write = function()
-    if not state.is_open then return end
+    if not state.is_open then
+        return
+    end
     if state.user_config.live_update then
         M.search(state.query)
     end
@@ -119,7 +118,9 @@ end
 
 M.search = function(query)
     query = query or state.query
-    if not query.search_query or #query.search_query == 0 then return end
+    if not query.search_query or #query.search_query == 0 then
+        return
+    end
 
     state.is_running = true
     state.query = query
@@ -128,20 +129,51 @@ M.search = function(query)
 
     local finder_creator = state_utils.get_finder_creator()
     state.finder_instance = finder_creator:new(state_utils.get_search_engine_config(), {
-        on_result = function(result)
-            if not state.is_running then return end
-            table.insert(state.total_item, result)
+        on_start = function()
+            state.total_item = {}
+            state.status_line = 'Start search'
+        end,
+        on_result = function(item)
+            if not state.is_running then
+                return
+            end
+
+            -- Process the item for display
+            if string.match(item.filename, '^%.%/') then
+                item.filename = item.filename:sub(3, #item.filename)
+            end
+            item.search_text = utils.truncate(utils.trim(item.text), 255)
+            item.replace_text = ''
+
+            if #state.query.replace_query > 1 then
+                local regex = state_utils.get_regex()
+                if regex then
+                    item.replace_text =
+                        regex.replace_all(state.query.search_query, state.query.replace_query, item.search_text)
+                end
+            end
+
+            table.insert(state.total_item, item)
         end,
         on_error = function(error_msg)
-            if not state.is_running then return end
+            if not state.is_running then
+                return
+            end
             state.status_line = 'Error: ' .. error_msg
             state.finder_instance = nil
         end,
         on_finish = function()
-            if not state.is_running then return end
-            state.status_line = 'Search completed'
+            if not state.is_running then
+                return
+            end
+            state.status_line = string.format('Total: %s matches', #state.total_item)
             state.finder_instance = nil
             state.is_running = false
+
+            -- Render the results in the UI
+            if ui and ui.render_results then
+                ui.render_results()
+            end
         end,
     })
 
@@ -208,7 +240,7 @@ M.change_options = function(key)
         if ui == nil then
             M.init_ui()
         end
-        
+
         if ui and ui.render_search_ui then
             ui.render_search_ui()
         end
@@ -217,16 +249,25 @@ M.change_options = function(key)
 end
 
 M.show_options = function()
-    if not ui then 
+    if not ui then
         M.init_ui()
     end
-    
+
     if ui and ui.show_options then
-        ui.show_options() 
+        ui.show_options()
     end
 end
 
 M.get_fold = function(lnum)
+    if not ui then
+        M.init_ui()
+    end
+
+    if ui and ui.get_fold then
+        return ui.get_fold(lnum)
+    end
+
+    -- Fallback implementation
     if lnum < config.lnum_UI then
         return '0'
     end
@@ -249,97 +290,75 @@ M.get_fold = function(lnum)
 end
 
 M.tab = function()
-    if not ui then 
+    if not ui then
         M.init_ui()
     end
-    
+
     if ui and ui.tab then
         ui.tab()
     end
 end
 
 M.tab_shift = function()
-    if not ui then 
+    if not ui then
         M.init_ui()
     end
-    
+
     if ui and ui.tab_shift then
         ui.tab_shift()
     end
 end
 
 M.toggle_preview = function()
-    if not ui then 
+    if not ui then
         M.init_ui()
     end
-    
+
     if ui and ui.toggle_preview then
         ui.toggle_preview()
     end
 end
 
--- Function to toggle between different view modes
-M.change_view = function()
-    if not ui then 
+M.toggle_checked = function()
+    if not ui then
         M.init_ui()
     end
-    
+
+    local lnum = unpack(vim.api.nvim_win_get_cursor(0))
+    local item = state.total_item[lnum]
+    if item and item.display_lnum == lnum - 1 then
+        item.disable = not item.disable
+
+        if ui and ui.render_results then
+            ui.render_results()
+        end
+    end
+end
+
+-- TODO: Should we need it?
+M.change_view = function()
+    if not ui then
+        M.init_ui()
+    end
+
     -- Toggle view mode
-    if state.view.mode == "both" then
-        state.view.mode = "replace"
+    if state.view.mode == 'both' then
+        state.view.mode = 'replace'
         state.view.show_search = false
         state.view.show_replace = true
-    elseif state.view.mode == "replace" then
-        state.view.mode = "search"
+    elseif state.view.mode == 'replace' then
+        state.view.mode = 'search'
         state.view.show_search = true
         state.view.show_replace = false
     else
-        state.view.mode = "both"
+        state.view.mode = 'both'
         state.view.show_search = true
         state.view.show_replace = true
     end
-    
+
     -- Trigger UI update if available
     if ui and ui.render_search_ui then
         ui.render_search_ui()
-    end
-end
-
--- Function to toggle between UI types
-M.toggle_ui = function()
-    state.user_config.use_legacy_ui = not state.user_config.use_legacy_ui
-    
-    -- Re-initialize the UI
-    M.init_ui()
-    
-    -- Notify the user
-    local ui_type = state.user_config.use_legacy_ui and "legacy" or "modern"
-    vim.notify("Switched to " .. ui_type .. " UI. Reopen spectre panel to apply changes.", vim.log.levels.INFO)
-    
-    -- If spectre is open, close and reopen it to apply changes
-    if state.is_open then
-        local query_backup = vim.deepcopy(state.query)
-        M.close()
-        M.open(query_backup)
-    end
-end
-
--- Function to set the UI type
-M.set_ui_type = function(use_legacy)
-    state.user_config.use_legacy_ui = use_legacy
-    
-    -- Re-initialize the UI
-    M.init_ui()
-    
-    -- Notify the user
-    local ui_type = state.user_config.use_legacy_ui and "legacy" or "modern"
-    vim.notify("Set to " .. ui_type .. " UI. Reopen spectre panel to apply changes.", vim.log.levels.INFO)
-    
-    -- If spectre is open, close and reopen it to apply changes
-    if state.is_open then
-        local query_backup = vim.deepcopy(state.query)
-        M.close()
-        M.open(query_backup)
     end
 end
 

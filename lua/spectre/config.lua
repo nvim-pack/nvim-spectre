@@ -220,7 +220,7 @@ local config = {
     is_insert_mode = false,
     is_block_ui_break = false,
     open_template = {},
-    use_legacy_ui = false, -- set to true to use the legacy UI
+    ui = 'plenary', -- set to true to use the legacy UI
 }
 
 return config

@@ -171,30 +171,30 @@ M.get_hl_line_text = function(opts, regex)
         if opts.replace_query and #opts.replace_query > 0 and opts.show_replace ~= false then
             local replace_match = regex.replace_all(opts.search_query, opts.replace_query, search_match)
             local total_increase = 0
-            
+
             if opts.show_search == false or opts.is_replace then
                 -- After replacement: Just show the replaced text
                 result.text = regex.replace_all(opts.search_query, opts.replace_query, opts.search_text)
                 result.replace = match_text_line(replace_match, result.text, 0)
                 result.search = {}
-                
+
                 -- If we want to show both the original and replaced text after replacement
                 if opts.is_replace then
                     -- Find all instances of replaced text and add the original in parentheses
                     local positions = match_text_line(replace_match, result.text, 0)
                     local new_text = result.text
                     local offset = 0
-                    
+
                     for _, pos in ipairs(positions) do
-                        local display_original = " (was: " .. search_match .. ")"
+                        local display_original = ' (was: ' .. search_match .. ')'
                         local insert_pos = pos[2] + offset
                         new_text = new_text:sub(1, insert_pos) .. display_original .. new_text:sub(insert_pos + 1)
                         offset = offset + #display_original
-                        
+
                         -- Add highlight for the "was" text
-                        table.insert(result.search, {insert_pos + 6, insert_pos + 6 + #search_match})
+                        table.insert(result.search, { insert_pos + 6, insert_pos + 6 + #search_match })
                     end
-                    
+
                     result.text = new_text
                 end
             else
@@ -202,12 +202,12 @@ M.get_hl_line_text = function(opts, regex)
                 for _, v in pairs(result.search) do
                     v[1] = v[1] + total_increase
                     v[2] = v[2] + total_increase
-                    
+
                     -- Add replacement text in parentheses after the search match with an arrow
-                    local display_replace = " → (" .. replace_match .. ")"
+                    local display_replace = ' → (' .. replace_match .. ')'
                     local pos = { v[2], v[2] + #display_replace }
                     table.insert(result.replace, pos)
-                    
+
                     local text = result.text
                     result.text = text:sub(0, v[2]) .. display_replace .. text:sub(v[2] + 1)
                     total_increase = total_increase + #display_replace

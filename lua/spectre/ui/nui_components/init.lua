@@ -1,14 +1,14 @@
 local M = {}
 
-local n = require("nui-components")
+local n = require('nui-components')
 if not n then
-    error("Failed to load nui-components")
+    error('Failed to load nui-components')
 end
-local state = require("spectre.state")
+local state = require('spectre.state')
 local api = vim.api
-local state_utils = require("spectre.state_utils")
+local state_utils = require('spectre.state_utils')
 local has_devicons, devicons = pcall(require, 'nvim-web-devicons')
-local utils = require("spectre.utils")
+local utils = require('spectre.utils')
 
 local preview_buf = nil
 local preview_namespace = api.nvim_create_namespace('SPECTRE_PREVIEW')
@@ -16,22 +16,22 @@ local preview_namespace = api.nvim_create_namespace('SPECTRE_PREVIEW')
 local function create_search_ui()
     -- Create a new buffer for the results
     local bufnr = api.nvim_create_buf(false, true)
-    api.nvim_buf_set_option(bufnr, "filetype", "spectre_panel")
-    api.nvim_buf_set_option(bufnr, "buftype", "nofile")
-    api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
-    api.nvim_buf_set_option(bufnr, "buflisted", false)
+    api.nvim_buf_set_option(bufnr, 'filetype', 'spectre_panel')
+    api.nvim_buf_set_option(bufnr, 'buftype', 'nofile')
+    api.nvim_buf_set_option(bufnr, 'bufhidden', 'wipe')
+    api.nvim_buf_set_option(bufnr, 'buflisted', false)
 
     -- Create a separate buffer for preview
     local preview_bufnr = api.nvim_create_buf(false, true)
-    api.nvim_buf_set_option(preview_bufnr, "buflisted", false)
-    api.nvim_buf_set_option(preview_bufnr, "wrap", true)
-    api.nvim_buf_set_option(preview_bufnr, "number", true)
-    api.nvim_buf_set_option(preview_bufnr, "relativenumber", true)
+    api.nvim_buf_set_option(preview_bufnr, 'buflisted', false)
+    api.nvim_buf_set_option(preview_bufnr, 'wrap', true)
+    api.nvim_buf_set_option(preview_bufnr, 'number', true)
+    api.nvim_buf_set_option(preview_bufnr, 'relativenumber', true)
 
     local signal = n.create_signal({
-        search_text = "",
-        replace_text = "",
-        path = "",
+        search_text = '',
+        replace_text = '',
+        path = '',
         is_file = false,
         results = {},
         has_search = false,
@@ -43,8 +43,8 @@ local function create_search_ui()
             n.columns(
                 { flex = 0 },
                 n.text_input({
-                    id = "search-input",
-                    border_label = "Search",
+                    id = 'search-input',
+                    border_label = 'Search',
                     autofocus = true,
                     flex = 1,
                     max_lines = 1,
@@ -60,8 +60,8 @@ local function create_search_ui()
             n.columns(
                 { flex = 0 },
                 n.text_input({
-                    id = "replace-input",
-                    border_label = "Replace",
+                    id = 'replace-input',
+                    border_label = 'Replace',
                     flex = 1,
                     max_lines = 1,
                     on_change = function(value)
@@ -74,9 +74,9 @@ local function create_search_ui()
             ),
 
             n.tree({
-                id = "results-tree",
+                id = 'results-tree',
                 flex = 1,
-                border_label = "Results",
+                border_label = 'Results',
                 data = signal.results,
                 hidden = signal.has_search:negate(),
                 on_select = function(node, component)
@@ -92,7 +92,7 @@ local function create_search_ui()
                 end,
                 on_change = function(focused_node)
                     if focused_node.filename then
-                        local full_path = vim.fn.fnamemodify(focused_node.filename, ":p")
+                        local full_path = vim.fn.fnamemodify(focused_node.filename, ':p')
                         if vim.fn.filereadable(full_path) then
                             local lines = vim.fn.readfile(full_path)
                             api.nvim_buf_set_lines(preview_bufnr, 0, -1, false, lines)
@@ -108,11 +108,11 @@ local function create_search_ui()
                                     local success, result = pcall(function()
                                         return utils.match_text_line(state.query.search_query, line, 0)
                                     end)
-                                    
-                                    if success and type(result) == "table" then
+
+                                    if success and type(result) == 'table' then
                                         matches = result
                                     end
-                                    
+
                                     for _, match in ipairs(matches) do
                                         -- Safely add highlight
                                         pcall(function()
@@ -135,7 +135,7 @@ local function create_search_ui()
                                 if line_num then
                                     -- Set cursor to the line number in the preview buffer
                                     api.nvim_buf_call(preview_bufnr, function()
-                                        vim.cmd("normal! " .. line_num .. "G")
+                                        vim.cmd('normal! ' .. line_num .. 'G')
                                     end)
                                 end
                             end
@@ -147,15 +147,15 @@ local function create_search_ui()
                 prepare_node = function(node, line, component)
                     if node.is_done ~= nil then
                         if node.is_done then
-                            local icon = "✔"
-                            local hl = "String"
+                            local icon = '✔'
+                            local hl = 'String'
                             if has_devicons then
                                 icon = '󰱒'
                             end
                             line:append('  ' .. icon .. ' ', hl)
                         else
-                            local icon = "◻"
-                            local hl = "Comment"
+                            local icon = '◻'
+                            local hl = 'Comment'
                             if has_devicons then
                                 icon = ''
                             end
@@ -164,7 +164,7 @@ local function create_search_ui()
                     end
 
                     if node.icon then
-                        line:append(" " .. node.icon .. " ", node.icon_highlight)
+                        line:append(' ' .. node.icon .. ' ', node.icon_highlight)
                     end
 
                     -- Add search highlighting if there's a search query
@@ -174,21 +174,25 @@ local function create_search_ui()
                         local success, result = pcall(function()
                             return utils.match_text_line(state.query.search_query, node.text, 0)
                         end)
-                        
-                        if success and type(result) == "table" then
+
+                        if success and type(result) == 'table' then
                             matches = result
                         end
-                        
+
                         local last_pos = 0
-                        local max_width = vim.api.nvim_win_get_width(0) -
-                        15                                                   -- Leave some space for icons and padding
+                        local max_width = vim.api.nvim_win_get_width(0) - 15 -- Leave some space for icons and padding
                         local truncated_text = utils.truncate(node.text, max_width)
 
                         -- Find if this node has been replaced
                         local is_replaced = false
                         if state.total_item and node.display_lnum ~= nil then
                             for _, item in ipairs(state.total_item) do
-                                if item and item.display_lnum and item.display_lnum == node.display_lnum and item.is_replace then
+                                if
+                                    item
+                                    and item.display_lnum
+                                    and item.display_lnum == node.display_lnum
+                                    and item.is_replace
+                                then
                                     is_replaced = true
                                     break
                                 end
@@ -200,10 +204,10 @@ local function create_search_ui()
                             if match[1] > last_pos then
                                 line:append(truncated_text:sub(last_pos + 1, match[1]))
                             end
-                            
+
                             -- Add highlighted match
                             line:append(truncated_text:sub(match[1] + 1, match[2]), state.user_config.highlight.search)
-                            
+
                             -- Add replacement preview if exists and not replaced yet
                             if state.query.replace_query and #state.query.replace_query > 0 and not is_replaced then
                                 -- Get the regex engine with safety check
@@ -215,7 +219,7 @@ local function create_search_ui()
                                     -- Fallback to vim regex
                                     regex = require('spectre.regex.vim')
                                 end
-                                
+
                                 -- Calculate replace_match with error handling
                                 local replace_match = {}
                                 success, result = pcall(function()
@@ -224,32 +228,34 @@ local function create_search_ui()
                                         replace_query = state.query.replace_query,
                                         search_text = truncated_text:sub(match[1] + 1, match[2]),
                                         show_search = true,
-                                        show_replace = true
+                                        show_replace = true,
                                     }, regex).replace
                                 end)
-                                
+
                                 if success then
                                     replace_match = result
                                 end
-                                
-                                if type(replace_match) == "table" and #replace_match > 0 then
+
+                                if type(replace_match) == 'table' and #replace_match > 0 then
                                     -- Calculate replace_text with error handling
-                                    local replace_text = ""
+                                    local replace_text = ''
                                     success, result = pcall(function()
-                                        return " → (" .. utils.get_hl_line_text({
-                                            search_query = state.query.search_query,
-                                            replace_query = state.query.replace_query,
-                                            search_text = truncated_text:sub(match[1] + 1, match[2]),
-                                        }, regex).text .. ")"
+                                        return ' → ('
+                                            .. utils.get_hl_line_text({
+                                                search_query = state.query.search_query,
+                                                replace_query = state.query.replace_query,
+                                                search_text = truncated_text:sub(match[1] + 1, match[2]),
+                                            }, regex).text
+                                            .. ')'
                                     end)
-                                    
+
                                     if success then
                                         replace_text = result
                                         line:append(replace_text, state.user_config.highlight.replace)
                                     end
                                 end
                             end
-                            
+
                             last_pos = match[2]
                         end
                         -- Add remaining text after last match
@@ -257,17 +263,16 @@ local function create_search_ui()
                             line:append(truncated_text:sub(last_pos + 1))
                         end
                     else
-                        local max_width = vim.api.nvim_win_get_width(0) -
-                        15                                                   -- Leave some space for icons and padding
+                        local max_width = vim.api.nvim_win_get_width(0) - 15 -- Leave some space for icons and padding
                         line:append(utils.truncate(node.text, max_width))
                     end
                     return line
                 end,
             }),
             n.buffer({
-                id = "preview-buffer",
+                id = 'preview-buffer',
                 flex = 1,
-                border_label = "Preview",
+                border_label = 'Preview',
                 hidden = signal.preview_visible:negate(),
                 is_focusable = false,
                 buf = preview_bufnr,
@@ -276,8 +281,8 @@ local function create_search_ui()
             n.columns(
                 { flex = 0 },
                 n.text_input({
-                    id = "path-input",
-                    border_label = "Path",
+                    id = 'path-input',
+                    border_label = 'Path',
                     flex = 1,
                     max_lines = 1,
                     on_change = function(value)
@@ -291,7 +296,7 @@ local function create_search_ui()
             n.columns(
                 { flex = 0 },
                 n.button({
-                    label = "Options",
+                    label = 'Options',
                     on_press = function()
                         vim.schedule(function()
                             M.show_options()
@@ -300,7 +305,7 @@ local function create_search_ui()
                 }),
                 n.gap(3),
                 n.button({
-                    label = "Replace All",
+                    label = 'Replace All',
                     on_press = function()
                         vim.schedule(function()
                             require('spectre.actions').run_replace()
@@ -317,16 +322,16 @@ local function create_search_ui()
         buf = bufnr,
         parent = vim.api.nvim_get_current_win(),
         border = {
-            style = "rounded",
+            style = 'rounded',
             text = {
-                top = "[Nvim Spectre]",
-                top_align = "center",
+                top = '[Nvim Spectre]',
+                top_align = 'center',
             },
         },
     })
 
     if not new_renderer then
-        error("Failed to create renderer")
+        error('Failed to create renderer')
     end
 
     new_renderer:render(body)
@@ -344,23 +349,29 @@ function M.open()
 end
 
 function M.on_search_change()
-    if not state.renderer then return end
+    if not state.renderer then
+        return
+    end
     local query = {
-        search_query = state.renderer:get_component_by_id("search-input"):get_current_value(),
-        replace_query = state.renderer:get_component_by_id("replace-input"):get_current_value(),
-        path = state.renderer:get_component_by_id("path-input"):get_current_value(),
+        search_query = state.renderer:get_component_by_id('search-input'):get_current_value(),
+        replace_query = state.renderer:get_component_by_id('replace-input'):get_current_value(),
+        path = state.renderer:get_component_by_id('path-input'):get_current_value(),
     }
     state.query = query -- Store the query in state
     M.search(query)
 end
 
 function M.search(query)
-    if not state.renderer then return end
-    local results_component = state.renderer:get_component_by_id("results-tree")
-    if not results_component then return end
+    if not state.renderer then
+        return
+    end
+    local results_component = state.renderer:get_component_by_id('results-tree')
+    if not results_component then
+        return
+    end
 
     local results = {}
-    local last_filename = ""
+    local last_filename = ''
     local current_group = nil
     state.total_item = {} -- Reset total_item
 
@@ -369,16 +380,16 @@ function M.search(query)
     state.finder_instance = finder_creator:new(state_utils.get_search_engine_config(), {
         on_result = function(result)
             if last_filename ~= result.filename then
-                local icon, icon_highlight = "", ""
+                local icon, icon_highlight = '', ''
                 if has_devicons then
-                    icon, icon_highlight = devicons.get_icon(result.filename, "", { default = true })
+                    icon, icon_highlight = devicons.get_icon(result.filename, '', { default = true })
                 end
 
                 current_group = n.node({
                     text = result.filename,
                     icon = icon,
                     icon_highlight = icon_highlight,
-                    children = {}
+                    children = {},
                 })
                 table.insert(results, current_group)
                 last_filename = result.filename
@@ -389,9 +400,9 @@ function M.search(query)
                     filename = result.filename,
                     col = result.col,
                     lnum = result.lnum,
-                    text = string.format("%d:%d: %s", result.lnum, result.col, result.text),
+                    text = string.format('%d:%d: %s', result.lnum, result.col, result.text),
                     is_done = false,
-                    display_lnum = #state.total_item
+                    display_lnum = #state.total_item,
                 })
                 table.insert(results, entry)
                 -- Store the entry in state.total_item with all required fields
@@ -401,7 +412,7 @@ function M.search(query)
                     lnum = result.lnum,
                     text = result.text,
                     display_lnum = #state.total_item,
-                    is_replace_finish = false
+                    is_replace_finish = false,
                 })
             end
         end,
@@ -422,13 +433,15 @@ function M.search(query)
 end
 
 function M.show_options()
-    if not state.renderer then return end
+    if not state.renderer then
+        return
+    end
     local cfg = state_utils.get_search_engine_config()
     local options = {}
     local i = 1
 
     for key, option in pairs(cfg.options) do
-        table.insert(options, n.option(string.format("%d: %s", i, option.desc or ""), { id = key }))
+        table.insert(options, n.option(string.format('%d: %s', i, option.desc or ''), { id = key }))
         i = i + 1
     end
 
@@ -437,7 +450,7 @@ function M.show_options()
     })
 
     local select_component = n.select({
-        border_label = "Options",
+        border_label = 'Options',
         data = options,
         selected = signal.selected,
         multiselect = true,

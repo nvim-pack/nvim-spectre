@@ -17,11 +17,16 @@ M.get_regex = function()
     if not state.regex then
         -- Default to vim regex as a fallback
         local regex_engine_name = 'vim'
-        
+
         -- Try to use the current replace engine's regex
-        if state.user_config and state.user_config.default and state.user_config.default.replace and state.user_config.default.replace.cmd then
+        if
+            state.user_config
+            and state.user_config.default
+            and state.user_config.default.replace
+            and state.user_config.default.replace.cmd
+        then
             local replace_cmd = state.user_config.default.replace.cmd
-            
+
             -- Map replace engines to regex engines
             if replace_cmd == 'oxi' then
                 regex_engine_name = 'rust'
@@ -31,12 +36,12 @@ M.get_regex = function()
                 regex_engine_name = 'rust'
             end
         end
-        
+
         -- Require the regex engine
         local success, regex = pcall(require, 'spectre.regex.' .. regex_engine_name)
         if success then
             state.regex = regex
-            
+
             -- Initialize options if available
             local cfg = M.get_replace_engine_config()
             if cfg and cfg.options_value then
@@ -47,7 +52,7 @@ M.get_regex = function()
             state.regex = require('spectre.regex.vim')
         end
     end
-    
+
     return state.regex
 end
 

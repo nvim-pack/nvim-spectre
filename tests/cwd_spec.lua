@@ -22,11 +22,7 @@ describe('check search on another directory', function()
         })
 
         local bufnr = api.nvim_get_current_buf()
-        local test1 = helper.defer_get_line(
-            bufnr,
-            config.lnum_UI + 2,
-            config.lnum_UI + 4
-        )
+        local test1 = helper.defer_get_line(bufnr, config.lnum_UI + 2, config.lnum_UI + 4)
         eq(' test2.txt:', test1[1], 'should have correct text')
         vim.api.nvim_win_set_cursor(0, { 12, 0 })
         vim.api.nvim_feedkeys(helper.t('<cr>'), 'x', true)
@@ -44,11 +40,7 @@ describe('check search on another directory', function()
             path = 'test2.txt',
         })
         local bufnr = api.nvim_get_current_buf()
-        local test1 = helper.defer_get_line(
-            bufnr,
-            config.lnum_UI + 2,
-            config.lnum_UI + 4
-        )
+        local test1 = helper.defer_get_line(bufnr, config.lnum_UI + 2, config.lnum_UI + 4)
         eq(' test2.txt:', test1[1], 'should have correct text')
         api.nvim_feedkeys(helper.t('<leader>R'), 'x', true)
         vim.wait(1000)

@@ -25,58 +25,58 @@ local M = {}
 M.user_config = {
     default = {
         find = {
-            cmd = "rg",
+            cmd = 'rg',
         },
         replace = {
-            cmd = "sed",
+            cmd = 'sed',
         },
     },
     find_engine = {
         rg = {
-            cmd = "rg",
+            cmd = 'rg',
             args = {
-                "--color=never",
-                "--no-heading",
-                "--with-filename",
-                "--line-number",
-                "--column",
+                '--color=never',
+                '--no-heading',
+                '--with-filename',
+                '--line-number',
+                '--column',
             },
             options = {
-                ["ignore-case"] = {
-                    value = "-i",
-                    icon = "[I]",
-                    desc = "ignore case",
+                ['ignore-case'] = {
+                    value = '-i',
+                    icon = '[I]',
+                    desc = 'ignore case',
                 },
-                ["hidden"] = {
-                    value = "--hidden",
-                    desc = "hidden file",
-                    icon = "[H]",
+                ['hidden'] = {
+                    value = '--hidden',
+                    desc = 'hidden file',
+                    icon = '[H]',
                 },
             },
         },
     },
     replace_engine = {
         oxi = {
-            cmd = "oxi",
+            cmd = 'oxi',
             args = {},
             options = {
-                ["ignore-case"] = {
-                    value = "-i",
-                    icon = "[I]",
-                    desc = "ignore case",
+                ['ignore-case'] = {
+                    value = '-i',
+                    icon = '[I]',
+                    desc = 'ignore case',
                 },
             },
         },
     },
     live_update = false,
-    line_sep = "└──────────────────────────────────────────────────────",
-    result_padding = "│  ",
-    line_sep_start = "┌──────────────────────────────────────────────────────",
+    line_sep = '└──────────────────────────────────────────────────────',
+    result_padding = '│  ',
+    line_sep_start = '┌──────────────────────────────────────────────────────',
     highlight = {
-        ui = "SpectreBody",
-        search = "SpectreSearch",
-        replace = "SpectreReplace",
-        border = "SpectreBorder",
+        ui = 'SpectreBody',
+        search = 'SpectreSearch',
+        replace = 'SpectreReplace',
+        border = 'SpectreBorder',
     },
 }
 
@@ -89,10 +89,10 @@ M.target_bufnr = nil
 M.finder_instance = nil
 M.total_item = {}
 M.is_running = false
-M.status_line = ""
+M.status_line = ''
 M.async_id = nil
 M.view = {
-    mode = "both",
+    mode = 'both',
     show_search = true,
     show_replace = true,
 }
