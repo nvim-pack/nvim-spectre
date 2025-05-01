@@ -40,12 +40,16 @@ end
 
 M.select_entry = function()
     local entry = M.get_current_entry()
-    if not entry then return end
+    if not entry then
+        return
+    end
 
-    local full_path = vim.fn.fnamemodify(entry.filename, ":p")
-    if not vim.fn.filereadable(full_path) then return end
+    local full_path = vim.fn.fnamemodify(entry.filename, ':p')
+    if not vim.fn.filereadable(full_path) then
+        return
+    end
 
-    vim.cmd("edit " .. full_path)
+    vim.cmd('edit ' .. full_path)
     api.nvim_win_set_cursor(0, { entry.lnum, entry.col - 1 })
 end
 
@@ -70,16 +74,20 @@ function M.get_current_entry()
     local cursor_pos = api.nvim_win_get_cursor(0)
     local line = api.nvim_buf_get_lines(bufnr, cursor_pos[1] - 1, cursor_pos[1], false)[1]
 
-    if not line then return nil end
+    if not line then
+        return nil
+    end
 
-    local filename, lnum, col = line:match("([^:]+):(%d+):(%d+):")
-    if not filename or not lnum or not col then return nil end
+    local filename, lnum, col = line:match('([^:]+):(%d+):(%d+):')
+    if not filename or not lnum or not col then
+        return nil
+    end
 
     return {
         filename = filename,
         lnum = tonumber(lnum),
         col = tonumber(col),
-        text = line:match(":[^:]+$"):sub(2),
+        text = line:match(':[^:]+$'):sub(2),
     }
 end
 
@@ -93,7 +101,7 @@ function M.get_all_entries()
                 col = item.col,
                 text = item.text,
                 display_lnum = display_lnum - 1,
-                is_replace_finish = item.is_replace_finish or false
+                is_replace_finish = item.is_replace_finish or false,
             })
         end
     end
@@ -103,7 +111,7 @@ end
 M.send_to_qf = function()
     local entries = M.get_all_entries()
     if #entries == 0 then
-        vim.notify("No entries to send to quickfix")
+        vim.notify('No entries to send to quickfix')
         return
     end
 
@@ -118,7 +126,7 @@ M.send_to_qf = function()
     end
 
     vim.fn.setqflist(qf_list)
-    vim.cmd("copen")
+    vim.cmd('copen')
 end
 
 -- input that comand to run on vim
@@ -154,7 +162,7 @@ function M.run_current_replace()
     if entry then
         M.run_replace({ entry })
     else
-        vim.notify("Not found any entry to replace.")
+        vim.notify('Not found any entry to replace.')
     end
 end
 
@@ -163,7 +171,7 @@ local is_running = false
 function M.run_replace(entries)
     entries = entries or M.get_all_entries()
     if #entries == 0 then
-        vim.notify("No entries to replace")
+        vim.notify('No entries to replace')
         return
     end
 
@@ -185,14 +193,14 @@ function M.run_replace(entries)
                     )
                     -- Trigger renderer redraw
                     if state.renderer then
-                        print("redrawing")
+                        print('redrawing')
                         state.renderer:redraw()
                     end
                 end
             end,
             on_error = function(result)
                 if result.ref then
-                    vim.notify("Error replacing: " .. result.value, vim.log.levels.ERROR)
+                    vim.notify('Error replacing: ' .. result.value, vim.log.levels.ERROR)
                     -- Add error mark to the line
                     local bufnr = api.nvim_get_current_buf()
                     local line = result.ref.display_lnum
@@ -205,7 +213,7 @@ function M.run_replace(entries)
                     )
                     -- Trigger renderer redraw
                     if state.renderer then
-                        print("redrawing")
+                        print('redrawing')
                         state.renderer:redraw()
                     end
                 end
