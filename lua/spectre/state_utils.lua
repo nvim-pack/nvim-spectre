@@ -58,9 +58,12 @@ end
 
 local get_options = function(cfg)
     local options_value = {}
-    for key, value in pairs(state.options) do
-        if value and cfg.options[key] ~= nil then
-            table.insert(options_value, cfg.options[key].value)
+    -- Check if cfg.options exists before trying to iterate through it
+    if cfg.options then
+        for key, value in pairs(state.options) do
+            if value and cfg.options[key] ~= nil then
+                table.insert(options_value, cfg.options[key].value)
+            end
         end
     end
     return options_value
