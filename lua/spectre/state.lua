@@ -94,7 +94,6 @@ M.async_id = nil
 M.view = {
     mode = 'both',
     show_search = true,
-    show_replace = true,
 }
 M.regex = nil
 M.renderer = nil

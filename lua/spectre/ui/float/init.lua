@@ -228,7 +228,6 @@ local function create_search_ui()
                                         replace_query = state.query.replace_query,
                                         search_text = truncated_text:sub(match[1] + 1, match[2]),
                                         show_search = true,
-                                        show_replace = true,
                                     }, regex).replace
                                 end)
 

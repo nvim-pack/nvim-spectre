@@ -168,7 +168,7 @@ M.get_hl_line_text = function(opts, regex)
     result.text = opts.search_text
     if search_match then
         result.search = match_text_line(search_match, opts.search_text, 0)
-        if opts.replace_query and #opts.replace_query > 0 and opts.show_replace ~= false then
+        if opts.replace_query and #opts.replace_query > 0 then
             local replace_match = regex.replace_all(opts.search_query, opts.replace_query, search_match)
             local total_increase = 0
 
@@ -196,21 +196,6 @@ M.get_hl_line_text = function(opts, regex)
                     end
 
                     result.text = new_text
-                end
-            else
-                -- Before replacement or preview: Show original text with replacement preview
-                for _, v in pairs(result.search) do
-                    v[1] = v[1] + total_increase
-                    v[2] = v[2] + total_increase
-
-                    -- Add replacement text in parentheses after the search match with an arrow
-                    local display_replace = ' → (' .. replace_match .. ')'
-                    local pos = { v[2], v[2] + #display_replace }
-                    table.insert(result.replace, pos)
-
-                    local text = result.text
-                    result.text = text:sub(0, v[2]) .. display_replace .. text:sub(v[2] + 1)
-                    total_increase = total_increase + #display_replace
                 end
             end
         end

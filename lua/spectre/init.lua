@@ -88,7 +88,6 @@ M.open = function(opts)
     state.view = {
         mode = 'both',
         show_search = true,
-        show_replace = true,
     }
     state.regex = nil
 
@@ -347,15 +346,12 @@ M.change_view = function()
     if state.view.mode == 'both' then
         state.view.mode = 'replace'
         state.view.show_search = false
-        state.view.show_replace = true
     elseif state.view.mode == 'replace' then
         state.view.mode = 'search'
         state.view.show_search = true
-        state.view.show_replace = false
     else
         state.view.mode = 'both'
         state.view.show_search = true
-        state.view.show_replace = true
     end
 
     -- Trigger UI update if available

@@ -58,7 +58,6 @@ M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
         replace_query = text_opts.replace_query,
         search_text = text_opts.search_text,
         show_search = view_opts.show_search,
-        show_replace = view_opts.show_replace,
     }, regex)
     local end_lnum = text_opts.is_replace == true and text_opts.lnum + 1 or text_opts.lnum
 
@@ -626,7 +625,6 @@ M.render_results = function()
             padding_text = cfg.result_padding,
             padding = padding,
             show_search = state.view.show_search,
-            show_replace = state.view.show_replace,
         }, state_utils.get_regex())
 
         c_line = c_line + 1
