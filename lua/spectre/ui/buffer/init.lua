@@ -426,8 +426,8 @@ M.mapping_buffer = function()
     -- Set up autocmds
     vim.cmd([[augroup spectre_panel
                 au!
-                au InsertEnter <buffer> lua require"spectre.ui.plenary".on_insert_enter()
-                au InsertLeave <buffer> lua require"spectre.ui.plenary".on_search_change()
+                au InsertEnter <buffer> lua require"spectre.ui.buffer".on_insert_enter()
+                au InsertLeave <buffer> lua require"spectre.ui.buffer".on_search_change()
                 au BufLeave <buffer> lua require("spectre").on_write()
                 au BufUnload <buffer> lua require("spectre").close()
             augroup END ]])
@@ -441,28 +441,28 @@ M.mapping_buffer = function()
         M.bufnr,
         'n',
         'x',
-        'x<cmd>lua require("spectre.ui.plenary").on_search_change()<CR>',
+        'x<cmd>lua require("spectre.ui.buffer").on_search_change()<CR>',
         map_opt
     )
     api.nvim_buf_set_keymap(
         M.bufnr,
         'n',
         'p',
-        "p<cmd>lua require('spectre.ui.plenary').on_search_change()<cr>",
+        "p<cmd>lua require('spectre.ui.buffer').on_search_change()<cr>",
         map_opt
     )
     api.nvim_buf_set_keymap(
         M.bufnr,
         'v',
         'p',
-        "p<cmd>lua require('spectre.ui.plenary').on_search_change()<cr>",
+        "p<cmd>lua require('spectre.ui.buffer').on_search_change()<cr>",
         map_opt
     )
     api.nvim_buf_set_keymap(
         M.bufnr,
         'v',
         'P',
-        "P<cmd>lua require('spectre.ui.plenary').on_search_change()<cr>",
+        "P<cmd>lua require('spectre.ui.buffer').on_search_change()<cr>",
         map_opt
     )
     api.nvim_buf_set_keymap(M.bufnr, 'n', 'd', '<nop>', map_opt)
@@ -472,7 +472,7 @@ M.mapping_buffer = function()
     api.nvim_buf_set_keymap(M.bufnr, 'n', 'O', 'ki', map_opt)
     api.nvim_buf_set_keymap(M.bufnr, 'n', 'u', '', map_opt) -- disable undo, It breaks the UI.
     api.nvim_buf_set_keymap(M.bufnr, 'n', 'yy', "<cmd>lua require('spectre.actions').copy_current_line()<cr>", map_opt)
-    api.nvim_buf_set_keymap(M.bufnr, 'n', '?', "<cmd>lua require('spectre.ui.plenary').show_help()<cr>", map_opt)
+    api.nvim_buf_set_keymap(M.bufnr, 'n', '?', "<cmd>lua require('spectre.ui.buffer').show_help()<cr>", map_opt)
 
     for _, map in pairs(state.user_config.mapping) do
         if map.cmd then

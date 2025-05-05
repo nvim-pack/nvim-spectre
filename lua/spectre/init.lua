@@ -48,10 +48,12 @@ end
 
 -- Initialize UI based on user config
 M.init_ui = function()
-    if state.user_config.ui == 'plenary' then
-        ui = require('spectre.ui.plenary')
+    if state.user_config.ui == 'buffer' then
+        ui = require('spectre.ui.buffer')
+    elseif state.user_config.ui == 'float' then
+        ui = require('spectre.ui.float')
     else
-        ui = require('spectre.ui.nui_components')
+        ui = require('spectre.ui.buffer')
     end
 end
 

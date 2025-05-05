@@ -12,12 +12,6 @@ local config = {
     lnum_UI = 8, -- total line for ui you can edit it
     line_result = 10, -- line begin result
 
-    -- result_padding = '│  ',
-    -- color_devicons = true,
-    -- line_sep_start = '┌-----------------------------------------',
-    -- result_padding     = '¦  ',
-    -- line_sep = '├──────────────────────────────────────',
-
     line_sep_start = '┌──────────────────────────────────────────────────────',
     result_padding = '│  ',
     line_sep = '└──────────────────────────────────────────────────────',
@@ -220,7 +214,7 @@ local config = {
     is_insert_mode = false,
     is_block_ui_break = false,
     open_template = {},
-    ui = 'plenary', -- set to true to use the legacy UI
+    ui = 'buffer',
 }
 
 return config
