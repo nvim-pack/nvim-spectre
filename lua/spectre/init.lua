@@ -24,7 +24,7 @@ local config = require('spectre.config')
 local state = require('spectre.state')
 local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
-local ui = require('spectre.ui')
+local ui = require('spectre.ui.buffer')
 local log = require('spectre._log')
 local async = require('plenary.async')
 
