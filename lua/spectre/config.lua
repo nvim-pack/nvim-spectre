@@ -12,15 +12,11 @@ local config = {
     lnum_UI = 8, -- total line for ui you can edit it
     line_result = 10, -- line begin result
 
-    -- result_padding = '│  ',
-    -- color_devicons = true,
-    -- line_sep_start = '┌-----------------------------------------',
-    -- result_padding     = '¦  ',
-    -- line_sep = '├──────────────────────────────────────',
-
+    -- TODO: make it deprecated
     line_sep_start = '┌──────────────────────────────────────────────────────',
     result_padding = '│  ',
     line_sep = '└──────────────────────────────────────────────────────',
+
     color_devicons = true,
     open_cmd = 'vnew',
     live_update = false,
@@ -220,6 +216,19 @@ local config = {
     is_insert_mode = false,
     is_block_ui_break = false,
     open_template = {},
+
+    ui = {
+        default = 'buffer',
+        buffer = {
+            lnum_UI = 8, -- total line for ui you can edit it
+            line_result = 10, -- line begin result
+
+            line_sep_start = '┌──────────────────────────────────────────────────────',
+            result_padding = '│  ',
+            line_sep = '└──────────────────────────────────────────────────────',
+        },
+        float = {},
+    },
 }
 
 return config
