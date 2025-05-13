@@ -7,7 +7,7 @@ local sed = {}
 sed.init = function(_, config)
     local uname = vim.loop.os_uname().sysname
     local sed_args
-    if uname == 'Darwin' then
+    if uname == 'Darwin' or uname == 'FreeBSD' then
         sed_args = { '-i', '', '-e' }
     else
         sed_args = { '-i', '-E' }
