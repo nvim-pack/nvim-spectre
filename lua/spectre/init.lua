@@ -24,7 +24,7 @@ local config = require('spectre.config')
 local state = require('spectre.state')
 local state_utils = require('spectre.state_utils')
 local utils = require('spectre.utils')
-local ui = require('spectre.ui.buffer')
+local ui = nil
 local log = require('spectre._log')
 local async = require('plenary.async')
 
@@ -38,6 +38,7 @@ M.setup = function(cfg)
         state.options[opt] = true
     end
     require('spectre.highlight').set_hl()
+
     M.check_replace_cmd_bins()
 end
 
@@ -119,6 +120,14 @@ M.open = function(opts)
         M.setup()
     end
 
+    if state.user_config.ui.default == 'buffer' then
+        ui = require('spectre.ui.buffer')
+    elseif state.user_config.ui.default == 'float' then
+        ui = require('spectre.ui.float')
+    else
+        vim.notify('Invalid ui type: ' .. state.user_config.ui, vim.log.levels.ERROR)
+    end
+
     opts = vim.tbl_extend('force', {
         cwd = nil,
         is_insert_mode = state.user_config.is_insert_mode,
@@ -163,29 +172,9 @@ M.open = function(opts)
         end
     end
 
-    vim.wo.foldenable = false
-    vim.bo.buftype = 'nofile'
-    vim.bo.buflisted = false
-    state.bufnr = api.nvim_get_current_buf()
-    vim.cmd(string.format('file %s/spectre', state.bufnr))
-    vim.bo.filetype = config.filetype
-    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_status, 0, -1)
-    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
-    api.nvim_buf_set_lines(state.bufnr, 0, -1, false, {})
-
-    vim.api.nvim_buf_attach(state.bufnr, false, {
-        on_detach = M.stop,
-    })
-    ui.render_text_query(opts)
-
-    state.cwd = opts.cwd
-    state.search_paths = opts.search_paths
     M.change_view('reset')
-    ui.render_search_ui()
 
-    if opts.is_insert_mode == true then
-        vim.api.nvim_feedkeys('A', 'n', true)
-    end
+    ui.open(opts)
 
     M.mapping_buffer(state.bufnr)
 

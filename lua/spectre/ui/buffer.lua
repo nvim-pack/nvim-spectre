@@ -12,6 +12,32 @@ local api = vim.api
 
 local M = {}
 
+M.open = function(opts)
+    vim.wo.foldenable = false
+    vim.bo.buftype = 'nofile'
+    vim.bo.buflisted = false
+    state.bufnr = api.nvim_get_current_buf()
+    vim.cmd(string.format('file %s/spectre', state.bufnr))
+    vim.bo.filetype = config.filetype
+    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_status, 0, -1)
+    api.nvim_buf_clear_namespace(state.bufnr, config.namespace_result, 0, -1)
+    api.nvim_buf_set_lines(state.bufnr, 0, -1, false, {})
+
+    vim.api.nvim_buf_attach(state.bufnr, false, {
+        on_detach = M.stop,
+    })
+
+    M.render_text_query(opts)
+
+    state.cwd = opts.cwd
+    state.search_paths = opts.search_paths
+    M.render_search_ui()
+
+    if opts.is_insert_mode == true then
+        vim.api.nvim_feedkeys('A', 'n', true)
+    end
+end
+
 ---@param regex RegexEngine
 M.render_line = function(bufnr, namespace, text_opts, view_opts, regex)
     local cfg = state.user_config
