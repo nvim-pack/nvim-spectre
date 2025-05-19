@@ -197,6 +197,10 @@ M.toggle = function(opts)
 end
 
 function M.mapping_buffer(bufnr)
+    if state.user_config.ui.default ~= 'buffer' then
+        return
+    end
+
     _G.__spectre_fold = M.get_fold
     vim.cmd([[augroup spectre_panel
                 au!
