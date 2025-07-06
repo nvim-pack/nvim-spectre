@@ -86,6 +86,8 @@ M.open_file_search = function(opts)
 
     if vim.loop.os_uname().sysname == 'Windows_NT' then
         opts.path = vim.fn.substitute(opts.path, '\\', '/', 'g')
+    else
+        opts.path = '/' .. opts.path
     end
 
     M.open(opts)
