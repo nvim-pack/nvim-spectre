@@ -51,6 +51,8 @@ vim.keymap.set('n', '<leader>sp', '<cmd>lua require("spectre").open_file_search(
 
 Use command: `:Spectre`
 
+Once you're in the Spectre UI, press `?` to get a full list of keybinds. By default: `<leader>R` replaces all.
+
 ## Warnings
 
 - Always commit your files before you replace text. `nvim-spectre`
