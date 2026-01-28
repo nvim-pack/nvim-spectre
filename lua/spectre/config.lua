@@ -124,7 +124,7 @@ local config = {
         },
         ['delete_line'] = {
             map = '<leader>rd',
-            cmd = "<cmd>lua require('spectre.actions').run_delete_line()<CR>",
+            cmd = "<cmd>lua require('spectre.actions').delete_line_file_current()<CR>",
             desc = 'delete line',
         },
     },
