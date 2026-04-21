@@ -1,5 +1,8 @@
+---@module 'spectre.highlight'
 local M = {}
 
+---Set the default highlight groups for the Spectre UI.
+---Uses `default = true` so user-defined highlights take priority.
 M.set_hl = function()
     vim.api.nvim_set_hl(0, 'SpectreHeader', { link = 'Comment', default = true })
     vim.api.nvim_set_hl(0, 'SpectreBody', { link = 'String', default = true })

@@ -1,3 +1,4 @@
+---@module 'spectre.actions'
 local api = vim.api
 local config = require('spectre.config')
 local state = require('spectre.state')
@@ -7,6 +8,11 @@ local utils = require('spectre.utils')
 
 local M = {}
 
+---Open a file at the given position, optionally in a specific window.
+---@param filename string
+---@param lnum number
+---@param col number
+---@param winid number?
 local open_file = function(filename, lnum, col, winid)
     if winid ~= nil then
         vim.fn.win_gotoid(winid)
@@ -17,6 +23,9 @@ local open_file = function(filename, lnum, col, winid)
     pcall(api.nvim_win_set_cursor, 0, { lnum, col })
 end
 
+---Check if a filename is an absolute path.
+---@param filename string
+---@return boolean
 local is_absolute = function(filename)
     if vim.loop.os_uname().sysname == 'Windows_NT' then
         return string.find(filename, '%a:\\') == 1
@@ -24,6 +33,9 @@ local is_absolute = function(filename)
     return string.sub(filename, 1, 1) == '/'
 end
 
+---Resolve a filename to an absolute path using the current working directory.
+---@param filename string
+---@return string
 local get_file_path = function(filename)
     -- if the path is absolute, return as is
     if is_absolute(filename) then
@@ -38,6 +50,7 @@ local get_file_path = function(filename)
     return vim.fn.expand(state.cwd) .. Path.path.sep .. filename
 end
 
+---Open the file for the search result under the cursor.
 M.select_entry = function()
     local t = M.get_current_entry()
     if t == nil then
@@ -50,6 +63,13 @@ M.select_entry = function()
     end
 end
 
+---@class SpectreSearchState
+---@field query SpectreQuery
+---@field cwd string|nil
+---@field options table<string, boolean>
+
+---Get a copy of the current search state (query, cwd, options).
+---@return SpectreSearchState
 M.get_state = function()
     local result = {
         query = state.query,
@@ -59,6 +79,8 @@ M.get_state = function()
     return vim.deepcopy(result)
 end
 
+---Mark an entry as finished (already replaced).
+---@param display_lnum number
 M.set_entry_finish = function(display_lnum)
     local item = state.total_item[display_lnum + 1]
     if item then
@@ -66,6 +88,8 @@ M.set_entry_finish = function(display_lnum)
     end
 end
 
+---Get the search result entry at the current cursor position.
+---@return SpectreEntry|nil
 M.get_current_entry = function()
     if not state.total_item then
         return
@@ -79,6 +103,8 @@ M.get_current_entry = function()
     end
 end
 
+---Get all active (non-disabled) search result entries.
+---@return SpectreEntry[]
 M.get_all_entries = function()
     local entries = {}
     for _, item in pairs(state.total_item) do
@@ -91,6 +117,8 @@ M.get_all_entries = function()
     return entries
 end
 
+---Send all search results to the quickfix list.
+---@return SpectreEntry[]
 M.send_to_qf = function()
     local entries = M.get_all_entries()
     vim.fn.setqflist(entries, 'r')
@@ -107,7 +135,7 @@ M.send_to_qf = function()
     return entries
 end
 
--- input that comand to run on vim
+---Build and feed a vim substitute command for the current search/replace.
 M.replace_cmd = function()
     M.send_to_qf()
     local replace_cmd = ''
@@ -135,6 +163,7 @@ M.replace_cmd = function()
     end
 end
 
+---Run replace for the entry at the current cursor position.
 M.run_current_replace = function()
     local entry = M.get_current_entry()
     if entry then
@@ -146,6 +175,8 @@ end
 
 local is_running = false
 
+---Run replace on the given entries (or all entries if nil).
+---@param entries SpectreEntry[]|nil
 M.run_replace = function(entries)
     if is_running == true then
         print('it is already running')
@@ -223,6 +254,8 @@ M.delete_line_file_current = function()
     end
 end
 
+---Delete lines from files for the given entries (or all entries if nil).
+---@param entries SpectreEntry[]|nil
 M.run_delete_line = function(entries)
     entries = entries or M.get_all_entries()
     local done_item = 0
@@ -289,6 +322,7 @@ M.run_delete_line = function(entries)
     end
 end
 
+---Show a picker to select from configured search templates.
 M.select_template = function()
     if not state.user_config.open_template or #state.user_config.open_template == 0 then
         vim.notify('You need to set open_template on setup function.')
@@ -311,6 +345,7 @@ M.select_template = function()
     end)
 end
 
+---Copy the current line's text content to a register.
 M.copy_current_line = function()
     local line_text = vim.api.nvim_get_current_line()
     local row = unpack(vim.api.nvim_win_get_cursor(0))

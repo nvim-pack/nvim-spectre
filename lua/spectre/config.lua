@@ -1,6 +1,48 @@
 local api = vim.api
 
+---@class SpectreMapping
+---@field map string
+---@field cmd string
+---@field desc string
+
+---@class SpectreEngineOption
+---@field value string
+---@field icon string
+---@field desc string
+
+---@class SpectreEngineConfig
+---@field cmd string
+---@field args string[]|nil
+---@field options table<string, SpectreEngineOption>
+---@field warn boolean?
+
 ---@class SpectreConfig
+---@field filetype string
+---@field namespace number
+---@field namespace_ui number
+---@field namespace_header number
+---@field namespace_status number
+---@field namespace_result number
+---@field lnum_UI number
+---@field line_result number
+---@field line_sep_start string
+---@field result_padding string
+---@field line_sep string
+---@field color_devicons boolean
+---@field open_cmd string|function
+---@field live_update boolean
+---@field lnum_for_results boolean
+---@field highlight table<string, string>
+---@field mapping table<string, SpectreMapping>
+---@field find_engine table<string, SpectreEngineConfig>
+---@field replace_engine table<string, SpectreEngineConfig>
+---@field default table
+---@field replace_vim_cmd string
+---@field use_trouble_qf boolean
+---@field is_open_target_win boolean
+---@field is_insert_mode boolean
+---@field is_block_ui_break boolean
+---@field open_template table[]
 local config = {
     filetype = 'spectre_panel',
     namespace = api.nvim_create_namespace('SEARCH_PANEL'),

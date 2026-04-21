@@ -1,5 +1,11 @@
+---@module 'spectre.search'
+---Search engine factory. Lazily loads search engine modules by name.
 local base = require('spectre.search.base')
 local s = {}
+
+---Get a search engine by name.
+---@param key string Engine name (e.g., "rg", "ag")
+---@return table engine Search engine creator
 s.get = function(key)
     assert(key ~= nil, 'key no nil')
     local ok, engine = pcall(require, 'spectre.search.' .. key)

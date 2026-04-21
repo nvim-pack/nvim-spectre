@@ -4,21 +4,35 @@
 ---@field path string
 ---@field is_file boolean
 
+---@class SpectreEntry
+---@field filename string
+---@field lnum number
+---@field col number
+---@field text string
+---@field search_text string?
+---@field replace_text string?
+---@field display_lnum number?
+---@field disable boolean?
+---@field is_replace_finish boolean?
+
 ---@class SpectreState
 ---@field user_config SpectreConfig
 ---@field status_line string
 ---@field cwd string|nil
 ---@field query SpectreQuery
 ---@field query_backup SpectreQuery|nil
----@field options table
+---@field options table<string, boolean>
 ---@field is_running boolean
 ---@field is_open boolean
----@field total_item table
+---@field total_item table<number, SpectreEntry>
 ---@field regex any
 ---@field finder_instance any|nil
 ---@field async_id number
 ---@field target_winid number
 ---@field target_bufnr number
+---@field bufnr number|nil
+---@field vt table<string, any>
+---@field view table<string, any>
 local state = {
     -- current config
     status_line = '',

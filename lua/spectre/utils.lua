@@ -1,3 +1,4 @@
+---@module 'spectre.utils'
 local api = vim.api
 local M = {}
 
@@ -7,6 +8,16 @@ local config = require('spectre.config')
 local state = require('spectre.state')
 
 local _regex_file_line = [[([^:]+):(%d+):(%d+):(.*)]]
+
+---@class GrepParsedLine
+---@field filename string
+---@field lnum number
+---@field col number
+---@field text string
+
+---Parse a grep-style output line into its components.
+---@param query string A line of output in format "file:lnum:col:text"
+---@return GrepParsedLine|nil parsed Parsed result with filename, lnum, col, text fields
 M.parse_line_grep = function(query)
     local t = { text = query }
     local _, _, filename, lnum, col, text = string.find(t.text, _regex_file_line)
@@ -31,24 +42,33 @@ M.parse_line_grep = function(query)
     return t
 end
 
--- help /ordinary-atom
--- help non-greedy
--- escape >=< to \> \= \< but if it dont have \>
+---Escape vim magic mode special characters in a query string.
+---@param query string
+---@return string
 M.escape_vim_magic = function(query)
     query = string.gsub(query, '@', '\\@')
     local regex = [=[(\\)@<![><=](\\)@!]=]
     return vim.fn.substitute(query, '\\v' .. regex, [[\\\0]], 'g')
 end
--- escape_chars but don't escape it if have slash before or after !
+---Escape special regex characters in a query string.
+---@param query string
+---@return string
 M.escape_chars = function(query)
     local regex = [=[(\\)@<![\^\%\(\)\[\]{\}\.\*\|\"\\\/]([\\\{\}])@!]=]
     return vim.fn.substitute(query, '\\v' .. regex, [[\\\0]], 'g')
 end
 
+---Trim leading and trailing whitespace from a string.
+---@param s string
+---@return string
 function M.trim(s)
     return (string.gsub(s, '^%s*(.-)%s*$', '%1'))
 end
 
+---Truncate a string to a given display width, appending " ..." if truncated.
+---@param str string|number|nil
+---@param len number
+---@return string
 M.truncate = function(str, len)
     if not str then
         return ''
@@ -59,18 +79,26 @@ M.truncate = function(str, len)
     end
     return string.sub(str, 0, len) .. ' ...'
 end
--- only escape slash
+---Escape backslashes in a string.
+---@param query string
+---@return string
 M.escape_slash = function(query)
     return query:gsub('%\\', '\\\\')
 end
 
--- escape slash with /
+---Escape forward slashes for use in sed expressions.
+---@param query string
+---@return string
 M.escape_sed = function(query)
     return query:gsub('[%/]', function(v)
         return [[\]] .. v
     end)
 end
 
+---Run an external command synchronously.
+---@param cmd table Command and arguments as a list
+---@param cwd string|nil Working directory
+---@return string[] stdout, number ret, string[] stderr
 M.run_os_cmd = function(cmd, cwd)
     if type(cmd) ~= 'table' then
         print('cmd has to be a table')
@@ -89,6 +117,13 @@ M.run_os_cmd = function(cmd, cwd)
     return stdout, ret, stderr
 end
 
+---Write virtual text (extmark) to a buffer.
+---@param bufnr number
+---@param ns number Namespace ID
+---@param line number 0-indexed line number
+---@param chunks table[] Virtual text chunks
+---@param virt_text_pos string|nil Position of virtual text (default: "overlay")
+---@return number extmark_id
 function M.write_virtual_text(bufnr, ns, line, chunks, virt_text_pos)
     local vt_id = nil
     if ns == config.namespace_status and state.vt.status_id ~= 0 then
@@ -103,6 +138,8 @@ function M.write_virtual_text(bufnr, ns, line, chunks, virt_text_pos)
     )
 end
 
+---Get the text of the current visual selection.
+---@return string
 function M.get_visual_selection()
     local start_pos = vim.api.nvim_buf_get_mark(0, '<')
     local end_pos = vim.api.nvim_buf_get_mark(0, '>')
@@ -190,7 +227,9 @@ M.get_hl_line_text = function(opts, regex)
     end
     return result
 end
---- remove item duplicate on table
+---Remove duplicate values from a list.
+---@param tbl table
+---@return table
 M.tbl_remove_dup = function(tbl)
     local hash = {}
     local res = {}
@@ -203,6 +242,10 @@ M.tbl_remove_dup = function(tbl)
     return res
 end
 
+---Flatten a nested table into a single-level list.
+---Uses vim.iter on Neovim 0.11+, falls back to vim.tbl_flatten.
+---@param t table
+---@return table
 M.tbl_flatten = function(t)
     return vim.fn.has('nvim-0.11') == 1 and vim.iter(t):flatten(math.huge):totable() or vim.tbl_flatten(t)
 end
